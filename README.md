@@ -26,3 +26,7 @@ Information
 - [ ] server
 - [ ] channel
 - [ ] user
+
+General
+- [] web socket session
+- [] external conf
