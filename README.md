@@ -28,5 +28,5 @@ Information
 - [ ] user
 
 General
-- [] web socket session
-- [] external conf
+- [ ] web socket session
+- [ ] external conf
