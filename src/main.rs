@@ -1,14 +1,14 @@
-use core::str::from_utf8;
-extern crate ajson;
-use std::process::Command;
-use rand::Rng;
+mod rev_curl;
+use std::{thread, time};
 
+use rev_curl::{permcheck, rev_history, rev_read, rev_send, sendas, divancheck, man};
 #[derive(Debug, Clone)]
 struct Data {
 
     token: String,
     channel: String,
-    content: String,
+    bot_id: String,
+    sudoers: Vec<String>
 }
 
 
@@ -16,221 +16,89 @@ struct Data {
 fn main() {
 
     let data = Data {
-    token: "".to_string(),
-    channel: "".to_string(),
-    content: "".to_string(),
+    token: "TOKEN".to_string(),
+    channel: "CHANNEL".to_string(),
+    bot_id: "BOTID".to_string(),
+    sudoers: vec!["SUDOER1".to_string(), "SUDOER2".to_string()]
     };
 
 
+    //users
 
 
-    //rev_read()
-    // in: token, channel
-    // out: latest message, author
+    let help = "**HELP**\\n`prefix: ?`\\n`mc: queries minecraft servers`\\n`ping: pong!!`".to_string();
 
-    // rev_send()
-    // in: token, channel, content (message)
-    // out: <none>
-    
-    // rev_search()
-    // in: token, channel, query
-    // out: <none>
-    // not complete
+    let sec = time::Duration::from_secs(2);
+
+
+    // main session
+
    
-    // rev_history
-    // in: token, channel, num_get
-    // out: content, author
-
-
-    
-
-
-fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<String>, Vec<String>){
-
-
-
-    struct Returner {
-
-        content: Vec<String>,
-        author: Vec<String>,
-    }
-
-    let mut n = Returner {
-        content: vec![],
-        author: vec![],
-    };
-
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
-    let token = "x-bot-token: ".to_owned() + &token;
-
-
-
-    let send = Command::new("curl")
-        .args([
-               "-sS", "-X", "GET", &api,
-              "-H", &token,
-              "-H", "Content-Type: application/json",
-        ])
-        .output()
-        .expect("failed to run");
-
-
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-
-     let mut list = ajson::get(&send_out1_stdout, "#").unwrap().to_string();
-
-    let list2 = list.parse::<i32>().unwrap();
-
-
-
-    if numget > list2 {
-
-        println!("invalid input for rev_history\nrequested {} messages but only {} found\n", numget, list);
-        //return (vec!["no".to_string()], vec!["no".to_string()])
-
-        numget = list2;
-    }
-
-    let mut x = 0;
-
-        for _x in 0..numget {
-            let iter1 = &(x.to_string() + ".content");
-            let iter2 = &(x.to_string() + ".author");
-
-            n.content.push("<placeholder>".to_string());
-            n.author.push("<placeholder>".to_string()); 
-
-            n.content[x] = ajson::get(&send_out1_stdout, iter1).unwrap().to_string();
-            n.author[x] = ajson::get(&send_out1_stdout, iter2).unwrap().to_string();
-
-
-
-
-             x = x + 1;
-        }
-            return (n.content, n.author);
-
-    
-        let failed: Vec<String> = vec!["no".to_string()];
-        let failed2: Vec<String> = vec!["no".to_string()];
-
-
-        return (failed, failed2)
-
-}
-
-
-
-fn rev_read(token: String, channel: String) -> (String, String){
-
-
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
-    let token = "x-bot-token: ".to_owned() + &token;
-
-
-
-    let send = Command::new("curl")
-        .args([
-               "-sS", "-X", "GET", &api,
-              "-H", &token,
-              "-H", "Content-Type: application/json",
-        ])
-        .output()
-        .expect("failed to run");
-
-
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-   //println!("REVOLT:\nstdout:\n{}\nstderr:\n{}", send_out1_stdout, send_out1_stderr);
-   
-   let content = ajson::get(&send_out1_stdout, "0.content").unwrap().to_string();
-   let author =  ajson::get(&send_out1_stdout, "0.author").unwrap().to_string();
-
-
-   return (content, author)
-   
-
-}
-
-
-fn rev_search(token: String, channel: String, content: String, limit: i8) {
-
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/search";
-    let token = "x-bot-token: ".to_owned() + &token;
-
-
-    //  DO NOT LINT 
-    let content_print = r#"{
-  "query": ""#.to_owned() + &content + r#"",
-  "limit": "# + &limit.to_string() + r#",
-  "sort": "Relevance",
-  "include_users": false"# + r#"
-}"#;
-
-println!("{}", content_print);
-
-
-    let send = Command::new("curl")
-        .args([
-               "-sS", "-X", "POST", &api,
-              "-H", &token,
-              "-H", "Content-Type: application/json",
-              "--data", &content_print
-        ])
-        .output()
-        .expect("failed to run");
-
-
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-    println!("REVOLT:\nstdout:\n{}\nstderr:\n{}", send_out1_stdout, send_out1_stderr);
-
-}
-
-
-
-fn rev_send(token: String, channel: String, content: String) {
-
-
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
-    let token = "x-bot-token: ".to_owned() + &token;
-    
-
-    // RNG
-
-
-    let mut random = rand::thread_rng();
-    let idem: i16 = random.gen();
-    let idem_print = "Idempotency-Key: ".to_owned() + &idem.to_string();
-
-
-    //  DO NOT LINT 
-    let content_print = r#"{
-  "content": ""#.to_owned() + &content + r#""
-}"#;
-
-
-println!("{}", content_print);
-
-    let send = Command::new("curl")
-        .args([
-               "-sS", "-X", "POST", &api,
-              "-H", &token,
-              "-H", &idem_print,
-              "-H", "Content-Type: application/json",
-              "--data", &content_print
-        ])
-        .output()
-        .expect("failed to run");
-
-
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-   // println!("REVOLT:\nster:\n{}\nstd:\n{}", send_out1_ster, send_out1_std);
+    loop {
+
+        // rate limit
+        thread::sleep(sec);
+      
+
+       let (raw, user) = rev_read(data.token.clone(), data.channel.clone());
+       let mut args = raw.split(" ").collect::<Vec<&str>>();
+       let mes = args[0];
+      
+       println!("{:?}", mes);
+       
+       let sudo = permcheck(user.clone(), data.sudoers.clone());
+
+       if user.clone() == data.bot_id {
+           // nothing
+       }else if mes.chars().nth(0).unwrap() != '?' {
+           // nothing
+
+
+        // general 
+       }else if mes == ("?help".to_string()) {
+            println!("sending help");
+            rev_send(data.token.clone(), data.channel.clone(), help.clone());
         
+        }else if mes == ("?ping".to_string()) {
+            println!("PingPong");
+            rev_send(data.token.clone(), data.channel.clone(), "Pong!!".to_string());
+        
+        }else if mes == ("?man".to_string()){
+            if args.len() < 2 {
+                rev_send(data.token.clone(), data.channel.clone(), man("man".to_string()));
+            }else {
+                rev_send(data.token.clone(), data.channel.clone(), man(args[1].to_string()));
+            };     
+
+
+            // TXC services 
+        }else if mes == ("?mc".to_string()) {
+            println!("running mc check");
+            rev_send(data.token.clone(), data.channel.clone(), divancheck(args[1].to_string()));
+       
+
+            // sudoers
+
+        }else if sudo == false {
+            rev_send(data.token.clone(), data.channel.clone(), "invalid permissons".to_string())
+        
+        }else if mes == ("?killbot".to_string()) {
+            if args.len() == 2 {
+                if args[1].to_string() == "--confirm" {
+                    println!("recived kill switch, stopping bot");
+                    rev_send(data.token.clone(), data.channel.clone(), "killing bot...".to_string());
+                    return
+                };
+            }else {
+                rev_send(data.token.clone(), data.channel.clone(), "run `?killbot --confirm` to confirm".to_string())
+            }; 
+
+        }else if mes == "?sendas".to_string() {
+            if args.len() < 3 {
+                rev_send(data.token.clone(), data.channel.clone(), "invalid use of sendas".to_string());
+            }else {
+                sendas(data.token.clone(), data.channel.clone(), args);
+            };
+        };
+    }
 }
