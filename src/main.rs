@@ -26,7 +26,7 @@ fn main() {
     //users
 
 
-    let help = "**HELP**\\n`prefix: ?`\\n`mc: queries minecraft servers`\\n`ping: pong!!`".to_string();
+    let help = "run ?man for help".to_string();
 
     let sec = time::Duration::from_secs(2);
 
