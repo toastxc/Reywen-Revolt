@@ -43,8 +43,6 @@ fn main() {
        let (raw, user) = rev_read(data.token.clone(), data.channel.clone());
        let mut args = raw.split(" ").collect::<Vec<&str>>();
        let mes = args[0];
-      
-       println!("{:?}", mes);
        
        let sudo = permcheck(user.clone(), data.sudoers.clone());
 
