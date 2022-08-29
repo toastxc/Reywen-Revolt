@@ -1,13 +1,8 @@
-# Revolt-Bot-Framework-Rust
-A framework for making a revolt-chat bot in rust, using curl and the Revolt API
+# Reywen 
+General purpose bot for Revolt.chat using the RevX library
 
-# Usage 
-```
-git clone https://github.com/toastxc/Revolt-Bot-Framework-Rust
-cd Revolt-Bot-Framework-Rust
-vi main.rs
-```
-you will need to add values to lines 19 - 21, further information can be found at 
+
+you will need to add values to src/main.rs for the bot to be functional 
 https://developers.revolt.chat/api
 
 # API functions
@@ -17,6 +12,7 @@ Messages
 - [x] reading messages
 - [x] reading chat history
 - [ ] mass deleting messages
+- [X] masqurade (half)
 
 Users
 - [ ] kicking users
