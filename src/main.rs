@@ -1,7 +1,7 @@
 mod rev_curl;
 use std::{thread, time};
 
-use rev_curl::{permcheck, rev_history, rev_read, rev_send, sendas, divancheck, man};
+use rev_curl::{permcheck, rev_history, rev_read, rev_send, sendas, divancheck, man, rev_del};
 #[derive(Debug, Clone)]
 struct Data {
 
@@ -15,11 +15,11 @@ struct Data {
 
 fn main() {
 
-    let data = Data {
-    token: "TOKEN".to_string(),
-    channel: "CHANNEL".to_string(),
-    bot_id: "BOTID".to_string(),
-    sudoers: vec!["SUDOER1".to_string(), "SUDOER2".to_string()]
+ let data = Data {
+    token: "".to_string(),
+    channel: "".to_string(),
+    bot_id: "".to_string(),
+    sudoers: vec![]
     };
 
 
@@ -40,10 +40,11 @@ fn main() {
         thread::sleep(sec);
       
 
-       let (raw, user) = rev_read(data.token.clone(), data.channel.clone());
-       let mut args = raw.split(" ").collect::<Vec<&str>>();
+       let (content, user, id) = rev_read(data.token.clone(), data.channel.clone());
+       let mut args = content.split(" ").collect::<Vec<&str>>();
        let mes = args[0];
-       
+      
+
        let sudo = permcheck(user.clone(), data.sudoers.clone());
 
        if user.clone() == data.bot_id {
@@ -66,7 +67,12 @@ fn main() {
                 rev_send(data.token.clone(), data.channel.clone(), man("man".to_string()));
             }else {
                 rev_send(data.token.clone(), data.channel.clone(), man(args[1].to_string()));
-            };     
+            };
+
+            }else if mes == ("?sudo".to_string()) {
+                println!("sudo check");
+                rev_send(data.token.clone(), data.channel.clone(), sudo.to_string());
+            
 
 
             // TXC services 
@@ -95,8 +101,18 @@ fn main() {
             if args.len() < 3 {
                 rev_send(data.token.clone(), data.channel.clone(), "invalid use of sendas".to_string());
             }else {
+                 rev_del(data.token.clone(), data.channel.clone(), id.to_string());
+
                 sendas(data.token.clone(), data.channel.clone(), args);
+
             };
-        };
+
+        }else if mes == "?delete".to_string() {
+            if args.len() < 0 {
+                rev_send(data.token.clone(), data.channel.clone(), "invalid use of delete".to_string());
+            }else {
+                rev_del(data.token.clone(), data.channel.clone(), id.to_string());
+            }
+        }
     }
 }
