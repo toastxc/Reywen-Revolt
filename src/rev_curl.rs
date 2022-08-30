@@ -2,6 +2,27 @@ use std::process::Command;
 use std::str::from_utf8;
 use rand::Rng;
 
+
+pub fn rev_del(token: String, channel: String, target: String)  {
+
+    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages/" + &target;
+    let token = "x-bot-token: ".to_owned() + &token;
+
+    let curl =  Command::new("curl")
+        .args([
+               "-sS", "-X", "DELETE", &api,
+              "-H", &token,
+
+        ])
+        .output()
+        .expect("failed to run");
+
+
+    let curl_stdout = from_utf8(&curl.stdout).unwrap().to_string();
+    let curl_stderr = from_utf8(&curl.stderr).unwrap().to_string();
+
+}
+
 pub fn permcheck(user: String, sudoers: Vec<String>) -> bool {
 
     for x in 0..sudoers.len() {
@@ -84,7 +105,7 @@ pub fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<Stri
 
 }
 
-pub fn rev_read(token: String, channel: String) -> (String, String){
+pub fn rev_read(token: String, channel: String) -> (String, String, String){
 
 
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
@@ -109,9 +130,9 @@ pub fn rev_read(token: String, channel: String) -> (String, String){
 
    let content = ajson::get(&send_out1_stdout, "0.content").unwrap().to_string();
    let author =  ajson::get(&send_out1_stdout, "0.author").unwrap().to_string();
+   let id = ajson::get(&send_out1_stdout, "0._id").unwrap().to_string();
 
-
-   return (content, author)
+   return (content, author, id)
 
 
 }
