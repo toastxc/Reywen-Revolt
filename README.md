@@ -11,8 +11,9 @@ Messages
 - [x] sending messages
 - [x] reading messages
 - [x] reading chat history
+- [x] delete messages
 - [ ] mass deleting messages
-- [X] masqurade (half)
+- [X] masqurade
 
 Users
 - [ ] kicking users
