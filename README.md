@@ -9,8 +9,8 @@ https://developers.revolt.chat/api
 
 - __sendas__
 Sends masqurade messages with custom profile picture 
-__mc__
-- Quries minecraft servers, returns true for online and false for offline
+- __mc__
+Quries minecraft servers, returns true for online and false for offline
 
 There are more features comming soon, for now I am focused on broadening the capabilities of the RevX library
 
