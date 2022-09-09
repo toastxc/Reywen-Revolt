@@ -3,11 +3,12 @@ use std::{thread, time};
 
 use rev_curl::{permcheck, rev_history, rev_read, rev_send, sendas, divancheck, man, rev_del};
 #[derive(Debug, Clone)]
+
 struct Data {
 
     token: String,
-    channel: String,
     bot_id: String,
+    channel: String,
     sudoers: Vec<String>
 }
 
@@ -15,20 +16,9 @@ struct Data {
 
 fn main() {
 
- let data = Data {
-    token: "".to_string(),
-    channel: "".to_string(),
-    bot_id: "".to_string(),
-    sudoers: vec![]
-    };
 
 
-    //users
-
-
-    let help = "run ?man for help".to_string();
-
-    let sec = time::Duration::from_secs(2);
+    let sec = time::Duration::from_secs(1);
 
 
     // main session
@@ -38,12 +28,25 @@ fn main() {
 
         // rate limit
         thread::sleep(sec);
-      
+     
 
-       let (content, user, id) = rev_read(data.token.clone(), data.channel.clone());
-       let mut args = content.split(" ").collect::<Vec<&str>>();
+
+       let (mut content, user, id) = rev_read(data.token.clone(), data.channel.clone());
+
+       let mut out = String::new();
+
+       for x in 0..content.chars().count() {
+
+           if content.chars().nth(x) == Some('\n') {
+               out = out + "\\n";
+           }else {
+               out = out + &(content.chars().nth(x).unwrap().to_string());
+           };
+       };
+
+       let mut args = out.split(' ').collect::<Vec<&str>>();
        let mes = args[0];
-      
+
 
        let sudo = permcheck(user.clone(), data.sudoers.clone());
 
@@ -56,7 +59,8 @@ fn main() {
         // general 
        }else if mes == ("?help".to_string()) {
             println!("sending help");
-            rev_send(data.token.clone(), data.channel.clone(), help.clone());
+            rev_send(data.token.clone(), data.channel.clone(), man("man".to_string()));
+
         
         }else if mes == ("?ping".to_string()) {
             println!("PingPong");
@@ -99,10 +103,11 @@ fn main() {
 
         }else if mes == "?sendas".to_string() {
             if args.len() < 3 {
-                rev_send(data.token.clone(), data.channel.clone(), "invalid use of sendas".to_string());
+                rev_send(data.token.clone(), data.channel.clone(), "**Options**\\ncheese, joe_biden, bingus, woof, walter, **Syntax**\\n```text\\n?sendas <name> <content>".to_string());
             }else {
                  rev_del(data.token.clone(), data.channel.clone(), id.to_string());
 
+                 println!("{:?}", args);
                 sendas(data.token.clone(), data.channel.clone(), args);
 
             };
