@@ -12,7 +12,6 @@ pub fn rev_del(token: String, channel: String, target: String)  {
         .args([
                "-sS", "-X", "DELETE", &api,
               "-H", &token,
-
         ])
         .output()
         .expect("failed to run");
@@ -174,6 +173,7 @@ println!("{}", content_print);
 
 pub fn rev_send(token: String, channel: String, content: String) {
 
+    content.replace("\n", "\\n");
 
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
     let token = "x-bot-token: ".to_owned() + &token;
@@ -245,6 +245,8 @@ pub fn sendas(token: String, channel: String, args: Vec<&str>) {
         "name": ""# + masq + r#"",
         "avatar": "https://toastxc.xyz/TXCS/"# + masq + r#".jpg"
     }}"#;
+
+
 
 
     let send = Command::new("curl")
