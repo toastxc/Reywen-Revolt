@@ -8,7 +8,7 @@ pub fn rev_del(token: String, channel: String, target: String)  {
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages/" + &target;
     let token = "x-bot-token: ".to_owned() + &token;
 
-    let curl =  Command::new("curl")
+   let  _curl =  Command::new("curl")
         .args([
                "-sS", "-X", "DELETE", &api,
               "-H", &token,
@@ -16,9 +16,6 @@ pub fn rev_del(token: String, channel: String, target: String)  {
         .output()
         .expect("failed to run");
 
-
-    let curl_stdout = from_utf8(&curl.stdout).unwrap().to_string();
-    let curl_stderr = from_utf8(&curl.stderr).unwrap().to_string();
 
 }
 
@@ -32,7 +29,7 @@ pub fn permcheck(user: String, sudoers: Vec<String>) -> bool {
     };
     return false
 }
-pub fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<String>, Vec<String>){
+fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<String>, Vec<String>){
 
     struct Returner {
 
@@ -48,7 +45,7 @@ pub fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<Stri
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
     let token = "x-bot-token: ".to_owned() + &token;
 
-    let send = Command::new("curl")
+    let curl = Command::new("curl")
         .args([
                "-sS", "-X", "GET", &api,
               "-H", &token,
@@ -58,11 +55,9 @@ pub fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<Stri
         .expect("failed to run");
 
 
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
+    let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
 
-
-     let mut list = ajson::get(&send_out1_stdout, "#").unwrap().to_string();
+    let list = ajson::get(&curl_out, "#").unwrap().to_string();
 
     let list2 = list.parse::<i32>().unwrap();
 
@@ -79,28 +74,18 @@ pub fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<Stri
     let mut x = 0;
 
         for _x in 0..numget {
-            let iter1 = &(x.to_string() + ".content");
-            let iter2 = &(x.to_string() + ".author");
+            let iter1 = &(_x.to_string() + ".content");
+            let iter2 = &(_x.to_string() + ".author");
 
             n.content.push("<placeholder>".to_string());
             n.author.push("<placeholder>".to_string());
 
-            n.content[x] = ajson::get(&send_out1_stdout, iter1).unwrap().to_string();
-            n.author[x] = ajson::get(&send_out1_stdout, iter2).unwrap().to_string();
-
-
-
+            n.content[x] = ajson::get(&curl_out, iter1).unwrap().to_string();
+            n.author[x] = ajson::get(&curl_out, iter2).unwrap().to_string();
 
              x = x + 1;
         }
             return (n.content, n.author);
-
-
-        let failed: Vec<String> = vec!["no".to_string()];
-        let failed2: Vec<String> = vec!["no".to_string()];
-
-
-        return (failed, failed2)
 
 }
 
@@ -123,9 +108,7 @@ pub fn rev_read(token: String, channel: String) -> (String, String, String){
 
 
     let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
 
-   //println!("REVOLT:\nstdout:\n{}\nstderr:\n{}", send_out1_stdout, send_out1_stderr);
 
    let content = ajson::get(&send_out1_stdout, "0.content").unwrap().to_string();
    let author =  ajson::get(&send_out1_stdout, "0.author").unwrap().to_string();
@@ -136,7 +119,7 @@ pub fn rev_read(token: String, channel: String) -> (String, String, String){
 
 }
 
-pub fn rev_search(token: String, channel: String, content: String, limit: i8) {
+fn rev_search(token: String, channel: String, content: String, limit: i8) {
 
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/search";
     let token = "x-bot-token: ".to_owned() + &token;
@@ -173,8 +156,6 @@ println!("{}", content_print);
 
 pub fn rev_send(token: String, channel: String, content: String) {
 
-    content.replace("\n", "\\n");
-
     let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
     let token = "x-bot-token: ".to_owned() + &token;
 
@@ -195,7 +176,7 @@ pub fn rev_send(token: String, channel: String, content: String) {
 
 println!("{}", content_print);
 
-    let send = Command::new("curl")
+    let _curl = Command::new("curl")
         .args([
                "-sS", "-X", "POST", &api,
               "-H", &token,
@@ -207,10 +188,7 @@ println!("{}", content_print);
         .expect("failed to run");
 
 
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-   //println!("REVOLT:\nstdout:\n{}\nstderr:\n{}", send_out1_stdout, send_out1_stderr);
+    //let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
 
 }
 
@@ -276,7 +254,7 @@ pub fn divancheck(server: String) -> String {
 
 
      let curlout = from_utf8(&curl.stdout).unwrap().to_string();
-     let curlerr = from_utf8(&curl.stderr).unwrap().to_string();
+     //let curlerr = from_utf8(&curl.stderr).unwrap().to_string();
 
      let returner = ajson::get(&curlout, "online").unwrap().to_string();
 
