@@ -1,7 +1,7 @@
-mod rev_curl;
+mod rev_x;
 use std::{thread, time};
 
-use rev_curl::{permcheck, rev_history, rev_read, rev_send, sendas, divancheck, man, rev_del};
+use rev_x::{permcheck, rev_read, rev_send, sendas, divancheck, man, rev_del};
 #[derive(Debug, Clone)]
 
 struct Data {
@@ -17,6 +17,26 @@ struct Data {
 fn main() {
 
 
+    let data = Data {
+        token: "".to_string(),
+        bot_id: "".to_string(),
+        channel: "".to_string(),
+        sudoers: vec!["".to_string()],
+    };
+
+
+    if data.token == "" {
+        println!("bot token required for functionality");
+            return
+    }else if data.bot_id == "" {
+        println!("bot id required for functionality");
+    }else if data.channel == "" {
+        println!("channel required for functionality");
+    }else if data.sudoers[0] == "" {
+        println!("WARN: no sudoers\nno users are able to run privileged  commmands")
+    }else {
+        println!("valid credentials, starting bot...");
+    };
 
     let sec = time::Duration::from_secs(1);
 
@@ -31,7 +51,7 @@ fn main() {
      
 
 
-       let (mut content, user, id) = rev_read(data.token.clone(), data.channel.clone());
+       let (content, user, id) = rev_read(data.token.clone(), data.channel.clone());
 
        let mut out = String::new();
 
@@ -44,7 +64,7 @@ fn main() {
            };
        };
 
-       let mut args = out.split(' ').collect::<Vec<&str>>();
+       let args = out.split(' ').collect::<Vec<&str>>();
        let mes = args[0];
 
 
@@ -113,7 +133,7 @@ fn main() {
             };
 
         }else if mes == "?delete".to_string() {
-            if args.len() < 0 {
+            if args.len() < 2 {
                 rev_send(data.token.clone(), data.channel.clone(), "invalid use of delete".to_string());
             }else {
                 rev_del(data.token.clone(), data.channel.clone(), id.to_string());
