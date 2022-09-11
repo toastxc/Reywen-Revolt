@@ -1,34 +1,36 @@
 use std::process::Command;
 use std::str::from_utf8;
 use rand::Rng;
+use ajson::*;
 
-pub fn rev_wordban(token: String, channel: String, list: Vec<String>) {
+pub fn rev_wordban(token: String, channel: String, list: Vec<String>, raw: String) {
 
     //println!("starting banlist");
 
-    let mes = rev_read2(token.clone(), channel.clone());
+
+    let mut delete = "";
 
 
-    let mut delete = vec!["".to_string()];
+    let content = ajson::get(&raw, "content").unwrap().to_string();
+ 
+    let id = ajson::get(&raw, "_id").unwrap().to_string();
 
-    for mut x in 0..mes.len() {
-   
-        let content = ajson::get(&mes[x], &"content".to_string()).unwrap();
         for mut y in 0..list.len() {
 
-            if content.to_string() == list[y] {
-                delete.push(mes[x].clone())
+            if content == list[y] {
+                delete = &id
             };
         };
 
-    };
 
     //println!("delete {:#?}", delete);
-    if delete == vec!["".to_string()] {
+    if delete == "" {
         return
     }else {
-        println!("{} illegal words found", delete.len() -1);
-        rev_mass_delete(token.clone(), channel.clone(), delete);
+        println!("illegal words found: {}", content);
+        rev_del(token.clone(), channel.clone(), delete.to_string());
+        sendas(token.clone(), channel.clone(), vec!["", "dad", "no", "ping!!"]);
+
     };
 
 
@@ -388,7 +390,7 @@ pub fn man(input: String) -> String {
     println!("aaaaaaaaaaaaa {}", input);
 
     let mc = 
-        "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?toastxc.xyz";
+        "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?mc hypixel.net";
     let ping =
         "**ping** - simple ping test for bot latency, no parameters";
     let killbot = 

@@ -1,16 +1,17 @@
 mod rev_x;
+
 use std::{thread, time};
-use std::process::Command;
-use std::str::from_utf8;
-
 use rev_x::*;
-#[derive(Debug, Clone)]
+use ajson::*;
+use url::Url;
+use tungstenite::{connect, Message};
 
+
+#[derive(Debug, Clone)]
 struct Data {
 
     token: String,
     bot_id: String,
-    channel: String,
     sudoers: Vec<String>
 }
 
@@ -19,15 +20,16 @@ struct Data {
 fn main() {
 
     // credentials
-       let data = Data {
+
+        let data = Data {
         token: "".to_string(),
         bot_id: "".to_string(),
-        channel: "".to_string(),
         sudoers: vec!["".to_string()],
     };
 
+
        // wordban
-       let wordlist = vec!["example".to_string(), "example2".to_string()];
+       let wordlist = vec!["example".to_string()];
        let wordban = true;
 
        // credentials check
@@ -36,123 +38,128 @@ fn main() {
             return
     }else if data.bot_id == "" {
         println!("bot id required for functionality");
-    }else if data.channel == "" {
-        println!("channel required for functionality");
     }else if data.sudoers[0] == "" {
         println!("WARN: no sudoers\nno users are able to run privileged  commmands")
     }else {
         println!("valid credentials, starting bot...");
     };
 
-    let sec = time::Duration::from_secs(2);
+    // new auth
 
-    // main session
+    let url = "wss://ws.revolt.chat/?format=json&version=1&token=".to_owned() + &data.token;
+
+    
+     let (mut socket, response) = connect(
+
+
+        Url::parse(&url).unwrap()).expect("Can't connect");
+
 
    
     loop {
 
-        // rate limit
-        thread::sleep(sec);
-     
-
-       let (content, user, id) = rev_read(data.token.clone(), data.channel.clone());
-
-       let mut out = String::new();
-
-       for x in 0..content.chars().count() {
-
-           if content.chars().nth(x) == Some('\n') {
-               out = out + "\\n";
-           }else {
-               out = out + &(content.chars().nth(x).unwrap().to_string());
-           };
-       };
-
-       let args = out.split(' ').collect::<Vec<&str>>();
-       let mes = args[0];
+   
+        let raw = socket.read_message().expect("Error reading message").to_string();
 
 
-       let sudo = permcheck(user.clone(), data.sudoers.clone());
 
-       if user.clone() == data.bot_id {
-           // nothing
-       }else if mes.chars().nth(0).unwrap() != '?' {
-           // nothing
+        let mes_type = ajson::get(&raw, "type").unwrap().to_string();
 
-
-        // general 
-       }else if mes == ("?help".to_string()) {
-            println!("sending help");
-            rev_send(data.token.clone(), data.channel.clone(), man("man".to_string()));
-
-        
-        }else if mes == ("?ping".to_string()) {
-            println!("PingPong");
-            rev_send(data.token.clone(), data.channel.clone(), "Pong!!".to_string());
-        
-        }else if mes == ("?man".to_string()){
-            if args.len() < 2 {
-                rev_send(data.token.clone(), data.channel.clone(), man("man".to_string()));
-            }else {
-                rev_send(data.token.clone(), data.channel.clone(), man(args[1].to_string()));
-            };
-
-            }else if mes == ("?sudo".to_string()) {
-                println!("sudo check");
-                rev_send(data.token.clone(), data.channel.clone(), sudo.to_string());
-            
-
-
-            // TXC services 
-        }else if mes == ("?mc".to_string()) {
-            println!("running mc check");
-            rev_send(data.token.clone(), data.channel.clone(), divancheck(args[1].to_string()));
        
-
-            // sudoers
-
-        }else if sudo == false {
-            rev_send(data.token.clone(), data.channel.clone(), "invalid permissons".to_string())
         
-        }else if mes == ("?killbot".to_string()) {
-            if args.len() == 2 {
-                if args[1].to_string() == "--confirm" {
-                    println!("recived kill switch, stopping bot");
-                    rev_send(data.token.clone(), data.channel.clone(), "killing bot...".to_string());
-                    return
+
+        //println!("TYPE:\n{:?}", mes_type);
+
+        if mes_type == "Message" {
+
+        
+            let mut content = ajson::get(&raw, "content").unwrap().to_string();
+            let channel = ajson::get(&raw, "channel").unwrap().to_string();
+            let author = ajson::get(&raw, "author").unwrap().to_string();
+            let id = ajson::get(&raw, "_id").unwrap().to_string();
+        
+
+            let mut out = String::new();
+
+            for x in 0..content.chars().count() {
+
+                if content.chars().nth(x) == Some('\n') {
+                    out = out + "\\n";
+
+                }else if content.chars().nth(x) == Some('\\') {
+                    out = out + "\\\\"
+                }else {
+
+                    out = out + &(content.chars().nth(x).unwrap().to_string());
                 };
-            }else {
-                rev_send(data.token.clone(), data.channel.clone(), "run `?killbot --confirm` to confirm".to_string())
-            }; 
+            };
+            let args = out.split(' ').collect::<Vec<&str>>();
 
-        }else if mes == "?sendas".to_string() {
-            if args.len() < 3 {
-                rev_send(data.token.clone(), data.channel.clone(), "**Options**\\ncheese, joe_biden, bingus, woof, walter, **Syntax**\\n```text\\n?sendas <name> <content>".to_string());
-            }else {
-                 rev_del(data.token.clone(), data.channel.clone(), id.to_string());
+            let content = args[0];
 
-                 println!("{:?}", args);
-                sendas(data.token.clone(), data.channel.clone(), args);
-
+            let mut content2 = String::new();
+            if args.len() >= 2 {
+                content2 = args[1].to_string();
             };
 
-        }else if mes == "?delete".to_string() {
-            if args.len() < 2 {
-                rev_send(data.token.clone(), data.channel.clone(), "invalid use of delete".to_string());
-            }else {
-                rev_del(data.token.clone(), data.channel.clone(), id.to_string());
-    
+
+            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+            let sudo = permcheck(author.clone(), data.sudoers.clone());
+
+            if author.clone() != data.bot_id {
+
+                if content.chars().count() >= 2 {
+
+
+                    if content.chars().nth(0).unwrap() == '?' {
+
+                    // main
+
+                    if content == "?help" {
+                        rev_send(data.token.clone(), channel.clone(), man("man".to_string()));
+
+                    }else if content == "?ping" {
+                        rev_send(data.token.clone(), channel.clone(), "Pong!!".to_string());
+
+                    }else if content == "?man" {
+
+                        if args.len() < 2 {
+                            rev_send(data.token.clone(), channel.clone(), man("man".to_string()));
+                        }else {
+                            rev_send(data.token.clone(), channel.clone(), man(content2));
+                        };
+                    }else if content == ("?sudo".to_string()) {
+                        rev_send(data.token.clone(), channel.clone(), sudo.to_string());
+                   
+                        }else if content == ("?mc".to_string()) {
+                            rev_send(data.token.clone(), channel.clone(), divancheck(args[1].to_string()));
+                        
+
+                            }else if content == "?sendas" {
+                                if args.len() < 3 {
+                                    rev_send(data.token.clone(), channel.clone(), "**Options**\\ncheese, joe_biden, bingus, woof, walter, **Syntax**\\n```text\\n?sendas <name> <content>".to_string());
+                                }else {
+                                    rev_del(data.token.clone(), channel.clone(), id.to_string());
+                                    sendas(data.token.clone(), channel.clone(), args);
+                                };
+                            };
+                   
+
+
+                            
+                    }else {
+                    };
+
+                    if wordban == true {
+
+                        rev_wordban(data.token.clone(), channel.clone(), wordlist.clone(), raw);
+
+
+
+                    };
+                };
             };
         };
-
-       // wordban
-       if wordban == true {
-           rev_wordban(data.token.clone(), data.channel.clone(), wordlist.clone());
-       };
-    
-
-
     };
-
-
 }
