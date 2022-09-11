@@ -12,6 +12,9 @@ Sends masqurade messages with custom profile picture
 - __mc__
 Quries minecraft servers, returns true for online and false for offline
 
+- __wordban__
+Auto deletes words found in the banlist
+
 There are more features comming soon, for now I am focused on broadening the capabilities of the RevX library
 
 # API functions
