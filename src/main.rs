@@ -1,7 +1,9 @@
 mod rev_x;
 use std::{thread, time};
+use std::process::Command;
+use std::str::from_utf8;
 
-use rev_x::{permcheck, rev_read, rev_send, sendas, divancheck, man, rev_del};
+use rev_x::*;
 #[derive(Debug, Clone)]
 
 struct Data {
@@ -16,15 +18,19 @@ struct Data {
 
 fn main() {
 
-
-    let data = Data {
+    // credentials
+       let data = Data {
         token: "".to_string(),
         bot_id: "".to_string(),
         channel: "".to_string(),
         sudoers: vec!["".to_string()],
     };
 
+       // wordban
+       let wordlist = vec!["example".to_string(), "example2".to_string()];
+       let wordban = true;
 
+       // credentials check
     if data.token == "" {
         println!("bot token required for functionality");
             return
@@ -38,8 +44,7 @@ fn main() {
         println!("valid credentials, starting bot...");
     };
 
-    let sec = time::Duration::from_secs(1);
-
+    let sec = time::Duration::from_secs(2);
 
     // main session
 
@@ -49,7 +54,6 @@ fn main() {
         // rate limit
         thread::sleep(sec);
      
-
 
        let (content, user, id) = rev_read(data.token.clone(), data.channel.clone());
 
@@ -137,7 +141,18 @@ fn main() {
                 rev_send(data.token.clone(), data.channel.clone(), "invalid use of delete".to_string());
             }else {
                 rev_del(data.token.clone(), data.channel.clone(), id.to_string());
-            }
-        }
-    }
+    
+            };
+        };
+
+       // wordban
+       if wordban == true {
+           rev_wordban(data.token.clone(), data.channel.clone(), wordlist.clone());
+       };
+    
+
+
+    };
+
+
 }
