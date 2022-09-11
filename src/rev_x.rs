@@ -388,7 +388,7 @@ pub fn man(input: String) -> String {
     println!("aaaaaaaaaaaaa {}", input);
 
     let mc = 
-        "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?mc hypixel.net";
+        "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?toastxc.xyz";
     let ping =
         "**ping** - simple ping test for bot latency, no parameters";
     let killbot = 
