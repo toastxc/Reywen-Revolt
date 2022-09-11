@@ -21,12 +21,13 @@ Messages
 - [x] reading messages
 - [x] reading chat history
 - [x] delete messages
-- [ ] mass deleting messages
+- [x] mass deleting messages
 - [X] masqurade
 
-Users
+Moderation
 - [ ] kicking users
 - [ ] banning users
+- [x] mass deleting banned words (100 per second)
 
 Information
 - [ ] server
