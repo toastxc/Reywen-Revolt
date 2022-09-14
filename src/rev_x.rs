@@ -3,12 +3,103 @@ use std::str::from_utf8;
 use rand::Rng;
 use ajson::*;
 
-pub fn rev_wordban(token: String, channel: String, list: Vec<String>, raw: String) {
 
-    //println!("starting banlist");
+pub fn rev_server(token: String, channel: String) -> String {
+
+    let url = format!("https://api.revolt.chat/channels/{channel}");
+    let token = format!("x-bot-token: {token}");
+
+    let curl = Command::new("curl")
+        .args([
+
+              "-sS", "-X", "GET", &url, 
+              "-H", &token,
+        ]).output().expect("failed to curl");
+
+    let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
+
+    return ajson::get(&curl_out, "server").unwrap().to_string();
+
+    println!("stout: {:?}", curl_out);
+
+}
+
+pub fn rev_kick(token: String, channel: String, mut content: String) {
+    
+
+    let server = rev_server(token.clone(), channel.clone());
+    
+    content.pop();
+    content.remove(0);
+    content.remove(0);
+ 
+    
+    println!("{content}");
+    let url = format!("https://api.revolt.chat/servers/{server}/members/{content}"); 
+    let token = format!("x-bot-token: {token}");
 
 
-    let mut delete = "";
+    let curl = Command::new("curl")
+        .args([
+              "-sS", "-X", "DELETE", &url,
+              "-H", &token, 
+        ]).output().expect("failed to run");
+
+
+    let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
+
+
+    println!("{curl_out}");
+
+}
+
+
+
+pub fn purge(token: String, channel: String, num: String) {
+
+
+    let raw = rev_read2(token.clone(), channel.clone());
+
+    let mut returner: Vec<String> = vec![];
+
+    let mut number = num.parse::<i32>();
+
+    let mut err: bool = true;
+
+    for x in 0..100 {
+        if number == Ok(x) {
+            err = false;
+            number = Ok(number.unwrap() );
+
+        }else {
+        };
+    };
+
+    let mut y = 0;
+
+    if err == false {
+
+        for x in 0..number.clone().unwrap() {
+        returner.push(ajson::get(&raw[y], "_id").unwrap().to_string());
+        y = y + 1;
+        };
+
+        println!("{:?}", returner);
+
+        rev_mass_delete(token, channel, returner)
+
+    }else {
+        rev_send(token, channel, "invalid number".to_string());
+    }
+    println!("{:?}", number);
+}
+
+
+
+
+pub fn wordban(token: String, channel: String, list: Vec<String>, raw: String) {
+
+    let mut delete = String::new();
 
 
     let content = ajson::get(&raw, "content").unwrap().to_string();
@@ -18,7 +109,7 @@ pub fn rev_wordban(token: String, channel: String, list: Vec<String>, raw: Strin
         for mut y in 0..list.len() {
 
             if content == list[y] {
-                delete = &id
+                delete = id.clone()
             };
         };
 
@@ -29,7 +120,7 @@ pub fn rev_wordban(token: String, channel: String, list: Vec<String>, raw: Strin
     }else {
         println!("illegal words found: {}", content);
         rev_del(token.clone(), channel.clone(), delete.to_string());
-        sendas(token.clone(), channel.clone(), vec!["", "dad", "no", "ping!!"]);
+        sendas(token.clone(), channel.clone(), vec!["", "dad", "no!!"]);
 
     };
 
@@ -37,13 +128,15 @@ pub fn rev_wordban(token: String, channel: String, list: Vec<String>, raw: Strin
 }
 pub fn rev_mass_delete(token: String, channel: String, messages: Vec<String>) {
 
-    let token = "x-bot-token: ".to_owned() + &token;
+    let token = format!("x-bot-token: {token}");
     let target = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages/bulk";
 
     let mut mes = String::new();
-    for x in 0..messages.len() -1 {
+    for x in 0..messages.len()  {
    
-        let mut current = ajson::get(&messages[x + 1], "_id").unwrap();
+        //let mut current = ajson::get(&messages[x], "_id").unwrap();
+    
+        let current = &messages[x];
 
         mes = mes + "\"" + &current.to_string() + "\", ";
     };
@@ -280,25 +373,18 @@ println!("{}", content_print);
 
 pub fn rev_send(token: String, channel: String, content: String) {
 
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
-    let token = "x-bot-token: ".to_owned() + &token;
+    let token = format!("x-bot-token: {token}");
 
+    let api = format!("https://api.revolt.chat/channels/{channel}/messages");
 
     // RNG
-
-
     let mut random = rand::thread_rng();
     let idem: i16 = random.gen();
-    let idem_print = "Idempotency-Key: ".to_owned() + &idem.to_string();
+    let idem_print = format!("Idempotency-Key: {idem}");
+    
 
+    let content_print = format!("{{\n\"content\":\"{content}\"\n}}");
 
-    //  DO NOT LINT 
-    let content_print = r#"{
-  "content": ""#.to_owned() + &content + r#""
-}"#;
-
-
-println!("{}", content_print);
 
     let _curl = Command::new("curl")
         .args([
@@ -350,7 +436,6 @@ pub fn sendas(token: String, channel: String, args: Vec<&str>) {
 
 
 
-
     let send = Command::new("curl")
         .args([
                "-sS", "-X", "POST", &api,
@@ -386,8 +471,6 @@ pub fn divancheck(server: String) -> String {
 }
 
 pub fn man(input: String) -> String {
-
-    println!("aaaaaaaaaaaaa {}", input);
 
     let mc = 
         "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?mc hypixel.net";

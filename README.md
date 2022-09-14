@@ -28,12 +28,12 @@ Messages
 - [X] masqurade
 
 Moderation
-- [ ] kicking users
+- [x] kicking users
 - [ ] banning users
 - [x] mass deleting banned words (100 per second)
 
 Information
-- [ ] server
+- [x] server
 - [ ] channel
 - [ ] user
 
