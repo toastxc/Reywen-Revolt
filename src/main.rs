@@ -1,18 +1,39 @@
 mod rev_x;
 
 use rev_x::*;
-use ajson::*;
 use url::Url;
 use tungstenite::{connect, Message};
+use ajson::*;
 
-#[derive(Debug, Clone)]
-struct Data {
+// fs 
+use std::io::Read;
+use std::fs::*;
+
+// serde
+use serde::{Deserialize, Serialize};
+use serde_json::{Result, Value};
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
+struct Auth {
 
     token: String,
     bot_id: String,
-    sudoers: Vec<String>
+    sudoers: Vec<String>,
+
+    wordban: bool,
+    wordlist: Vec<String>
+
 }
 
+
+fn conf_serde(json: String) -> Result<Auth> {
+
+
+        let conf: Auth = serde_json::from_str(&json)?;
+
+        Ok(conf)
+}
 
 
 fn main() {
@@ -20,16 +41,18 @@ fn main() {
     // credentials
 
 
-       let data = Data {
-        token: "".to_string(),
-        bot_id: "".to_string(),
-        sudoers: vec!["".to_string()],
-    };
+    let mut data_str = String::new();
+
+    let mut config_json = File::open("config.json")
+        .expect("File not found");
+
+    config_json.read_to_string(&mut data_str)
+        .expect("Error while reading file");
 
 
-       // wordban
-       let wordlist = vec!["example".to_string()];
-       let wordban_bool = false;
+     let data = conf_serde(data_str.to_string()).unwrap();
+
+
 
        // credentials check
     if data.token == "" {
@@ -61,9 +84,12 @@ fn main() {
 
         let mes_type = ajson::get(&raw, "type").unwrap().to_string();
       
+
+        if mes_type == "Authenticated" {
+            println!("{raw}")
         
 
-        if mes_type == "Message" {
+        }else if mes_type == "Message" {
 
         
             let mut content = ajson::get(&raw, "content").unwrap().to_string();
@@ -163,9 +189,9 @@ fn main() {
 
                     }
                             
-                    if wordban_bool == true {
+                    if data.wordban == true {
 
-                        wordban(data.token.clone(), channel.clone(), wordlist.clone(), raw);
+                        wordban(data.token.clone(), channel.clone(), data.wordlist.clone(), raw);
 
 
         
@@ -176,5 +202,3 @@ fn main() {
         };
     };
 }
-
-
