@@ -20,8 +20,6 @@ pub fn rev_server(token: String, channel: String) -> String {
 
     return ajson::get(&curl_out, "server").unwrap().to_string();
 
-    println!("stout: {:?}", curl_out);
-
 }
 
 pub fn rev_kick(token: String, channel: String, mut content: String) {
