@@ -39,4 +39,4 @@ Information
 
 General
 - [x] web socket session
-- [ ] external conf
+- [x] external conf
