@@ -93,16 +93,10 @@ pub fn purge(token: String, channel: String, num: String) {
 }
 
 
-
-
-pub fn wordban(token: String, channel: String, list: Vec<String>, raw: String) {
+pub fn wordban(token: String, channel: String, list: Vec<String>, content: String, id: String) {
 
     let mut delete = String::new();
 
-
-    let content = ajson::get(&raw, "content").unwrap().to_string();
- 
-    let id = ajson::get(&raw, "_id").unwrap().to_string();
 
         for mut y in 0..list.len() {
 
@@ -124,6 +118,8 @@ pub fn wordban(token: String, channel: String, list: Vec<String>, raw: String) {
 
 
 }
+
+
 pub fn rev_mass_delete(token: String, channel: String, messages: Vec<String>) {
 
     let token = format!("x-bot-token: {token}");
