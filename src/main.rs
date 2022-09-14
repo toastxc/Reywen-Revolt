@@ -1,5 +1,6 @@
 mod rev_x;
 
+
 use rev_x::*;
 use url::Url;
 use tungstenite::{connect, Message};
@@ -51,7 +52,6 @@ fn main() {
 
 
      let data = conf_serde(data_str.to_string()).unwrap();
-
 
 
        // credentials check
@@ -191,7 +191,7 @@ fn main() {
                             
                     if data.wordban == true {
 
-                        wordban(data.token.clone(), channel.clone(), data.wordlist.clone(), raw);
+                        wordban(data.token.clone(), channel.clone(), data.wordlist.clone(), content.to_string(), id.to_string());
 
 
         
@@ -201,4 +201,5 @@ fn main() {
             };
         };
     };
+
 }
