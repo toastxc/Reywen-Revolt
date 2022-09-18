@@ -112,7 +112,7 @@ pub fn wordban(token: String, channel: String, list: Vec<String>, content: Strin
     }else {
         println!("illegal words found: {}", content);
         rev_del(token.clone(), channel.clone(), delete.to_string());
-        sendas(token.clone(), channel.clone(), vec!["", "dad", "no!!"]);
+        rev_send(token.clone(), channel.clone(), "no bad words!! grrr".to_string());
 
     };
 
@@ -393,103 +393,5 @@ pub fn rev_send(token: String, channel: String, content: String) {
 
 
     //let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
-
-}
-
-pub fn sendas(token: String, channel: String, args: Vec<&str>) {
-
-
-    let masq = args[1];
-    let mut content = String::new();
-
-    for x in 0..args.len() -2  {
-        content = content.to_owned() + " "  + args[x + 2]
-    };
-
-    //println!("masq: {}\ncontent: {}", masq, content);
-
-// ###################################### curl
-
-    let api = "https://api.revolt.chat/channels/".to_owned() + &channel + "/messages";
-    let token = "x-bot-token: ".to_owned() + &token;
-
-    // RNG
-
-    let mut random = rand::thread_rng();
-    let idem: i16 = random.gen();
-    let idem_print = "Idempotency-Key: ".to_owned() + &idem.to_string();
-
-
-       let content_print2 = r#"{
-    "content": ""#.to_owned() + &content + r#"",
-    "masquerade":
-    {
-        "name": ""# + masq + r#"",
-        "avatar": "https://toastxc.xyz/TXCS/"# + masq + r#".jpg"
-    }}"#;
-
-
-
-    let send = Command::new("curl")
-        .args([
-               "-sS", "-X", "POST", &api,
-              "-H", &token,
-              "-H", &idem_print,
-              "-H", "Content-Type: application/json",
-              "--data", &content_print2
-        ])
-        .output()
-        .expect("failed to run");
-
-    let stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let stderr = from_utf8(&send.stderr).unwrap().to_string();
-
-    println!("{}\n{}", stdout, stderr);
-}
-
-
-pub fn divancheck(server: String) -> String {
-
-    let curl = Command::new("curl")
-        .arg("https://api.mcsrvstat.us/2/".to_owned() + &server)
-        .output()
-        .expect("failed to run");
-
-
-     let curlout = from_utf8(&curl.stdout).unwrap().to_string();
-     //let curlerr = from_utf8(&curl.stderr).unwrap().to_string();
-
-     let returner = ajson::get(&curlout, "online").unwrap().to_string();
-
-     return returner
-}
-
-pub fn man(input: String) -> String {
-
-    let mc = 
-        "**mc** - checks the status of a minecraft server\\nexample: \\n```text\\n?mc hypixel.net";
-    let ping =
-        "**ping** - simple ping test for bot latency, no parameters";
-    let killbot = 
-        "killbot closes the bot server, can only be accessed by sudoers";
-    let sendas =
-        "sendas uses masqurade to replace a sentence with a different profile picture and name, the pfps are pulled from toastxc.xyz and corospond to the name given\\nas this feature is still experimental it can only be accessed by sudoers";
-
-    let man =
-        "**man** - short for manual\\ninformation on commands\\noptions: mc, ping, killbot, sendas";
-
-    if input == "mc" {
-        return mc.to_string()
-    }else if input == "ping" {
-        return ping.to_string()
-    }else if input == "killbot" {
-        return killbot.to_string()
-    }else if input == "sendas" {
-        return sendas.to_string()
-    }else if input == "man" {
-        return man.to_string()
-    }else {
-        return man.to_string()
-    }
 
 }
