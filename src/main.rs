@@ -5,6 +5,7 @@ mod reywen;
 use rev_x::*;
 use reywen::*;
 
+
 use url::Url;
 use tungstenite::{connect, Message};
 use ajson::*;
@@ -17,8 +18,10 @@ use std::fs::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+// time
+use std::time::{SystemTime, UNIX_EPOCH};
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct Auth {
 
     token: String,
@@ -33,16 +36,13 @@ struct Auth {
 
 fn conf_serde(json: String) -> Result<Auth> {
 
-
         let conf: Auth = serde_json::from_str(&json)?;
 
         Ok(conf)
 }
 
-
-fn main() {
-
-    // credentials
+#[tokio::main]
+async fn main()  {
 
 
     let mut data_str = String::new();
@@ -76,14 +76,21 @@ fn main() {
     
      let (mut socket, response) = connect(Url::parse(&url).unwrap()).expect("Can't connect");
 
-
-   
-    loop {
-
- 
+    loop { 
         
-        let raw = socket.read_message().expect("Error reading message").to_string();
 
+         let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+
+         let ping = r#"{
+    "type": "Ping",
+    "data": 0
+}"#;
+
+         socket.write_message(Message::Text(ping.to_string()));
+
+
+        let raw = socket.read_message().expect("Error reading message").to_string();
 
         let mes_type = ajson::get(&raw, "type").unwrap().to_string();
       
@@ -166,6 +173,7 @@ fn main() {
                         };
                                             
 
+                    
 
 
                     }else if content == "?purge" {
@@ -177,20 +185,18 @@ fn main() {
                             }else {
                                 purge(data.token.clone(), channel.clone(), content2);
                             };
-                       
+                    
+                    }else if content == "?mog" {
+                        if args.len() < 2 {
+                            rev_send(data.token.clone(), channel.clone(), "invalid use of ?mog".to_string());
+                                     }else {
+                                         rev_send(data.token.clone(), channel.clone(), mog(content2));
+                                     };
+                                     };
+                    
 
-                    }else if content == "?kick" {
-                        if sudo == false {
-                            rev_send(data.token.clone(), channel.clone(), "you require sudo for ?kick".to_string());
-                        }else if args.len() < 2 {
-                                rev_send(data.token.clone(), channel.clone(), "invalid use of ?kick".to_string());
-                            }else {
-                                rev_kick(data.token.clone(), channel.clone(), content2.clone());
-                                println!("kicking {}", content2.clone());
-                            };
-                        }; 
 
-                    }
+                    };
                             
                     if data.wordban == true {
 
@@ -203,6 +209,15 @@ fn main() {
                 };
             };
         };
+
+            let elapsed = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+     
+            
+            if (elapsed - start).as_secs() > 1 {
+                println!("process {:?}", elapsed - start);
+            };
+
     };
 
 }
