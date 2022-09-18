@@ -64,7 +64,7 @@ pub fn purge(token: String, channel: String, num: String) {
 
     let mut err: bool = true;
 
-    for x in 0..100 {
+    for x in 0..49 {
         if number == Ok(x) {
             err = false;
             number = Ok(number.unwrap() );
