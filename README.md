@@ -35,6 +35,8 @@ Moderation
 - [x] kicking users
 - [ ] banning users
 - [x] mass deleting banned words (100 per second)
+- [x] word blacklist
+- [x] user sudo check 
 
 Information
 - [x] server
