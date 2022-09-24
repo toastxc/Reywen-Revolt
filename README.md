@@ -5,7 +5,7 @@ https://developers.revolt.chat/api
 
 # Example use
 
-```rust:.example.rs
+```.example.rs 
 
 ```   
 
