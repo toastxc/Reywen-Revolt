@@ -1,14 +1,13 @@
 mod rev_x;
 mod reywen;
 
-
+// Reywen Libraries
 use rev_x::*;
 use reywen::*;
 
-
+// websocket
 use url::Url;
 use tungstenite::{connect, Message};
-use ajson::*;
 
 // fs 
 use std::io::Read;
@@ -32,6 +31,7 @@ struct Auth {
     wordlist: Vec<String>
 
 }
+
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Messages {
@@ -135,15 +135,12 @@ fn main()  {
 
     loop { 
         
-
-
          let ping = r#"{
     "type": "Ping",
     "data": 0
 }"#;
 
         
-
         socket.write_message(Message::Text(ping.to_string()));
 
         let raw = socket.read_message().expect("Error reading message").to_string();
@@ -249,7 +246,8 @@ fn main()  {
                         }else if args.len() >= 2 {
                                 rev_send(data.token.clone(), channel.clone(), mog(content2));
 
-                            };
+                   
+                        };
                         };
                     };
                             
@@ -270,7 +268,7 @@ fn main()  {
      
             
             if (elapsed - start).as_secs() > 1 {
-                println!("process {:?}", elapsed - start);
+                println!("WARN: thread processing took {:?}", elapsed - start);
             };
 
     };
