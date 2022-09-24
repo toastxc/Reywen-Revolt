@@ -1,7 +1,7 @@
 # Reywen 
 A meme bot for Revolt.chat using the RevX library
 
-https://developers.revolt.chat/api
+RevX can be used to construct your own bot!
 
 # Example use
 
@@ -17,7 +17,8 @@ if content == "?hello" {
 }
 
 ```   
-
+For further information goto 
+https://developers.revolt.chat/api
 
 
 # API functions
