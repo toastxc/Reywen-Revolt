@@ -33,6 +33,63 @@ struct Auth {
 
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Messages {
+                r#type: String,
+                _id: String,
+                nonce: String,
+                channel: String,
+                author: String,
+                content: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Messages_at {
+                r#type: String,
+                _id: String,
+                nonce: String,
+                channel: String,
+                author: String,
+                content: String,
+        // additional
+                attachments: Vec<Attachment>
+
+                
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Attachment {
+    _id: String,
+    tag: String,
+    filename: String,
+    metadata: Metadata,
+    content_type: String,
+    size: u32
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Metadata {
+    r#type: String,
+    width: u32,
+    height: u32,
+}
+
+
+// debug structs - used for determining type
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Attach {
+     attachments: Vec<Attachment>
+}
+
+
+fn message2struct(json: String) -> Result<Messages> {
+    
+    let out: Messages = serde_json::from_str(&json)?;
+
+    Ok(out)
+
+
+}
 
 fn conf_serde(json: String) -> Result<Auth> {
 
@@ -41,8 +98,8 @@ fn conf_serde(json: String) -> Result<Auth> {
         Ok(conf)
 }
 
-#[tokio::main]
-async fn main()  {
+
+fn main()  {
 
 
     let mut data_str = String::new();
@@ -70,16 +127,14 @@ async fn main()  {
     };
 
     // new auth
-
+    
     let url = "wss://ws.revolt.chat/?format=json&version=1&token=".to_owned() + &data.token;
 
-    
-     let (mut socket, response) = connect(Url::parse(&url).unwrap()).expect("Can't connect");
+    let (mut socket, response) = connect(Url::parse(&url).unwrap()).expect("Can't connect");
+
 
     loop { 
         
-
-         let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
 
          let ping = r#"{
@@ -87,26 +142,30 @@ async fn main()  {
     "data": 0
 }"#;
 
-         socket.write_message(Message::Text(ping.to_string()));
+        
 
+        socket.write_message(Message::Text(ping.to_string()));
 
         let raw = socket.read_message().expect("Error reading message").to_string();
 
         let mes_type = ajson::get(&raw, "type").unwrap().to_string();
       
 
+        let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
         if mes_type == "Authenticated" {
-            println!("{raw}")
+
+            let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         
 
         }else if mes_type == "Message" {
 
-        
-            let mut content = ajson::get(&raw, "content").unwrap().to_string();
-            let channel = ajson::get(&raw, "channel").unwrap().to_string();
-            let author = ajson::get(&raw, "author").unwrap().to_string();
-            let id = ajson::get(&raw, "_id").unwrap().to_string();
-        
+            println!("raw\n{raw}\n\n\n");
+
+
+            let raw_json = message2struct(raw).unwrap();
+
+            let (content, channel, author, id) = (raw_json.content, raw_json.channel, raw_json.author, raw_json._id);
 
             let mut out = String::new();
 
@@ -131,8 +190,6 @@ async fn main()  {
                 content2 = args[1].to_string();
             };
 
-
-            // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
             let sudo = permcheck(author.clone(), data.sudoers.clone());
 
@@ -188,14 +245,12 @@ async fn main()  {
                     
                     }else if content == "?mog" {
                         if args.len() < 2 {
-                            rev_send(data.token.clone(), channel.clone(), "invalid use of ?mog".to_string());
-                                     }else {
-                                         rev_send(data.token.clone(), channel.clone(), mog(content2));
-                                     };
-                                     };
-                    
+                            rev_send(data.token.clone(), channel.clone(), mog("1".to_string()));
+                        }else if args.len() >= 2 {
+                                rev_send(data.token.clone(), channel.clone(), mog(content2));
 
-
+                            };
+                        };
                     };
                             
                     if data.wordban == true {
