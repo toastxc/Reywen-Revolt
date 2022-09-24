@@ -1,13 +1,8 @@
 {
 	"token": "",
 	"bot_id": "",
-	"sudoers": [
-		"",
-		"",
-		""
-	],
+	"sudoers": [ "" ],
 	"wordban": false,
 	"wordlist": [ "example", "example2"
 	]
-
 }
