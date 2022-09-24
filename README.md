@@ -1,21 +1,15 @@
 # Reywen 
-General purpose bot for Revolt.chat using the RevX library
+A meme bot for Revolt.chat using the RevX library
 
-
-you will need to add values to src/main.rs for the bot to be functional 
 https://developers.revolt.chat/api
 
-# Features
+# Example use
 
-- __sendas__
-Sends masqurade messages with custom profile picture 
-- __mc__
-Quries minecraft servers, returns true for online and false for offline
+```rust:.example.rs
 
-- __wordban__
-Auto deletes words found in the banlist
+```   
 
-There are more features comming soon, for now I am focused on broadening the capabilities of the RevX library
+
 
 # API functions
 
