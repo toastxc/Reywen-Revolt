@@ -46,3 +46,4 @@ Information
 General
 - [x] web socket session
 - [x] external conf
+- [ ] async
