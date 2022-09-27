@@ -29,8 +29,7 @@ pub fn rev_kick(token: String, channel: String, mut content: String) {
     
     content.pop();
     content.remove(0);
-    content.remove(0);
- 
+    content.remove(0); 
     
     println!("{content}");
     let url = format!("https://api.revolt.chat/servers/{server}/members/{content}"); 
@@ -62,34 +61,25 @@ pub fn purge(token: String, channel: String, num: String) {
 
     let mut number = num.parse::<i32>();
 
-    let mut err: bool = true;
-
-    for x in 0..49 {
-        if number == Ok(x) {
-            err = false;
-            number = Ok(number.unwrap() );
-
-        }else {
-        };
+    let number = match number {
+        Ok(number) => number,
+        Err(error) => return 
     };
 
-    let mut y = 0;
+    
 
-    if err == false {
-
-        for x in 0..number.clone().unwrap() {
+    let mut y = 0; 
+    for x in 0..number.clone() {
         returner.push(ajson::get(&raw[y], "_id").unwrap().to_string());
-        y = y + 1;
-        };
+        y +=  1;
 
-        println!("{:?}", returner);
+        println!("{y}");
+    };
+   
+    println!("{:?}\n{}", returner, number);
+    rev_mass_delete(token, channel, returner)
 
-        rev_mass_delete(token, channel, returner)
 
-    }else {
-        rev_send(token, channel, "invalid number".to_string());
-    }
-    println!("{:?}", number);
 }
 
 
@@ -128,8 +118,6 @@ pub fn rev_mass_delete(token: String, channel: String, messages: Vec<String>) {
     let mut mes = String::new();
     for x in 0..messages.len()  {
    
-        //let mut current = ajson::get(&messages[x], "_id").unwrap();
-    
         let current = &messages[x];
 
         mes = mes + "\"" + &current.to_string() + "\", ";
@@ -160,7 +148,7 @@ pub fn rev_mass_delete(token: String, channel: String, messages: Vec<String>) {
 
         let curl_err = from_utf8(&curl.stderr).unwrap().to_string();
 
-        println!("{}{}", curl_out, curl_err);
+        println!("aa{}{}", curl_out, curl_err);
 
 }
 
@@ -192,6 +180,8 @@ pub fn permcheck(user: String, sudoers: Vec<String>) -> bool {
     };
     return false
 }
+
+
 fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<String>, Vec<String>){
 
     struct Returner {
@@ -224,13 +214,9 @@ fn rev_history(token: String, channel: String, mut numget: i32) -> (Vec<String>,
 
     let list2 = list.parse::<i32>().unwrap();
 
-
-
     if numget > list2 {
 
         println!("invalid input for rev_history\nrequested {} messages but only {} found\n", numget, list);
-        //return (vec!["no".to_string()], vec!["no".to_string()])
-
         numget = list2;
     }
 
@@ -303,10 +289,6 @@ pub fn rev_read2(token: String, channel: String) -> Vec<String> {
     let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
 
 
-   //let content = ajson::get(&send_out1_stdout, "0.content").unwrap().to_string();
-   //let author =  ajson::get(&send_out1_stdout, "0.author").unwrap().to_string();
-   //let id = ajson::get(&send_out1_stdout, "0._id").unwrap().to_string();
-
     let mut vec = vec![];
     
     let mut curl_len = ajson::get(&curl_out, "#").unwrap().to_string();
@@ -358,10 +340,10 @@ println!("{}", content_print);
         .expect("failed to run");
 
 
-    let send_out1_stdout = from_utf8(&send.stdout).unwrap().to_string();
-    let send_out1_stderr = from_utf8(&send.stderr).unwrap().to_string();
+    let curl_stdout = from_utf8(&send.stdout).unwrap().to_string();
+    let curl_stderr = from_utf8(&send.stderr).unwrap().to_string();
 
-    println!("REVOLT:\nstdout:\n{}\nstderr:\n{}", send_out1_stdout, send_out1_stderr);
+    println!("{}{}", curl_stdout, curl_stderr);
 
 }
 
@@ -379,7 +361,6 @@ pub fn rev_send(token: String, channel: String, content: String) {
 
     let content_print = format!("{{\n\"content\":\"{content}\"\n}}");
 
-
     let _curl = Command::new("curl")
         .args([
                "-sS", "-X", "POST", &api,
@@ -392,6 +373,7 @@ pub fn rev_send(token: String, channel: String, content: String) {
         .expect("failed to run");
 
 
-    //let curl_out = from_utf8(&curl.stdout).unwrap().to_string();
+    let curl_out = from_utf8(&_curl.stdout).unwrap().to_string();
+    println!("{curl_out}");
 
 }
