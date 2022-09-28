@@ -3,6 +3,8 @@ A meme bot for Revolt.chat using the RevX library
 
 RevX can be used to construct your own bot!
 
+Currently working on a full redesign fork of this bot and it's library
+
 # Example use
 
 ```rust
