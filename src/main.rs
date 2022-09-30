@@ -96,10 +96,8 @@ async fn main()  {
 // establishes web socket conneciton
 pub async fn websocket(url: String, authen: Auth) {
 
-
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
      println!("WebSocket handshake has been successfully completed");
-
 
      let (mut write, read) = ws_stream.split();
 
@@ -118,12 +116,9 @@ pub async fn websocket(url: String, authen: Auth) {
         // new main!
         
        newmain(authen.clone(), out).await;
-
     });
 
     read_future.await;
-
-
 }
 
 // moved from websocket to avoid confusion
@@ -201,29 +196,28 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
         content += &format!(" {}", content_vec[x + 2]);
     };
 
-    //let returner = format!("reywen-dev\n**from**: `{from}`\n**name**: `{masq}`\n**pfp**: `{link}`\n**content** `{content}`:");
-
-
-
     let masq_s = Masquerade {
         name: Some(masq.to_string()),
         avatar: Some(link),
         colour: None,
     };
 
+
     let returner = RMessagePayload {
-        content: Some(content),
-        replies: None,
+          content: Some(content),
+    //      replies: Some(message.replies),
+
+          replies: None,
           attachments: None,
           masquerade: Some(masq_s)
     };
 
-    rev_send(auth, message, returner).await;
+    println!("aaaaaaaaaaaaaa{:?}", message.replies);
+    rev_send(auth.clone(), message.clone(), returner).await;
+    rev_del(auth.clone(), message.clone()).await;
 }
 
 pub async fn send(auth: Auth, message: RMessage, content: String) {
-
-
 
     let reply = RReplies {
         id: message._id.clone(),
@@ -239,7 +233,25 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
     rev_send(auth, message, payload2).await;
 
 }
+pub async fn rev_del(auth: Auth, message: RMessage) {
 
+    println!("rev_del...");
+    let channel = message.channel;
+    let target = message._id;
+
+    let client: std::result::Result<reqwest::Response, reqwest::Error> =
+    reqwest::Client::new()
+    .delete(format!("https://api.revolt.chat/channels/{channel}/messages/{target}"))
+    .header("x-bot-token", auth.token)
+    .send().await;
+
+     match client {
+        Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
+        Err(_) => println!("{:?}", client)
+    };
+
+
+}
 // sends messages over http
 pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
     
@@ -266,6 +278,7 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         Err(_) => println!("{:?}", client)
     };
 }
+// deletes messages over http
 
 
 // cleans invalid characters such as \n and \
@@ -289,12 +302,9 @@ pub fn message_clean(mut message: RMessage) -> RMessage {
         }else if current == Some('\\') {
             out += "\\\\";
         }else {
-            out += &current.unwrap().to_string();
-            
+            out += &current.unwrap().to_string();  
         };
-
     };
     message.content = Some(out);
-    return message
-    
+    return message    
 }
