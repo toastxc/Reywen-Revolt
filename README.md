@@ -21,7 +21,7 @@ if content == "?hello" {
 ```rust
  match &content as &str {
 
-        "?hello" => rev_send(data, message, format!("hello <@{}>", reply).to_string()).await,
+        "?hello" => rev_send(data, message, "hello user".to_string()).await,
         _ => return
     };
 
