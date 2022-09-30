@@ -52,7 +52,7 @@ pub struct Masquerade {
 // skip embed
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct RMessage_payload {
+pub struct RMessagePayload {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -71,4 +71,13 @@ pub struct RMessage_payload {
 pub struct RReplies {
     pub id: String,
     pub mention: bool,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Auth {
+
+    pub token: String,
+    pub bot_id: String,
+    pub sudoers: Vec<String>,
 }
