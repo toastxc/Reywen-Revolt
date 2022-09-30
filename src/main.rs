@@ -3,10 +3,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Result};
 
 
-// internal
+// structs
 #[path = "./structure/message.rs"]
 mod message;
 use message::*;
+
+
+// non functional - issue #18
+// RevX2
+//mod rev_x;
+//use rev_x::*;
+
 
 // misc
 use rand::Rng;
@@ -26,14 +33,6 @@ use std::{
 
 use tokio;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Auth {
-
-    token: String,
-    bot_id: String,
-    sudoers: Vec<String>,
-
-}
 
 // debug serde & file system read for config.json
 fn conf_file() -> Result<Auth> {
@@ -164,22 +163,11 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
 
     };
 
-    /*
-      RMessage { 
-      _id: "01GE1FJJW76ZE487Y6F5PQ8Y7V", 
-      nonce: Some("01GE1FJJANPKTPB0C5R7HCGSVW"), 
-      channel: "01G1JBX8J5GRVMWH4NY3QWBQ3B", 
-      author: "01FSRTTGJC1XJ6ZEQJMSX8Q96C", 
-      content: Some("h"), 
-      mentions: None, 
-      replies: None, 
-      masquerade: None }
-
-      */
-
 }
 
 // sends messages over http
+
+
 pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
     
     let reply = RReplies {
@@ -224,7 +212,6 @@ pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
 
 // cleans invalid characters such as \n and \
 pub fn message_clean(mut message: RMessage) -> RMessage {
-
 
     if message.content == None {
         return message
