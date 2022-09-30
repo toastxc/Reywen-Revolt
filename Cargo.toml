@@ -1,23 +1,27 @@
 [package]
-name = "revoltbotcurl"
+name = "reywen2"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+reqwest = { version = "0.11", features = ["json", "native-tls"] }
 
-rand = "0.8.5"
-
-# websocket
-url="*"
-tungstenite = { version = "0.17.3", features = ["native-tls"] }
-
-
-# JSON
-ajson = "0.2.4"
 serde_json="*"
 serde = { version = "1.0", features = ["derive"] }
 
-# Async
+optional_struct = "*"
+
+validator = { version = "0.14", features = ["derive"] }
+
+
 tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "*", features = ["native-tls"]}
+
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+
+futures-channel = "0.3"
+
+
+rand = "0.8.5"
