@@ -12,8 +12,6 @@ use message::*;
 mod auth;
 use auth::*;
 
-
-
 // non functional - issue #18
 // RevX2
 //mod rev_x;
@@ -148,56 +146,111 @@ pub async fn newmain(authen: Auth, out: String) {
 
 // main message engine 
 pub async fn message_process(data: Auth, message_in: RMessage) {
-
-    
+ 
     let content = message_in.content.clone();
 
+    // validity test
     if content == None {
         return
+    //}else if message_in.author == data.bot_id {
+    //    return
     };
 
     let message = message_clean(message_in);
 
-    let content = message.content.clone().unwrap();
+    let content_vec =  content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
+    let mut content_min1 = String::new();
+
+    for x in 0..content_vec.len() -1 {
+        content_min1 += &format!("{} ", content_vec[x + 1])
+    };
+ 
     let reply = message.author.clone();
 
-    if content == "?hello Reywen".to_string() {
-  
-        rev_send(data, message, format!("hello <@{}>", reply).to_string()).await;
-
+    match &content_vec[0] as &str {
+        
+        "?Mog" | "?mog"  => send(data, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
+        "?ver" | "?version" => send(data, message, "**Version**\nReywen: `2.0.1`\nRevX: `2.0.1`".to_string()).await,
+        "?echo" => send(data, message, content_min1).await,
+        "?sendas" => sendas(data, message, content_vec).await,
+        _ => return
     };
 
 }
 
-// sends messages over http
+pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
 
+    if content_vec.len() < 3 {
+        send(auth, message, "invalid use of sendas".to_string()).await;
+        return
+    };
+    let from = message._id.clone();
+    let masq = content_vec[1];
+    let mut content = String::new();
+    //content = "placeholder".to_string();
 
-pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
-    
-    let reply = RReplies {
-        id: message._id,
-        mention: false,
+    let link = match masq {
+        "bingus"    | "cheese"  | "dad" | 
+        "deeznuts"  |  "insert" | "joe_biden" | 
+        "valence"   | "walter"  | "woof" => format!("https://toastxc.xyz/TXCS/{masq}.jpg"),
+        _ => format!("https://toastxc.xyz/TXCS/default.png")
     };
 
-    let payload = RMessagePayload {
+    for x in 0..content_vec.len() -2 {
+        content += &format!(" {}", content_vec[x + 2]);
+    };
 
+    //let returner = format!("reywen-dev\n**from**: `{from}`\n**name**: `{masq}`\n**pfp**: `{link}`\n**content** `{content}`:");
+
+
+
+    let masq_s = Masquerade {
+        name: Some(masq.to_string()),
+        avatar: Some(link),
+        colour: None,
+    };
+
+    let returner = RMessagePayload {
         content: Some(content),
-      //  replies: None,
-        
+        replies: None,
+          attachments: None,
+          masquerade: Some(masq_s)
+    };
+
+    rev_send(auth, message, returner).await;
+}
+
+pub async fn send(auth: Auth, message: RMessage, content: String) {
+
+
+
+    let reply = RReplies {
+        id: message._id.clone(),
+        mention: false,
+    };
+    let payload2 = RMessagePayload {
+        content: Some(content),
         replies: Some(vec![reply]),
           attachments: None,
           masquerade: None
     };
 
-    let payload2 = serde_json::to_string(&payload).unwrap();
+    rev_send(auth, message, payload2).await;
 
+}
+
+// sends messages over http
+pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
+    
     println!("rev_send...");
 
     let channel = message.channel;
 
     let mut random = rand::thread_rng();
     let idem: i64 = random.gen();
+
+    let payload2 = serde_json::to_string(&payload).unwrap();
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> = 
         reqwest::Client::new()
@@ -223,7 +276,6 @@ pub fn message_clean(mut message: RMessage) -> RMessage {
     };
 
     let mut out = String::new();
-
 
     let iter = message.content.as_ref().unwrap().chars().count();
     let content = message.content.as_ref().unwrap();
