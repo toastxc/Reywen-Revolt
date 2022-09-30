@@ -7,10 +7,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Result};
 
 
-// web socket 
-//use url::Url;
-//use tungstenite::{connect, Message};
-
 // internal
 #[path = "./structure/message.rs"]
 mod message;
@@ -65,7 +61,6 @@ fn Message_in(raw: String) -> Result<RMessage> {
         Err(RMessage) => Err(RMessage),
         Ok(ref RMessage) =>  Ok(message.unwrap())
     }
-
     
 }
 
@@ -73,18 +68,25 @@ fn Message_in(raw: String) -> Result<RMessage> {
 async fn main()  {
 
 
-     let data_in = conf_file();
+    let data_in = conf_file();
     let data = match data_in {
 
         Ok(Auth) => Auth,
         Err(error) => panic!("Invalid credentials, {error}")
     };
 
+    if data.token == "" {
+        panic!("Invalid credentials, bot requires a token");
+    }else if data.bot_id == "" {
+        panic!("Invalid credentials, bot requires an ID");
+    }else if data.sudoers[0] == "" {
+        println!("no sudoers found")
+    };
+
+   
     let token = data.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
-
-
 
      websocket(url, data).await;
 
@@ -108,17 +110,14 @@ pub async fn websocket(url: String, authen: Auth) {
     let read_future = read.for_each(|message| async {
          
         let data = message.unwrap().into_data();
-        //let p_data = tokio::io::stdout().write(&data).await.unwrap();
        
         let out = from_utf8(&data).unwrap().to_string();
-        //println!("{:?}", out);
 
 
         // new main!
         
        newmain(authen.clone(), out).await;
 
-        //message_process(authen.clone(), Message_deser.expect("failed to unwrap"));
     });
 
     read_future.await;
@@ -126,24 +125,9 @@ pub async fn websocket(url: String, authen: Auth) {
 
 }
 
-/*     
-        let Message_deser = Message_in(write);
-
-        match Message_deser {
-            Err(RMessage) => return Err(RMessage),
-            Ok(ref RMessage) => message_process(data.clone(), Message_deser.unwrap())
-        };
-
-        Ok(())
-
-}
-*/
-
-
 pub async fn newmain(authen: Auth, out: String) {
 
     let inval_message = Message_in(out);
-
     
     match inval_message {
         Err(_) => return,
@@ -156,7 +140,6 @@ pub async fn newmain(authen: Auth, out: String) {
     message_process(authen, message).await;
 
 }
-
 
 pub async fn message_process(data: Auth, message_in: RMessage) {
 
@@ -197,7 +180,6 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
 }
 
 pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
-
     
     let reply = RReplies {
         id: message._id,
@@ -216,9 +198,7 @@ pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
 
     let payload2 = serde_json::to_string(&payload).unwrap();
 
-    println!("{}", payload2);
-    
-    println!("sending...\n\n");
+    println!("rev_send...");
 
     let channel = message.channel;
 
@@ -239,7 +219,6 @@ pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
         Err(_) => println!("{:?}", client)
     };
 }
-
 
 
 // cleans invalid characters such as \n and \
