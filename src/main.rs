@@ -1,7 +1,3 @@
-// filesystem
-use std::io::Read;
-use std::fs::*;
-
 // serde
 use serde::{Deserialize, Serialize};
 use serde_json::{Result};
@@ -12,21 +8,23 @@ use serde_json::{Result};
 mod message;
 use message::*;
 
-use tokio;
-use tokio::io::AsyncWriteExt;
-
-
-use std::{thread, time};
-
-use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
+// misc
 use rand::Rng;
 
+// network
 use futures_util::{StreamExt, SinkExt};
+use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
-use std::str::from_utf8;
+// std
+use std::{
+    io::Read, 
+    fs::File, 
+//    thread, 
+//    time, 
+    str::from_utf8
+};
 
-use std::collections::HashMap;
-
+use tokio;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Auth {
@@ -37,6 +35,7 @@ pub struct Auth {
 
 }
 
+// debug serde & file system read for config.json
 fn conf_file() -> Result<Auth> {
 
     let mut config_json = File::open("config.json")
@@ -52,14 +51,15 @@ fn conf_file() -> Result<Auth> {
      Ok(conf)
 }
 
-fn Message_in(raw: String) -> Result<RMessage> {
+// debug serde message processor
+fn message_in(raw: String) -> Result<RMessage> {
 
 
     let message: Result<RMessage> = serde_json::from_str(&raw);
 
     match message {
-        Err(RMessage) => Err(RMessage),
-        Ok(ref RMessage) =>  Ok(message.unwrap())
+        Err(rmessage) => Err(rmessage),
+        Ok(ref _rmessage) =>  Ok(message.unwrap())
     }
     
 }
@@ -71,7 +71,7 @@ async fn main()  {
     let data_in = conf_file();
     let data = match data_in {
 
-        Ok(Auth) => Auth,
+        Ok(auth) => auth,
         Err(error) => panic!("Invalid credentials, {error}")
     };
 
@@ -83,7 +83,6 @@ async fn main()  {
         println!("no sudoers found")
     };
 
-   
     let token = data.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
@@ -92,7 +91,7 @@ async fn main()  {
 
 }
 
-
+// establishes web socket conneciton
 pub async fn websocket(url: String, authen: Auth) {
 
 
@@ -125,9 +124,11 @@ pub async fn websocket(url: String, authen: Auth) {
 
 }
 
+// moved from websocket to avoid confusion
+// debugs and sends messages to the engine
 pub async fn newmain(authen: Auth, out: String) {
 
-    let inval_message = Message_in(out);
+    let inval_message = message_in(out);
     
     match inval_message {
         Err(_) => return,
@@ -141,6 +142,7 @@ pub async fn newmain(authen: Auth, out: String) {
 
 }
 
+// main message engine 
 pub async fn message_process(data: Auth, message_in: RMessage) {
 
     
@@ -155,8 +157,6 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
     let content = message.content.clone().unwrap();
 
     let reply = message.author.clone();
-
-   // println!("{}", message.content.as_ref().expect("failed to unwrap debug"));
 
     if content == "?hello Reywen".to_string() {
   
@@ -179,6 +179,7 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
 
 }
 
+// sends messages over http
 pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
     
     let reply = RReplies {
@@ -186,7 +187,7 @@ pub async fn rev_send(auth: Auth, message: RMessage, content: String)  {
         mention: false,
     };
 
-    let payload = RMessage_payload {
+    let payload = RMessagePayload {
 
         content: Some(content),
       //  replies: None,
