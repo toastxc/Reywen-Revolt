@@ -19,12 +19,14 @@ if content == "?hello" {
 ```
 ## New method
 ```rust
-if content == "?hello" {
-  
-    rev_send(data, message, "hello user".to_string()).await;
-}
+ match &content as &str {
+
+        "?hello Reywen" => rev_send(data, message, format!("hello <@{}>", reply).to_string()).await,
+        _ => return
+    };
 
 ```
+
 While the difference in syntax is minimal, there are many benefits of RevX2 over RevX1, such as
 - async
 - error handling
