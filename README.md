@@ -21,7 +21,7 @@ if content == "?hello" {
 ```rust
  match &content as &str {
 
-        "?hello Reywen" => rev_send(data, message, format!("hello <@{}>", reply).to_string()).await,
+        "?hello" => rev_send(data, message, format!("hello <@{}>", reply).to_string()).await,
         _ => return
     };
 
@@ -35,6 +35,8 @@ Features specific to Messages
 - masqurade (properly)
 - reply
 - mentions
+
+Using `match` instead of `else if` is more compact, and allows for more complex functions
 
 
 For further information goto 
