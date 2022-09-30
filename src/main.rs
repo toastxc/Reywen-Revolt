@@ -1,12 +1,17 @@
 // serde
-use serde::{Deserialize, Serialize};
+//use serde::{Deserialize, Serialize};
 use serde_json::{Result};
 
 
 // structs
-#[path = "./structure/message.rs"]
+#[path = "./lib/message.rs"]
 mod message;
 use message::*;
+
+#[path = "./lib/auth.rs"]
+mod auth;
+use auth::*;
+
 
 
 // non functional - issue #18
