@@ -202,19 +202,48 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
         colour: None,
     };
 
+ 
+    let replier = wstoapi_reply(message.replies.clone()).await;
+
+
+ //   let replier: Option<Vec<RReplies>> = Some(vec![rep.unwrap()]);
 
     let returner = RMessagePayload {
           content: Some(content),
-    //      replies: Some(message.replies),
-
-          replies: None,
+          replies: replier,
           attachments: None,
           masquerade: Some(masq_s)
     };
 
-    println!("aaaaaaaaaaaaaa{:?}", message.replies);
     rev_send(auth.clone(), message.clone(), returner).await;
     rev_del(auth.clone(), message.clone()).await;
+}
+// converts websocket replies to API compatible replies
+pub async fn wstoapi_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
+
+    if input == None {
+        
+        return None
+    
+    }else {
+        
+        let mut repstruct = vec![];
+        let iter = input.clone()?.len();
+
+        for x in 0..iter {
+            
+            let input_iter = &input.as_ref().expect("failed to convert input wstoapi")[x];
+            
+            let reply = RReplies {
+                id: input_iter.to_string(),
+                mention: false,
+            };
+            repstruct.push(reply);
+        };
+
+        return Some(repstruct)
+    };
+
 }
 
 pub async fn send(auth: Auth, message: RMessage, content: String) {
