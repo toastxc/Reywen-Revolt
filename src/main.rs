@@ -166,7 +166,7 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
     match &content_vec[0] as &str {
         
         "?Mog" | "?mog"  => send(data, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
-        "?ver" | "?version" => send(data, message, "**Version**\nReywen: `2.0.1`\nRevX: `2.0.1`".to_string()).await,
+        "?ver" | "?version" => send(data, message, "**Version**\nReywen: `2.0.1`\nRevX: `2.0.2`".to_string()).await,
         "?echo" => send(data, message, content_min1).await,
         "?sendas" => sendas(data, message, content_vec).await,
         _ => return
@@ -174,6 +174,7 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
 
 }
 
+// masq wrapper for rev_send
 pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
 
     if content_vec.len() < 3 {
@@ -204,9 +205,6 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
 
  
     let replier = wstoapi_reply(message.replies.clone()).await;
-
-
- //   let replier: Option<Vec<RReplies>> = Some(vec![rep.unwrap()]);
 
     let returner = RMessagePayload {
           content: Some(content),
@@ -246,6 +244,7 @@ pub async fn wstoapi_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> 
 
 }
 
+// non masq wrapper for rev_send
 pub async fn send(auth: Auth, message: RMessage, content: String) {
 
     let reply = RReplies {
@@ -262,6 +261,9 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
     rev_send(auth, message, payload2).await;
 
 }
+
+
+// deletes messages over http
 pub async fn rev_del(auth: Auth, message: RMessage) {
 
     println!("rev_del...");
@@ -307,7 +309,6 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         Err(_) => println!("{:?}", client)
     };
 }
-// deletes messages over http
 
 
 // cleans invalid characters such as \n and \
