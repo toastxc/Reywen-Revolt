@@ -12,6 +12,12 @@ use message::*;
 mod auth;
 use auth::*;
 
+
+#[path = "./lib/user.rs"]
+mod user;
+use user::*;
+
+
 // non functional - issue #18
 // RevX2
 //mod rev_x;
@@ -134,8 +140,116 @@ pub async fn newmain(authen: Auth, out: String) {
     };
 
     let message = message_clean(inval_message.unwrap());
-  
-    message_process(authen, message).await;
+
+    message_process(authen.clone(), message.clone()).await;
+    br_main(authen.clone(), message.clone()).await;
+
+}
+
+pub async fn br_main(auth: Auth, message: RMessage) {
+
+
+    let (chan1, chan2) = ("01GE938XQHSW94JPE087670C7D", "01GE9394H32XG1KV62M08G90VS");
+
+    if message.channel != chan1.to_string() {
+        return
+    };
+    println!("bridge established");
+
+    /*
+    let chanselect = match message.channel {
+        chan1 => chan1,
+        chan2 => chan2,
+        _     => return
+    };
+*/
+   
+ /*   let message_send = RMessage {
+        _id: message._id,
+        nonce: None,
+        channel: chan2.to_string(),
+        author: message.author,
+        content: message.content.clone(),
+        mentions: None,
+        replies: None,
+        masquerade: None
+    };
+*/
+    let mut message2 = message.clone();
+    
+    message2.channel = chan2.to_string();
+
+    let mut br_masq = Masquerade {
+        name: None,
+        avatar: None,
+        colour: None
+    };
+    
+    if message2.masquerade == None {
+
+        // native masq
+        let user = rev_user(auth.clone(), message.author.clone()).await.expect("failed to GET user details - 182");
+
+        let pfplink = user.avatar.unwrap().id;
+
+        let pfp = format!("https://autumn.revolt.chat/avatars/{pfplink}");
+
+        br_masq = Masquerade {
+            name: Some(user.username),
+            avatar: Some(pfp),
+            colour: None
+        };
+        
+    }else {
+        
+        br_masq = Masquerade {
+            name: message2.masquerade.as_ref().unwrap().name.clone(),
+            avatar: message2.masquerade.as_ref().unwrap().avatar.clone(),
+            colour: None
+        };  
+         //  println!("AAAAAAAAAAAAAA{:?}", message2.masquerade.as_ref().unwrap().name);
+
+    };
+
+    let payload = RMessagePayload {
+        content: message.content.clone(),
+        attachments: None,
+        replies: wstoapi_reply(message.replies).await,
+        masquerade: Some(br_masq),
+        //masquerade: None
+    };
+
+
+
+
+    rev_send(auth, message2, payload).await;
+
+    //auth: Auth, message: RMessage, payload: RMessagePayload
+}
+
+pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
+
+    println!("rev_user...");
+   
+    let client: std::result::Result<reqwest::Response, reqwest::Error> =
+    reqwest::Client::new()
+    .get(format!("https://api.revolt.chat/users/{target}"))
+    .header("x-bot-token", auth.token)
+    .send().await;
+
+    let client_res = match client {
+        Ok(_) => client.unwrap().text().await.unwrap(),
+        Err(_) => "error".to_string()
+    };
+
+
+  //  println!("{:?}", client_res);
+
+    let message: Result<RUserFetch> = serde_json::from_str(&client_res);
+    match message {
+        Ok(_) => return Ok(message.unwrap()),
+        Err(_) => return message
+    };
 
 }
 
@@ -147,8 +261,8 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
     // validity test
     if content == None {
         return
-    //}else if message_in.author == data.bot_id {
-    //    return
+    }else if message_in.author == data.bot_id {
+        return
     };
 
     let message = message_clean(message_in);
