@@ -127,11 +127,13 @@ pub async fn websocket(url: String, authen: Auth) {
     read_future.await;
 }
 
+
 // moved from websocket to avoid confusion
 // debugs and sends messages to the engine
 pub async fn newmain(authen: Auth, out: String) {
 
-    let inval_message = message_in(out);
+    let inval_message = message_in(out.clone());
+    let inval2 = message_in(out.clone());
     
     match inval_message {
         Err(_) => return,
@@ -139,45 +141,35 @@ pub async fn newmain(authen: Auth, out: String) {
 
     };
 
-    let message = message_clean(inval_message.unwrap());
-
-    message_process(authen.clone(), message.clone()).await;
-    br_main(authen.clone(), message.clone()).await;
+    let message = message_clean(inval_message.expect("failed to process message"));
+    
+    message_process(authen.clone(), message).await;
+    br_main(authen.clone(), inval2.unwrap()).await;
 
 }
 
 pub async fn br_main(auth: Auth, message: RMessage) {
 
+    let (chan1, chan2) = ("01GE938XQHSW94JPE087670C7D".to_string(), "01GE9394H32XG1KV62M08G90VS".to_string());
 
-    let (chan1, chan2) = ("01GE938XQHSW94JPE087670C7D", "01GE9394H32XG1KV62M08G90VS");
-
-    if message.channel != chan1.to_string() {
+    if message.author == auth.bot_id && message.masquerade != None {
         return
     };
-    println!("bridge established");
 
-    /*
-    let chanselect = match message.channel {
-        chan1 => chan1,
-        chan2 => chan2,
-        _     => return
+    let mut chan_rec = String::new();
+    if message.channel == chan1 {
+        chan_rec = chan2;
+    }else if message.channel == chan2 {
+        chan_rec = chan1
+    }else {
+        return
     };
-*/
-   
- /*   let message_send = RMessage {
-        _id: message._id,
-        nonce: None,
-        channel: chan2.to_string(),
-        author: message.author,
-        content: message.content.clone(),
-        mentions: None,
-        replies: None,
-        masquerade: None
-    };
-*/
+
+
+    println!("rx: bridge");
     let mut message2 = message.clone();
     
-    message2.channel = chan2.to_string();
+    message2.channel = chan_rec.to_string();
 
     let mut br_masq = Masquerade {
         name: None,
@@ -188,8 +180,16 @@ pub async fn br_main(auth: Auth, message: RMessage) {
     if message2.masquerade == None {
 
         // native masq
-        let user = rev_user(auth.clone(), message.author.clone()).await.expect("failed to GET user details - 182");
+        
+        let user = rev_user(auth.clone(), message.author.clone()).await.expect("failed to GET user details");
 
+        println!("{:?}", user);
+        /*
+        match user {
+            Err(_) => println!("failed to get user details") && return,
+            Ok(_) => print!("")
+        };
+        */
         let pfplink = user.avatar.unwrap().id;
 
         let pfp = format!("https://autumn.revolt.chat/avatars/{pfplink}");
@@ -207,7 +207,6 @@ pub async fn br_main(auth: Auth, message: RMessage) {
             avatar: message2.masquerade.as_ref().unwrap().avatar.clone(),
             colour: None
         };  
-         //  println!("AAAAAAAAAAAAAA{:?}", message2.masquerade.as_ref().unwrap().name);
 
     };
 
@@ -216,20 +215,17 @@ pub async fn br_main(auth: Auth, message: RMessage) {
         attachments: None,
         replies: wstoapi_reply(message.replies).await,
         masquerade: Some(br_masq),
-        //masquerade: None
     };
 
-
-
+    //let message3 = message_clean(message2);
 
     rev_send(auth, message2, payload).await;
 
-    //auth: Auth, message: RMessage, payload: RMessagePayload
 }
 
 pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
 
-    println!("rev_user...");
+    println!("rev: user");
    
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new()
@@ -239,7 +235,7 @@ pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
 
     let client_res = match client {
         Ok(_) => client.unwrap().text().await.unwrap(),
-        Err(_) => "error".to_string()
+        Err(_) => "Rev_User_".to_string()
     };
 
 
@@ -380,7 +376,7 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
 // deletes messages over http
 pub async fn rev_del(auth: Auth, message: RMessage) {
 
-    println!("rev_del...");
+    println!("REV: del");
     let channel = message.channel;
     let target = message._id;
 
@@ -391,8 +387,8 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
     .send().await;
 
      match client {
-        Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
-        Err(_) => println!("{:?}", client)
+        Ok(_) => return,
+        Err(_) => println!("rev_del_Err:\n{:?}", client)
     };
 
 
@@ -419,7 +415,8 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         .send().await;
  
     match client {
-        Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
+        //Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
+        Ok(_) => return,
         Err(_) => println!("{:?}", client)
     };
 }
