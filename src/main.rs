@@ -17,6 +17,10 @@ use auth::*;
 mod user;
 use user::*;
 
+#[path = "./lib/br.rs"]
+mod br;
+use br::*;
+
 
 // non functional - issue #18
 // RevX2
@@ -43,10 +47,10 @@ use std::{
 use tokio;
 
 
-// debug serde & file system read for config.json
+// import and deserialize auth.conf
 fn conf_file() -> Result<Auth> {
 
-    let mut config_json = File::open("config.json")
+    let mut config_json = File::open("auth.json")
         .expect("File not found");
 
     let mut data_str = String::new();
@@ -59,7 +63,7 @@ fn conf_file() -> Result<Auth> {
      Ok(conf)
 }
 
-// debug serde message processor
+// deserialize messages from ws
 fn message_in(raw: String) -> Result<RMessage> {
 
 
@@ -69,16 +73,34 @@ fn message_in(raw: String) -> Result<RMessage> {
         Err(rmessage) => Err(rmessage),
         Ok(ref _rmessage) =>  Ok(message.unwrap())
     }
-    
 }
+
+
+// import and deserialize bridge.json
+fn bridge_init() -> Result<BrConf> {
+    
+    let mut config_json = File::open("bridge.json")
+        .expect("bridge config file not found");
+
+    let mut brconf_str = String::new();
+    config_json.read_to_string(&mut brconf_str)
+        .expect("Error while reading file");
+
+
+    let config: BrConf = serde_json::from_str(&brconf_str).expect("failed to interpret brconf");
+
+    Ok(config)
+}
+
 
 #[tokio::main]
 async fn main()  {
 
 
+    println!("booting...");
+    // auth files
     let data_in = conf_file();
     let data = match data_in {
-
         Ok(auth) => auth,
         Err(error) => panic!("Invalid credentials, {error}")
     };
@@ -88,22 +110,43 @@ async fn main()  {
     }else if data.bot_id == "" {
         panic!("Invalid credentials, bot requires an ID");
     }else if data.sudoers[0] == "" {
-        println!("no sudoers found")
+        println!("WARN: no sudoers found")
+    };
+    println!("init: auth.json");
+    
+    
+
+    // bridge
+    let br_in = bridge_init();
+    let br = match br_in {
+        Err(_br) => panic!("failed to import bridge conf\n"),
+        Ok(br) => br
+    };
+    if br.enabled == true {
+        println!("init: bridge.json");
+        if br.channel_1.len() != 26{
+            println!("WARN: bridge channels may not be valid");
+        }else if br.channel_2.len() != 26 {
+            println!("WARN: bridge channels may not be valid");
+        }else if br.channel_1 == br.channel_2 {
+            panic!("bridge channels cannot be the same")
+        };
     };
 
     let token = data.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
 
-     websocket(url, data).await;
+ 
+     websocket(url, data, br).await;
 
 }
 
-// establishes web socket conneciton
-pub async fn websocket(url: String, authen: Auth) {
+// establishes websocket connection
+pub async fn websocket(url: String, authen: Auth, br: BrConf) {
 
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
-     println!("WebSocket handshake has been successfully completed");
+     println!("init: websocket");
 
      let (mut write, read) = ws_stream.split();
 
@@ -118,20 +161,22 @@ pub async fn websocket(url: String, authen: Auth) {
        
         let out = from_utf8(&data).unwrap().to_string();
 
-
-        // new main!
-        
-       newmain(authen.clone(), out).await;
+       // moved websocket main to self contained function for ease of use 
+       newmain(authen.clone(), out, br.clone()).await;
     });
 
     read_future.await;
 }
 
-// moved from websocket to avoid confusion
-// debugs and sends messages to the engine
-pub async fn newmain(authen: Auth, out: String) {
 
-    let inval_message = message_in(out);
+
+// websocket main
+// imports messages, cleans them and sends to 
+// bridge and message processing
+pub async fn newmain(authen: Auth, out: String, br: BrConf) {
+
+    let inval_message = message_in(out.clone());
+    let inval2 = message_in(out.clone());
     
     match inval_message {
         Err(_) => return,
@@ -139,56 +184,56 @@ pub async fn newmain(authen: Auth, out: String) {
 
     };
 
-    let message = message_clean(inval_message.unwrap());
-
-    message_process(authen.clone(), message.clone()).await;
-    br_main(authen.clone(), message.clone()).await;
+    // removed error prone characters
+    let message = message_clean(inval_message.expect("failed to process message"));
+    
+    
+    message_process(authen.clone(), message).await;
+    
+    // br does not require 'cleaned' messages
+    if br.enabled == true {
+        br_main(authen.clone(), inval2.unwrap(), br).await;
+    };
 
 }
+// main for bridge, WIP
+pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
 
-pub async fn br_main(auth: Auth, message: RMessage) {
 
-
-    let (chan1, chan2) = ("01GE938XQHSW94JPE087670C7D", "01GE9394H32XG1KV62M08G90VS");
-
-    if message.channel != chan1.to_string() {
+    let (chan1, chan2) = (br.channel_1, br.channel_2);
+    // removing feedback loop
+    if input_message.author == auth.bot_id && input_message.masquerade != None {
         return
     };
-    println!("bridge established");
 
-    /*
-    let chanselect = match message.channel {
-        chan1 => chan1,
-        chan2 => chan2,
-        _     => return
+
+    // channel switch
+    let mut chan_rec = String::new();
+    if input_message.channel == chan1 {
+       chan_rec = chan2;
+    }else if input_message.channel == chan2 {
+       chan_rec = chan1;
     };
-*/
-   
- /*   let message_send = RMessage {
-        _id: message._id,
-        nonce: None,
-        channel: chan2.to_string(),
-        author: message.author,
-        content: message.content.clone(),
-        mentions: None,
-        replies: None,
-        masquerade: None
-    };
-*/
-    let mut message2 = message.clone();
+
+
     
-    message2.channel = chan2.to_string();
+    let mut message = input_message.clone();
+    
+    message.channel = chan_rec;
 
     let mut br_masq = Masquerade {
         name: None,
         avatar: None,
         colour: None
     };
-    
-    if message2.masquerade == None {
+   
+    // masq switch - if user has no masquerade: pull from user info API
+    // else - port over masquerade details 
+    if input_message.masquerade == None {
 
-        // native masq
-        let user = rev_user(auth.clone(), message.author.clone()).await.expect("failed to GET user details - 182");
+        // API get masq
+        
+        let user = rev_user(auth.clone(), input_message.author.clone()).await.expect("failed to GET user details");
 
         let pfplink = user.avatar.unwrap().id;
 
@@ -202,34 +247,30 @@ pub async fn br_main(auth: Auth, message: RMessage) {
         
     }else {
         
+        // translate masq
         br_masq = Masquerade {
-            name: message2.masquerade.as_ref().unwrap().name.clone(),
-            avatar: message2.masquerade.as_ref().unwrap().avatar.clone(),
+            name: message.masquerade.as_ref().unwrap().name.clone(),
+            avatar: message.masquerade.as_ref().unwrap().avatar.clone(),
             colour: None
         };  
-         //  println!("AAAAAAAAAAAAAA{:?}", message2.masquerade.as_ref().unwrap().name);
 
     };
 
+    // message for rev_send
     let payload = RMessagePayload {
         content: message.content.clone(),
         attachments: None,
-        replies: wstoapi_reply(message.replies).await,
+        replies: wstoapi_reply(input_message.replies).await,
         masquerade: Some(br_masq),
-        //masquerade: None
     };
 
+    rev_send(auth, message, payload).await;
 
-
-
-    rev_send(auth, message2, payload).await;
-
-    //auth: Auth, message: RMessage, payload: RMessagePayload
 }
 
 pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
 
-    println!("rev_user...");
+  //  println!("rev: user");
    
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new()
@@ -239,7 +280,7 @@ pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
 
     let client_res = match client {
         Ok(_) => client.unwrap().text().await.unwrap(),
-        Err(_) => "error".to_string()
+        Err(_) => "Err:\n{error}".to_string()
     };
 
 
@@ -275,8 +316,6 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
  
-    let reply = message.author.clone();
-
     match &content_vec[0] as &str {
         
         "?Mog" | "?mog"  => send(data, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
@@ -295,7 +334,7 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
         send(auth, message, "invalid use of sendas".to_string()).await;
         return
     };
-    let from = message._id.clone();
+    //let from = message._id.clone();
     let masq = content_vec[1];
     let mut content = String::new();
     //content = "placeholder".to_string();
@@ -380,7 +419,6 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
 // deletes messages over http
 pub async fn rev_del(auth: Auth, message: RMessage) {
 
-    println!("rev_del...");
     let channel = message.channel;
     let target = message._id;
 
@@ -391,8 +429,8 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
     .send().await;
 
      match client {
-        Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
-        Err(_) => println!("{:?}", client)
+        Ok(_) => return,
+        Err(_) => println!("Err:\n{:?}", client)
     };
 
 
@@ -400,8 +438,6 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
 // sends messages over http
 pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
     
-    println!("rev_send...");
-
     let channel = message.channel;
 
     let mut random = rand::thread_rng();
@@ -419,8 +455,9 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         .send().await;
  
     match client {
-        Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
-        Err(_) => println!("{:?}", client)
+        //Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
+        Ok(_) => return,
+        Err(_) => println!("Err:\n{:?}", client)
     };
 }
 
