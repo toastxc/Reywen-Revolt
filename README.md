@@ -38,6 +38,15 @@ Features specific to Messages
 
 Using `match` instead of `else if` is more compact, and allows for more complex functions
 
+# Getting started
+```bash
+git clone https://github.com/toastxc/Reywen-Revolt.git
+cd Reywen
+vim auth.json 
+vim bridge.json 
+cargo run
+```
+
 
 For further information goto 
 https://developers.revolt.chat/api
