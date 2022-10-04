@@ -25,8 +25,8 @@ mod lreywen;
 use lreywen::*;
 
 // network
-use futures_util::{StreamExt, SinkExt};
-use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
+use futures_util::{StreamExt};
+use tokio_tungstenite::{connect_async};
 
 
 use std::str::from_utf8;
@@ -87,12 +87,7 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
      println!("init: websocket");
 
-     let (mut write, read) = ws_stream.split();
-
-    write.send(Message::Text(r#"{
-        "type": "ping",
-        "data": 0
-      }"#.to_string()+"\\n")).await.unwrap();
+     let (mut _write, read) = ws_stream.split();
 
     let read_future = read.for_each(|message| async {
          
