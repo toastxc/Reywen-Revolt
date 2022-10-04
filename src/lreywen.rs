@@ -1,11 +1,11 @@
-// a library for high level functions
+// a library for high level non essential functions
 
 use crate::lib::{
     auth::Auth,
-    message::{RMessage, RReplies, RMessagePayload},
+    message::{RMessage, RReplies, RMessagePayload, Masquerade},
 };
 
-use crate::rev_x::rev_send;
+use crate::rev_x::*;
 
 pub async fn send(auth: Auth, message: RMessage, content: String) {
 
@@ -23,3 +23,46 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
     rev_send(auth, message, payload2).await;
 
 }
+// masq wrapper for rev_send
+pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
+
+    if content_vec.len() < 3 {
+        send(auth, message, "invalid use of sendas".to_string()).await;
+        return
+    };
+    //let from = message._id.clone();
+    let masq = content_vec[1];
+    let mut content = String::new();
+    //content = "placeholder".to_string();
+
+    let link = match masq {
+        "bingus"    | "cheese"  | "dad" |
+        "deeznuts"  |  "insert" | "joe_biden" |
+        "valence"   | "walter"  | "woof" => format!("https://toastxc.xyz/TXCS/{masq}.jpg"),
+        _ => format!("https://toastxc.xyz/TXCS/default.png")
+    };
+
+    for x in 0..content_vec.len() -2 {
+        content += &format!(" {}", content_vec[x + 2]);
+    };
+
+    let masq_s = Masquerade {
+        name: Some(masq.to_string()),
+        avatar: Some(link),
+        colour: None,
+    };
+
+
+    let replier = rev_convert_reply(message.replies.clone()).await;
+
+    let returner = RMessagePayload {
+          content: Some(content),
+          replies: replier,
+          attachments: None,
+          masquerade: Some(masq_s)
+    };
+
+    rev_send(auth.clone(), message.clone(), returner).await;
+    rev_del(auth.clone(), message.clone()).await;
+}
+
