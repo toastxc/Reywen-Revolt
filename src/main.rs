@@ -1,105 +1,43 @@
-// serde
-//use serde::{Deserialize, Serialize};
-use serde_json::{Result};
+// quark structs
+mod lib {
+    pub mod auth;
+    pub mod message;
+    pub mod user;
+    pub mod br;
+}
 
-
-// structs
-#[path = "./lib/message.rs"]
-mod message;
-use message::*;
-
-#[path = "./lib/auth.rs"]
-mod auth;
-use auth::*;
-
-
-#[path = "./lib/user.rs"]
-mod user;
-use user::*;
-
-#[path = "./lib/br.rs"]
-mod br;
-use br::*;
-
-
-// non functional - issue #18
-// RevX2
-//mod rev_x;
-//use rev_x::*;
-
-
-// misc
-use rand::Rng;
-
-// network
-use futures_util::{StreamExt, SinkExt};
-use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
-
-// std
-use std::{
-    io::Read, 
-    fs::File, 
-//    thread, 
-//    time, 
-    str::from_utf8
+use crate::lib::{
+    message::RMessage,
+    br::BrConf,
+    auth::Auth,
 };
 
+// reywen fs
+mod fs;
+use fs::{auth_init, bridge_init};
+
+// RevX2
+pub mod rev_x;
+use rev_x::*;
+
+// reywen lib
+mod lreywen;
+use lreywen::*;
+
+// network
+use futures_util::{StreamExt};
+use tokio_tungstenite::{connect_async};
+
+
+use std::str::from_utf8;
 use tokio;
-
-
-// import and deserialize auth.conf
-fn conf_file() -> Result<Auth> {
-
-    let mut config_json = File::open("auth.json")
-        .expect("File not found");
-
-    let mut data_str = String::new();
-
-     config_json.read_to_string(&mut data_str)
-        .expect("Error while reading file");
-
-     let conf: Auth = serde_json::from_str(&data_str).expect("failed to interpret conf");
-
-     Ok(conf)
-}
-
-// deserialize messages from ws
-fn message_in(raw: String) -> Result<RMessage> {
-
-
-    let message: Result<RMessage> = serde_json::from_str(&raw);
-
-    match message {
-        Err(rmessage) => Err(rmessage),
-        Ok(ref _rmessage) =>  Ok(message.unwrap())
-    }
-}
-
-
-// import and deserialize bridge.json
-fn bridge_init() -> Result<BrConf> {
-    
-    let mut config_json = File::open("bridge.json")
-        .expect("bridge config file not found");
-
-    let mut brconf_str = String::new();
-    config_json.read_to_string(&mut brconf_str)
-        .expect("Error while reading file");
-
-
-    let config: BrConf = serde_json::from_str(&brconf_str).expect("failed to interpret brconf");
-
-    Ok(config)
-}
-
 
 #[tokio::main]
 async fn main()  {
 
-
     println!("booting...");
     // auth files
-    let data_in = conf_file();
+    let data_in = auth_init();
     let data = match data_in {
         Ok(auth) => auth,
         Err(error) => panic!("Invalid credentials, {error}")
@@ -148,12 +86,7 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
      println!("init: websocket");
 
-     let (mut write, read) = ws_stream.split();
-
-    write.send(Message::Text(r#"{
-        "type": "ping",
-        "data": 0
-      }"#.to_string()+"\\n")).await.unwrap();
+     let (mut _write, read) = ws_stream.split();
 
     let read_future = read.for_each(|message| async {
          
@@ -169,127 +102,27 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
 }
 
 
-
 // websocket main
 // imports messages, cleans them and sends to 
 // bridge and message processing
 pub async fn newmain(authen: Auth, out: String, br: BrConf) {
 
-    let inval_message = message_in(out.clone());
-    let inval2 = message_in(out.clone());
-    
+    let inval_message = rev_message_in(out.clone());
+    let inval2 = rev_message_in(out.clone());
+
     match inval_message {
         Err(_) => return,
         Ok(_) => print!("")
 
     };
-
-    // removed error prone characters
-    let message = message_clean(inval_message.expect("failed to process message"));
     
+    let message = inval_message;
     
-    message_process(authen.clone(), message).await;
+    message_process(authen.clone(), message.expect("failed to process message")).await;
     
     // br does not require 'cleaned' messages
     if br.enabled == true {
         br_main(authen.clone(), inval2.unwrap(), br).await;
-    };
-
-}
-// main for bridge, WIP
-pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
-
-
-    let (chan1, chan2) = (br.channel_1, br.channel_2);
-    // removing feedback loop
-    if input_message.author == auth.bot_id && input_message.masquerade != None {
-        return
-    };
-
-
-    // channel switch
-    let mut chan_rec = String::new();
-    if input_message.channel == chan1 {
-       chan_rec = chan2;
-    }else if input_message.channel == chan2 {
-       chan_rec = chan1;
-    };
-
-
-    
-    let mut message = input_message.clone();
-    
-    message.channel = chan_rec;
-
-    let mut br_masq = Masquerade {
-        name: None,
-        avatar: None,
-        colour: None
-    };
-   
-    // masq switch - if user has no masquerade: pull from user info API
-    // else - port over masquerade details 
-    if input_message.masquerade == None {
-
-        // API get masq
-        
-        let user = rev_user(auth.clone(), input_message.author.clone()).await.expect("failed to GET user details");
-
-        let pfplink = user.avatar.unwrap().id;
-
-        let pfp = format!("https://autumn.revolt.chat/avatars/{pfplink}");
-
-        br_masq = Masquerade {
-            name: Some(user.username),
-            avatar: Some(pfp),
-            colour: None
-        };
-        
-    }else {
-        
-        // translate masq
-        br_masq = Masquerade {
-            name: message.masquerade.as_ref().unwrap().name.clone(),
-            avatar: message.masquerade.as_ref().unwrap().avatar.clone(),
-            colour: None
-        };  
-
-    };
-
-    // message for rev_send
-    let payload = RMessagePayload {
-        content: message.content.clone(),
-        attachments: None,
-        replies: wstoapi_reply(input_message.replies).await,
-        masquerade: Some(br_masq),
-    };
-
-    rev_send(auth, message, payload).await;
-
-}
-
-pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
-
-  //  println!("rev: user");
-   
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new()
-    .get(format!("https://api.revolt.chat/users/{target}"))
-    .header("x-bot-token", auth.token)
-    .send().await;
-
-    let client_res = match client {
-        Ok(_) => client.unwrap().text().await.unwrap(),
-        Err(_) => "Err:\n{error}".to_string()
-    };
-
-
-  //  println!("{:?}", client_res);
-
-    let message: Result<RUserFetch> = serde_json::from_str(&client_res);
-    match message {
-        Ok(_) => return Ok(message.unwrap()),
-        Err(_) => return message
     };
 
 }
@@ -306,7 +139,7 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
         return
     };
 
-    let message = message_clean(message_in);
+    let message = rev_message_clean(message_in).await;
 
     let content_vec =  content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
@@ -325,167 +158,4 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
         _ => return
     };
 
-}
-
-// masq wrapper for rev_send
-pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
-
-    if content_vec.len() < 3 {
-        send(auth, message, "invalid use of sendas".to_string()).await;
-        return
-    };
-    //let from = message._id.clone();
-    let masq = content_vec[1];
-    let mut content = String::new();
-    //content = "placeholder".to_string();
-
-    let link = match masq {
-        "bingus"    | "cheese"  | "dad" | 
-        "deeznuts"  |  "insert" | "joe_biden" | 
-        "valence"   | "walter"  | "woof" => format!("https://toastxc.xyz/TXCS/{masq}.jpg"),
-        _ => format!("https://toastxc.xyz/TXCS/default.png")
-    };
-
-    for x in 0..content_vec.len() -2 {
-        content += &format!(" {}", content_vec[x + 2]);
-    };
-
-    let masq_s = Masquerade {
-        name: Some(masq.to_string()),
-        avatar: Some(link),
-        colour: None,
-    };
-
- 
-    let replier = wstoapi_reply(message.replies.clone()).await;
-
-    let returner = RMessagePayload {
-          content: Some(content),
-          replies: replier,
-          attachments: None,
-          masquerade: Some(masq_s)
-    };
-
-    rev_send(auth.clone(), message.clone(), returner).await;
-    rev_del(auth.clone(), message.clone()).await;
-}
-// converts websocket replies to API compatible replies
-pub async fn wstoapi_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
-
-    if input == None {
-        
-        return None
-    
-    }else {
-        
-        let mut repstruct = vec![];
-        let iter = input.clone()?.len();
-
-        for x in 0..iter {
-            
-            let input_iter = &input.as_ref().expect("failed to convert input wstoapi")[x];
-            
-            let reply = RReplies {
-                id: input_iter.to_string(),
-                mention: false,
-            };
-            repstruct.push(reply);
-        };
-
-        return Some(repstruct)
-    };
-
-}
-
-// non masq wrapper for rev_send
-pub async fn send(auth: Auth, message: RMessage, content: String) {
-
-    let reply = RReplies {
-        id: message._id.clone(),
-        mention: false,
-    };
-    let payload2 = RMessagePayload {
-        content: Some(content),
-        replies: Some(vec![reply]),
-          attachments: None,
-          masquerade: None
-    };
-
-    rev_send(auth, message, payload2).await;
-
-}
-
-
-// deletes messages over http
-pub async fn rev_del(auth: Auth, message: RMessage) {
-
-    let channel = message.channel;
-    let target = message._id;
-
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new()
-    .delete(format!("https://api.revolt.chat/channels/{channel}/messages/{target}"))
-    .header("x-bot-token", auth.token)
-    .send().await;
-
-     match client {
-        Ok(_) => return,
-        Err(_) => println!("Err:\n{:?}", client)
-    };
-
-
-}
-// sends messages over http
-pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
-    
-    let channel = message.channel;
-
-    let mut random = rand::thread_rng();
-    let idem: i64 = random.gen();
-
-    let payload2 = serde_json::to_string(&payload).unwrap();
-
-    let client: std::result::Result<reqwest::Response, reqwest::Error> = 
-        reqwest::Client::new()
-        .post(format!("https://api.revolt.chat/channels/{channel}/messages"))
-        .header("x-bot-token", auth.token)
-        .header("Idempotency-Key", idem)
-        .header("Content-Type", "application/json")
-        .body(payload2)
-        .send().await;
- 
-    match client {
-        //Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
-        Ok(_) => return,
-        Err(_) => println!("Err:\n{:?}", client)
-    };
-}
-
-
-// cleans invalid characters such as \n and \
-pub fn message_clean(mut message: RMessage) -> RMessage {
-
-    if message.content == None {
-        return message
-    };
-
-    let mut out = String::new();
-
-    let iter = message.content.as_ref().unwrap().chars().count();
-    let content = message.content.as_ref().unwrap();
-
-
-    for x in 0..iter {
-        let current = content.chars().nth(x);
-
-        if current == Some('\n') {
-            out += "\\n";
-        }else if current == Some('\\') {
-            out += "\\\\";
-        }else {
-            out += &current.unwrap().to_string();  
-        };
-    };
-    message.content = Some(out);
-    return message    
 }
