@@ -192,7 +192,12 @@ pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
 
         // API get masq
         
-        let user = rev_user(auth.clone(), input_message.author.clone()).await.expect("failed to GET user details");
+        let user1 = rev_user(auth.clone(), input_message.author.clone()).await;
+
+        let user = match user1 {
+            Ok(_) => user1.expect("failed to GET user details"),
+            Err(_)  => return
+        };
 
         let pfplink = user.avatar.unwrap().id;
 
