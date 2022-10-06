@@ -21,10 +21,15 @@ if content == "?hello" {
 ```rust
  match &content as &str {
 
-        "?hello" => rev_send(data, message, "hello user".to_string()).await,
+        "?hello" => send(data, message, "hello user".to_string()).await,
         _ => return
     };
 
+```
+## getting started
+```shell
+wget https://raw.githubusercontent.com/toastxc/Reywen-Revolt/main/start.sh 
+sh start.sh
 ```
 
 While the difference in syntax is minimal, there are many benefits of RevX2 over RevX1, such as
