@@ -1,9 +1,9 @@
 // a library for high level non essential functions
 
-use crate::lib::{
-    auth::Auth,
+use crate::{Auth, lib::{
     message::{RMessage, RReplies, RMessagePayload, Masquerade},
-};
+}};
+
 
 use crate::rev_x::*;
 

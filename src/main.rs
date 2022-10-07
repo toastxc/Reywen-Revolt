@@ -1,20 +1,17 @@
 // quark structs
 mod lib {
-    pub mod auth;
     pub mod message;
     pub mod user;
-    pub mod br;
+    pub mod conf;
 }
 
 use crate::lib::{
     message::RMessage,
-    br::BrConf,
-    auth::Auth,
+    conf::{MainConf, BrConf, Auth}
 };
-
 // reywen fs
 mod fs;
-use fs::{auth_init, bridge_init};
+use fs::{Conf_init};
 
 // RevX2
 pub mod rev_x;
@@ -43,6 +40,8 @@ const PING: &str = r#"{
 async fn main()  {
 
     println!("booting...");
+
+    /*
     // auth files
     let data_in = auth_init();
     let data = match data_in {
@@ -78,16 +77,41 @@ async fn main()  {
         };
     };
 
-    let token = data.token.clone();
+    */
+
+
+    // import
+    let details_in = Conf_init();
+
+    let details = match details_in {
+        Err(MainConf) => panic!("failed to import json"),
+        Ok(MainConf) => MainConf,
+    };
+
+ //   let details = conf_error(details_in);
+
+
+    if details.message.message_enabled && details.bridge.bridge_enabled == true {
+        println!("init: message\ninit: bridge")
+    }else if details.message.message_enabled == true {
+        println!("init: message")
+    }else if details.bridge.bridge_enabled == true {
+        println!("init: bridge")
+    }else {
+        panic!("No services enabled, reywen shutting down")
+    };
+    
+    
+    let token = details.auth.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
 
-    websocket(url, data, br).await;
+    websocket(url, details).await;
 
 }
 
 // establishes websocket connection
-pub async fn websocket(url: String, authen: Auth, br: BrConf) {
+pub async fn websocket(url: String, details: MainConf) {
 
 
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
@@ -108,7 +132,6 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
         let out = from_utf8(&data).unwrap().to_string();
 
        // moved websocket main to self contained function for ease of use 
-       newmain(authen.clone(), out, br.clone()).await;
 
      });
 
@@ -119,7 +142,7 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
 // websocket main
 // imports messages, cleans them and sends to 
 // bridge and message processing
-pub async fn newmain(authen: Auth, out: String, br: BrConf) {
+pub async fn newmain(out: String, details: MainConf) {
 
     let raw_message = rev_message_in(out);
 
@@ -129,21 +152,25 @@ pub async fn newmain(authen: Auth, out: String, br: BrConf) {
     };
 
     tokio::join!(
-        br_main(authen.clone(), message2, br),
-        message_process(authen.clone(), message),
+     //   br_main(authemessage2),
+        message_process(details, message),
         );
 }
 
 
 
 // main message engine 
-pub async fn message_process(data: Auth, message_in: RMessage) {
- 
+pub async fn message_process(details: MainConf, message_in: RMessage) {
+
+    if details.message.message_enabled == false {
+        return
+    };
+
     let content = message_in.content.clone();
     // validity test
     if content == None {
         return
-    }else if message_in.author == data.bot_id {
+    }else if message_in.author == details.auth.bot_id {
         return
     };
     let message = rev_message_clean(message_in).await;
@@ -156,14 +183,16 @@ pub async fn message_process(data: Auth, message_in: RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
 
+    println!("{:?}", message);
   
     match &content_vec[0] as &str {
         
-        "?Mog" | "?mog"  => send(data, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
-        "?ver" | "?version" => send(data, message, "**Version**\nReywen: `2.0.1`\nRevX: `2.0.2`".to_string()).await,
-        "?echo" => send(data, message, content_min1).await,
-        "?sendas" => sendas(data, message, content_vec).await,
+        "?Mog" | "?mog"  => send(details.auth, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
+        "?ver" | "?version" => send(details.auth, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
+        "?echo" => send(details.auth, message, content_min1).await,
+        "?sendas" => sendas(details.auth, message, content_vec).await,
         _ => return
     };
 
 }
+

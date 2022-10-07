@@ -2,8 +2,7 @@
 
 use serde_json::{Result};
 use crate::lib::{
-    auth::Auth,
-    br::BrConf,
+    conf::MainConf
 };
 
 
@@ -12,6 +11,25 @@ use std::{
     fs::File,
 };
 
+// import and deserialize message.conf
+
+pub fn Conf_init() -> Result<MainConf> {
+
+  
+    let mut config_json = File::open("reywen.json")
+        .expect("File not found: reywen.json");
+
+    let mut data_str = String::new();
+
+     config_json.read_to_string(&mut data_str)
+        .expect("Error while reading file");
+
+     let conf: MainConf = serde_json::from_str(&data_str).expect("failed to interpret conf");
+
+     Ok(conf)
+}
+
+/*
 // import and deserialize auth.conf
 pub fn auth_init() -> Result<Auth> {
 
@@ -44,4 +62,4 @@ pub fn bridge_init() -> Result<BrConf> {
 
     Ok(config)
 }
-
+*/

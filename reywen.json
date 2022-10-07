@@ -1,0 +1,18 @@
+{
+	"message":{
+		"message_enabled": true
+	},
+
+	"auth":{
+		"token": "",
+		"bot_id": "",
+		"sudoers": [""]
+	
+	},
+	
+	"bridge":{
+		"bridge_enabled": false,
+		"channel_1": "",
+		"channel_2": ""
+	}
+}

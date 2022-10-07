@@ -2,11 +2,13 @@
 
 use crate::lib::{
     message::{RMessage, RMessagePayload, RReplies, Masquerade},
-    auth::Auth,
+    //auth::Auth,
     user::RUserFetch,
-    br::BrConf,
-
+    //br::BrConf,
 };
+    use crate::BrConf;
+    use crate::Auth;
+
 
 
 
@@ -155,7 +157,7 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
     };
 
 }
-
+//pub fn conf_error(details_in: 
 pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
 
 
