@@ -91,16 +91,22 @@ async fn main()  {
  //   let details = conf_error(details_in);
 
 
-    if details.message.message_enabled && details.bridge.bridge_enabled == true {
-        println!("init: message\ninit: bridge")
-    }else if details.message.message_enabled == true {
-        println!("init: message")
-    }else if details.bridge.bridge_enabled == true {
-        println!("init: bridge")
-    }else {
-        panic!("No services enabled, reywen shutting down")
+   
+    let mut sendstr = String::new();
+
+    let (mes_bool, br_bool) = 
+        (details.message.message_enabled, details.bridge.bridge_enabled);
+    
+    sendstr += match true {
+        mes_bool => "init: message",
+        br_bool => "init: bridge"
     };
     
+    if sendstr == "" {
+        panic!("no option selected, shutting down...");
+    };
+
+    println!("{sendstr}");
     
     let token = details.auth.token.clone();
 
