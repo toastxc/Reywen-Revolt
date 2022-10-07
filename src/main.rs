@@ -7,11 +7,11 @@ mod lib {
 
 use crate::lib::{
     message::RMessage,
-    conf::{MainConf, BrConf, Auth}
+    conf::{MainConf, Auth}
 };
 // reywen fs
 mod fs;
-use fs::{Conf_init};
+use fs::{conf_init};
 
 // RevX2
 pub mod rev_x;
@@ -41,73 +41,25 @@ async fn main()  {
 
     println!("booting...");
 
-    /*
-    // auth files
-    let data_in = auth_init();
-    let data = match data_in {
-        Ok(auth) => auth,
-        Err(error) => panic!("Invalid credentials, {error}")
+    // import
+    let details_in = conf_init();
+
+    let details = match details_in {
+        Err(_main_conf) => panic!("failed to import json"),
+        Ok(main_conf) => main_conf,
     };
 
-    if data.token == "" {
-        panic!("Invalid credentials, bot requires a token");
-    }else if data.bot_id == "" {
-        panic!("Invalid credentials, bot requires an ID");
-    }else if data.sudoers[0] == "" {
-        println!("WARN: no sudoers found")
-    };
-    println!("init: auth.json");
-    
-    
-
-    // bridge
-    let br_in = bridge_init();
-    let br = match br_in {
-        Err(_br) => panic!("failed to import bridge conf\n"),
-        Ok(br) => br
-    };
-    if br.enabled == true {
-        println!("init: bridge.json");
-        if br.channel_1.len() != 26{
-            println!("WARN: bridge channels may not be valid");
-        }else if br.channel_2.len() != 26 {
-            println!("WARN: bridge channels may not be valid");
-        }else if br.channel_1 == br.channel_2 {
-            panic!("bridge channels cannot be the same")
+    if details.message.message_enabled == false && details.bridge.bridge_enabled == false {
+        panic!("No services enabled, reywen shutting down")
+    }else {
+        if details.message.message_enabled == true {
+            println!("init: message")
+        }if details.bridge.bridge_enabled == true {
+            println!("init: bridge")
         };
     };
 
-    */
 
-
-    // import
-    let details_in = Conf_init();
-
-    let details = match details_in {
-        Err(MainConf) => panic!("failed to import json"),
-        Ok(MainConf) => MainConf,
-    };
-
- //   let details = conf_error(details_in);
-
-
-   
-    let mut sendstr = String::new();
-
-    let (mes_bool, br_bool) = 
-        (details.message.message_enabled, details.bridge.bridge_enabled);
-    
-    sendstr += match true {
-        mes_bool => "init: message",
-        br_bool => "init: bridge"
-    };
-    
-    if sendstr == "" {
-        panic!("no option selected, shutting down...");
-    };
-
-    println!("{sendstr}");
-    
     let token = details.auth.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
@@ -139,6 +91,7 @@ pub async fn websocket(url: String, details: MainConf) {
 
        // moved websocket main to self contained function for ease of use 
 
+        newmain(out, details.clone()).await;
      });
 
     read_future.await;
@@ -157,9 +110,10 @@ pub async fn newmain(out: String, details: MainConf) {
         Ok(_) => (raw_message.as_ref().expect("REASON").clone(), raw_message.unwrap())
     };
 
+
     tokio::join!(
-     //   br_main(authemessage2),
-        message_process(details, message),
+        br_main(details.clone(), message2),
+        message_process(details.clone(), message),
         );
 }
 
@@ -189,7 +143,6 @@ pub async fn message_process(details: MainConf, message_in: RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
 
-    println!("{:?}", message);
   
     match &content_vec[0] as &str {
         

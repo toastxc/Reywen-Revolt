@@ -1,15 +1,12 @@
 // structs
 
-use crate::lib::{
-    message::{RMessage, RMessagePayload, RReplies, Masquerade},
-    //auth::Auth,
-    user::RUserFetch,
-    //br::BrConf,
-};
-    use crate::BrConf;
-    use crate::Auth;
-
-
+use crate::{
+    lib::{
+        message::{
+            RMessage, RMessagePayload, RReplies, Masquerade},
+            user::RUserFetch},
+        MainConf,
+        Auth};
 
 
 // dep
@@ -158,14 +155,18 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
 
 }
 //pub fn conf_error(details_in: 
-pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
+pub async fn br_main(details: MainConf, input_message: RMessage) {
 
+    let auth = details.auth.clone();
+    let br = details.bridge.clone();
 
-    let (chan1, chan2) = (br.channel_1, br.channel_2);
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade != None {
         return
     };
+
+
+    let (chan1, chan2) = (br.channel_1, br.channel_2);
 
 
     // channel switch
