@@ -154,6 +154,7 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
     };
 
 }
+/*
 //pub fn conf_error(details_in: 
 pub async fn br_main(details: MainConf, input_message: RMessage) {
 
@@ -234,4 +235,4 @@ pub async fn br_main(details: MainConf, input_message: RMessage) {
     rev_send(auth, message, payload).await;
 
 }
-
+*/

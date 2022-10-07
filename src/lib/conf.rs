@@ -5,6 +5,7 @@ pub struct MainConf {
     pub message: MessageConf,
     pub auth: Auth,
     pub bridge: BrConf,
+    pub shell: ShellConf,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -31,3 +32,16 @@ pub struct BrConf {
     pub channel_2: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ShellConf {
+    pub enabled: bool,
+    pub whitelist_sudoers: bool,
+    pub enable_sudo: bool,
+    pub shell_channel: SocConf,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SocConf {
+    pub enabled: bool,
+    pub channel: String,
+}
