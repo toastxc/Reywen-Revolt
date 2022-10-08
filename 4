@@ -65,16 +65,11 @@ pub async fn bash_exec(input: Vec<&str>) {
 
     let out = format!("{}{}", String::from_utf8_lossy(&stdout), String::from_utf8_lossy(&stderr));
 
-    if out.chars().count() <= 2000 {
-        println!("{out}");
-    }else {
-        panic!("invalid message for rev")
-    };
-
-    //let out_vec = out.split('\n').collect::<Vec<&str>>();
+    println!("{:?}", out.chars().len());
+    let out_vec = out.split('\n').collect::<Vec<&str>>();
 
 
-    //println!("{}", out_vec.len());
+    println!("{}", out_vec.len());
 
     //for x in 0..out_vec.len()
     
