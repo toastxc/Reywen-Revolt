@@ -16,6 +16,19 @@ use rand::Rng;
 use serde_json::{Result};
 
 
+pub async fn sudocheck(user: String, auth: Auth) -> bool {
+
+  
+    for x in 0..auth.sudoers.len() {
+        if user == auth.sudoers[x] {
+            return true
+        };
+    };
+
+    return false
+
+}
+
 // deserializes websocket messages
 pub fn rev_message_in(raw: String) -> Result<RMessage> {
 
