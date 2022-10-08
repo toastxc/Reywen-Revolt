@@ -8,10 +8,19 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
         return
    };
 
-    let auth = details.auth;
-    let shell = details.shell;
-    let soc = shell.shell_channel;
+    let (auth, shell, soc) = (details.auth, details.shell.clone(), details.shell.shell_channel.clone());
 
+    let content_vec =  message.content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
+
+    if content_vec.len() <= 1 {
+        return
+    };
+
+    let mut content_min1 = String::new();
+
+    for x in 0..content_vec.len() -1 {
+        content_min1 += &format!("{} ", content_vec[x + 1])
+    };
 
     let user = message.author;
 
@@ -25,18 +34,12 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
 
     if soc.enabled == true && soc.channel == message.channel {
         if shell.whitelist_sudoers == true && sudoer == true {
-           // if message.content.expect("this should be impossible").chars().nth(0) == "?/" {
+           if content_vec[0] == "?/" {
 
-            println!("{:?}", message.content.expect("this should be impossible").chars().nth(0).unwrap());
-            println!("exec!!")
-            //};
+//               bash_exec(content_min1);
+               
+               
+            };
         };
     };
-    /*
-
-    println!("{:?}", details.shell);
-
-    println!("{:?}  {:?}", details.shell.shell_only_channel.soc_channel, message.channel);
-*/
-    
 }
