@@ -46,12 +46,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
 
 pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
-
-
-
-
     // shell
-
 
     let mut com = Command::new(input[1]);
 
@@ -60,19 +55,22 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
     };
 
 
-    let stdout = com.output().unwrap().stdout;
-    let stderr = com.output().unwrap().stderr;
+    match com.output() {
+        Err(e) => {
+            rev_send(details.auth, message, bash_masq(e.to_string()).await).await;
+            return},
+        Ok(_) => {},
+    };
+
+    let stdout = com.output().expect("error with stdout").stdout;
 
 
-    //let (stdout, stderr) = (com.stderr.clone(), com.stderr.clone());
 
-    let out = format!("{}{}", String::from_utf8_lossy(&stdout), String::from_utf8_lossy(&stderr));
+    let out = format!("{}", String::from_utf8_lossy(&stdout));
 
-    if out.chars().count() <= 2000 {
-        
-        //send(details.auth, message, out).await
+    if out.chars().count() <= 2000 {        
 
-        rev_send(details.auth, message, bash_masq(out).await).await
+        rev_send(details.auth, message, bash_masq(format!("```{out}```")).await).await
 
     }else {
 
@@ -84,5 +82,6 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
         };
     };
 
-
 }
+
+
