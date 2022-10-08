@@ -1,4 +1,4 @@
-use crate::{MainConf, RMessage};
+use crate::{MainConf, RMessage, send};
 use std::process::Command;
 pub async fn shell_main(details: MainConf, message: RMessage) {
 
@@ -8,7 +8,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
         return
    };
 
-    let (auth, shell, soc) = (details.auth, details.shell.clone(), details.shell.shell_channel.clone());
+    let (auth, shell, soc) = (details.auth.clone(), details.shell.clone(), details.shell.shell_channel.clone());
 
     let content_vec =  message.content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
@@ -22,7 +22,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
 
-    let user = message.author;
+    let user = message.author.clone();
 
     let mut sudoer = false;
     for x in 0..auth.sudoers.len() {
@@ -36,7 +36,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
         if shell.whitelist_sudoers == true && sudoer == true {
            if content_vec[0] == "?/" {
 
-               bash_exec(content_vec).await;
+               bash_exec(content_vec, details.clone(), message.clone()).await;
                
                
             };
@@ -44,7 +44,8 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
     };
 }
 
-pub async fn bash_exec(input: Vec<&str>) {
+pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
+
 
     println!("WARN: bashexec");
 
@@ -67,13 +68,16 @@ pub async fn bash_exec(input: Vec<&str>) {
 
     if out.chars().count() <= 2000 {
         println!("{out}");
+        send(details.auth, message, out).await
+
     }else {
 
 
         let out_vec = out.split('\n').collect::<Vec<&str>>();
 
         for x in 0..out_vec.len() {
-            println!("{}", out_vec[x])
+            println!("{}", out_vec[x]);
+            send(details.auth.clone(), message.clone(), out_vec[x].to_string()).await
         };
     };
 
