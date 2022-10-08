@@ -23,7 +23,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
    }else if content_vec.len() <= 1 {
         return
     }else if shell.whitelist_sudoers == true && sudoer != true {
-        rev_send(details.auth, message, bash_masq("only sudoers allowed".to_string()).await).await;
+        rev_send(details.auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
         return
     };
 
@@ -64,18 +64,22 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     let out = String::from_utf8_lossy(&stdout);
 
-    println!("{:?}", out);
     if out.chars().count() <= 2000 {        
 
-        rev_send(details.auth, message, bash_masq(format!("```\n{out}```")).await).await
+        rev_send(details.auth, message, bash_masq(format!("```\n{out}")).await).await
 
     }else {
-
 
         let out_vec = out.split('\n').collect::<Vec<&str>>();
 
         for x in 0..out_vec.len() {
-            send(details.auth.clone(), message.clone(), out_vec[x].to_string()).await
+
+            
+            let mes = format!("`{}`", out_vec[x].to_string());
+            let payload = bash_masq(mes).await;
+
+            rev_send(details.auth.clone(), message.clone(), payload).await;
+                
         };
     };
 
