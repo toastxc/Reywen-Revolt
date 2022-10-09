@@ -1,4 +1,4 @@
-use crate::{MainConf, RMessage, send, bash_masq, rev_send, sudocheck};
+use crate::{MainConf, RMessage, send, bash_masq, rev_send, sudocheck, Auth};
 use std::process::Command;
 pub async fn shell_main(details: MainConf, message: RMessage) {
 
@@ -66,23 +66,76 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     if out.chars().count() <= 2000 {        
 
-        rev_send(details.auth, message, bash_masq(format!("```\n{out}")).await).await
+        rev_send(details.auth, message, bash_masq(format!("```text\n{out}")).await).await
 
     }else {
 
-        let out_vec = out.split('\n').collect::<Vec<&str>>();
 
-        for x in 0..out_vec.len() {
+        //let payload = bash_masq(mes.clone()).await;
 
-            
-            let mes = format!("`{}`", out_vec[x].to_string());
-            let payload = bash_masq(mes).await;
+        bash_big_msg(out.to_string(), details.auth.clone(), message.clone()).await;
 
-            rev_send(details.auth.clone(), message.clone(), payload).await;
-                
         };
-    };
 
 }
 
+pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
+
+    let vec: Vec<char> = out.chars().collect();
+
+    let (a, b, c) = convert(vec.len() as i32);
+
+    // iterator
+    // payload
+    // remainder
+
+
+    let mut current = String::new();
+    let mut iter = 0;
+
+    for x in 0..a {
+        for y in 0..b {
+
+            current += &vec[(iter) as usize].to_string();
+            iter = iter + 1;
+        };
+        print!("{current}");
+
+        current = format!("```\\n\\n{current}");
+        let payload = bash_masq(current).await;
+
+        rev_send(auth.clone(), message.clone(), payload).await;
+
+
+        current = String::new();
+
+    };
+
+    if c > 0 {
+        for x in 0..c {
+
+            current += &vec[( iter - 1) as usize].to_string();
+            iter += 1;
+        };
+
+          current = format!("```\\n\\n{current}");
+
+        let payload = bash_masq(current).await;
+
+        rev_send(auth.clone(), message.clone(), payload).await;
+
+    };
+
+    print!("\n");
+
+}
+
+pub fn convert(a: i32) -> (i32, i32, i32){
+
+    if a < 1900 {
+        return (1, a, 0)
+    };
+   
+    return (a / 1900, 1900,  a % 1900);
+}
 
