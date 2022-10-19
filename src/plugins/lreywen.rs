@@ -1,11 +1,31 @@
 // a library for high level non essential functions
 
-use crate::lib::{
-    auth::Auth,
+use crate::{Auth, lib::{
     message::{RMessage, RReplies, RMessagePayload, Masquerade},
-};
+}};
+
 
 use crate::rev_x::*;
+
+
+pub async fn bash_masq(out: String) -> RMessagePayload {
+
+      let masq = Masquerade {
+        name: Some("ReyShell".to_string()),
+        avatar: Some("https://toastxc.xyz/TXCS/reyshell.png".to_string()),
+        colour: None,
+    };
+
+    let payload = RMessagePayload {
+        content: Some(out.to_string()),
+        attachments: None,
+        replies: None,
+        masquerade:  Some(masq)
+    };
+
+    return payload
+
+}
 
 pub async fn send(auth: Auth, message: RMessage, content: String) {
 

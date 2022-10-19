@@ -1,28 +1,38 @@
 // quark structs
 mod lib {
-    pub mod auth;
     pub mod message;
     pub mod user;
-    pub mod br;
+    pub mod conf;
 }
-
 use crate::lib::{
     message::RMessage,
-    br::BrConf,
-    auth::Auth,
+    conf::{MainConf, Auth}
 };
+
+
+// reywen plugins
+mod plugins {
+    pub mod lreywen;
+    pub mod message;
+    pub mod shell;
+    pub mod bridge;
+}
+use crate::plugins::{
+    lreywen::*,
+    message::*,
+    shell::*,
+    bridge::*,
+};
+
 
 // reywen fs
 mod fs;
-use fs::{auth_init, bridge_init};
+use fs::{conf_init};
 
 // RevX2
 pub mod rev_x;
 use rev_x::*;
 
-// reywen lib
-mod lreywen;
-use lreywen::*;
 
 // network
 use futures_util::StreamExt;
@@ -43,51 +53,40 @@ const PING: &str = r#"{
 async fn main()  {
 
     println!("booting...");
-    // auth files
-    let data_in = auth_init();
-    let data = match data_in {
-        Ok(auth) => auth,
-        Err(error) => panic!("Invalid credentials, {error}")
+
+    // import
+    let details_in = conf_init();
+
+    let details = match details_in {
+        Err(_main_conf) => panic!("failed to import json"),
+        Ok(main_conf) => main_conf,
     };
 
-    if data.token == "" {
-        panic!("Invalid credentials, bot requires a token");
-    }else if data.bot_id == "" {
-        panic!("Invalid credentials, bot requires an ID");
-    }else if data.sudoers[0] == "" {
-        println!("WARN: no sudoers found")
-    };
-    println!("init: auth.json");
-    
-    
-
-    // bridge
-    let br_in = bridge_init();
-    let br = match br_in {
-        Err(_br) => panic!("failed to import bridge conf\n"),
-        Ok(br) => br
-    };
-    if br.enabled == true {
-        println!("init: bridge.json");
-        if br.channel_1.len() != 26{
-            println!("WARN: bridge channels may not be valid");
-        }else if br.channel_2.len() != 26 {
-            println!("WARN: bridge channels may not be valid");
-        }else if br.channel_1 == br.channel_2 {
-            panic!("bridge channels cannot be the same")
+    if details.message.message_enabled == false
+        && details.bridge.bridge_enabled == false 
+            &&details.shell.enabled == false {
+        panic!("No services enabled, reywen shutting down")
+    }else {
+        if details.message.message_enabled == true {
+            println!("init: message")
+        }if details.bridge.bridge_enabled == true {
+            println!("init: bridge")
+        }if details.shell.enabled == true {
+            println!("init: shell")
         };
     };
 
-    let token = data.token.clone();
+
+    let token = details.auth.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
 
-    websocket(url, data, br).await;
+    websocket(url, details).await;
 
 }
 
 // establishes websocket connection
-pub async fn websocket(url: String, authen: Auth, br: BrConf) {
+pub async fn websocket(url: String, details: MainConf) {
 
 
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
@@ -108,8 +107,8 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
         let out = from_utf8(&data).unwrap().to_string();
 
        // moved websocket main to self contained function for ease of use 
-       newmain(authen.clone(), out, br.clone()).await;
 
+        new_main(out, details.clone()).await;
      });
 
     read_future.await;
@@ -119,51 +118,23 @@ pub async fn websocket(url: String, authen: Auth, br: BrConf) {
 // websocket main
 // imports messages, cleans them and sends to 
 // bridge and message processing
-pub async fn newmain(authen: Auth, out: String, br: BrConf) {
+pub async fn new_main(out: String, details: MainConf) {
 
     let raw_message = rev_message_in(out);
 
-    let (message, message2) = match raw_message {
+    let (message, message2, message3) = match raw_message {
         Err(_) => return,
-        Ok(_) => (raw_message.as_ref().expect("REASON").clone(), raw_message.unwrap())
+        Ok(_) => (
+            raw_message.as_ref().expect("failed converting message").clone(), 
+            raw_message.as_ref().expect("failed converting message").clone(), 
+            raw_message.as_ref().expect("failed converting message").clone()
+            )
     };
+
 
     tokio::join!(
-        br_main(authen.clone(), message2, br),
-        message_process(authen.clone(), message),
+        br_main(details.clone(), message),
+        message_process(details.clone(), message2),
+        shell_main(details.clone(), message3)
         );
-}
-
-
-
-// main message engine 
-pub async fn message_process(data: Auth, message_in: RMessage) {
- 
-    let content = message_in.content.clone();
-    // validity test
-    if content == None {
-        return
-    }else if message_in.author == data.bot_id {
-        return
-    };
-    let message = rev_message_clean(message_in).await;
-
-    let content_vec =  content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
-
-    let mut content_min1 = String::new();
-
-    for x in 0..content_vec.len() -1 {
-        content_min1 += &format!("{} ", content_vec[x + 1])
-    };
-
-  
-    match &content_vec[0] as &str {
-        
-        "?Mog" | "?mog"  => send(data, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
-        "?ver" | "?version" => send(data, message, "**Version**\nReywen: `2.0.1`\nRevX: `2.0.2`".to_string()).await,
-        "?echo" => send(data, message, content_min1).await,
-        "?sendas" => sendas(data, message, content_vec).await,
-        _ => return
-    };
-
 }

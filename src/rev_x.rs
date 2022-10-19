@@ -1,19 +1,33 @@
 // structs
 
-use crate::lib::{
-    message::{RMessage, RMessagePayload, RReplies, Masquerade},
-    auth::Auth,
-    user::RUserFetch,
-    br::BrConf,
-
-};
-
+use crate::{
+    lib::{
+        message::{
+            RMessage, RMessagePayload, RReplies, 
+           // Masquerade
+        },
+            user::RUserFetch},
+//        MainConf,
+        Auth};
 
 
 // dep
 use rand::Rng;
 use serde_json::{Result};
 
+
+pub async fn sudocheck(user: String, auth: Auth) -> bool {
+
+  
+    for x in 0..auth.sudoers.len() {
+        if user == auth.sudoers[x] {
+            return true
+        };
+    };
+
+    return false
+
+}
 
 // deserializes websocket messages
 pub fn rev_message_in(raw: String) -> Result<RMessage> {
@@ -155,15 +169,20 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
     };
 
 }
+/*
+//pub fn conf_error(details_in: 
+pub async fn br_main(details: MainConf, input_message: RMessage) {
 
-pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
+    let auth = details.auth.clone();
+    let br = details.bridge.clone();
 
-
-    let (chan1, chan2) = (br.channel_1, br.channel_2);
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade != None {
         return
     };
+
+
+    let (chan1, chan2) = (br.channel_1, br.channel_2);
 
 
     // channel switch
@@ -231,4 +250,4 @@ pub async fn br_main(auth: Auth, input_message: RMessage, br: BrConf) {
     rev_send(auth, message, payload).await;
 
 }
-
+*/
