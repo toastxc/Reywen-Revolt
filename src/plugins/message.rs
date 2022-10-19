@@ -32,6 +32,7 @@ pub async fn message_process(details: MainConf, message_in: RMessage) {
         "?ver" | "?version" => send(details.auth, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
         "?echo" => send(details.auth, message, content_min1).await,
         "?sendas" => sendas(details.auth, message, content_vec).await,
+        "?whydoyounothaveanyfeatures:trol:" => send(details.auth, message, "Reywen1 was an experiment to see if <@01FSRTTGJC1XJ6ZEQJMSX8Q96C> could make a bot for revolt with no libraries in rust\n Reywen2 was a test to see how much better they could make it with more experience in rust... if you want to make add features Reywen is not difficult to develop for \n".to_string()).await,
         _ => return
     };
 

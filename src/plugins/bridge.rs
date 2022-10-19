@@ -32,11 +32,8 @@ pub async fn br_main(details: MainConf, input_message: RMessage) {
     
     message.channel = chan_rec;
 
-    let mut br_masq = Masquerade {
-        name: None,
-        avatar: None,
-        colour: None
-    };
+    let br_masq: Masquerade;
+
     // masq switch - if user has no masquerade: pull from user info API
     // else - port over masquerade details 
     if input_message.masquerade == None {

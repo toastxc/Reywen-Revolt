@@ -1,17 +1,16 @@
-use crate::{MainConf, RMessage, send, bash_masq, rev_send, sudocheck, Auth};
+use crate::{MainConf, RMessage, bash_masq, rev_send, sudocheck, Auth};
 use std::process::Command;
 pub async fn shell_main(details: MainConf, message: RMessage) {
 
     // initalize variables
-
-    let user = message.author.clone();
     let (auth, shell, soc) = (details.auth.clone(), details.shell.clone(), details.shell.shell_channel.clone());
     let content_vec =  message.content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
 
-    let sudoer = sudocheck(message.author.clone(), details.auth.clone()).await;
-    // perm check 
+    let sudoer = sudocheck(message.author.clone(), auth.clone()).await;
+    
 
+    // perm check 
     if details.shell.enabled == false {
         return
     }else if message.content == None {
@@ -23,7 +22,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
    }else if content_vec.len() <= 1 {
         return
     }else if shell.whitelist_sudoers == true && sudoer != true {
-        rev_send(details.auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
+        rev_send(auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
         return
     };
 
@@ -70,9 +69,6 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     }else {
 
-
-        //let payload = bash_masq(mes.clone()).await;
-
         bash_big_msg(out.to_string(), details.auth.clone(), message.clone()).await;
 
         };
@@ -93,8 +89,8 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
     let mut current = String::new();
     let mut iter = 0;
 
-    for x in 0..a {
-        for y in 0..b {
+    for _ in 0..a {
+        for _ in 0..b {
 
             current += &vec[(iter) as usize].to_string();
             iter = iter + 1;
@@ -112,7 +108,7 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
     };
 
     if c > 0 {
-        for x in 0..c {
+        for _ in 0..c {
 
             current += &vec[( iter - 1) as usize].to_string();
             iter += 1;
