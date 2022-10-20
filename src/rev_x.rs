@@ -115,7 +115,6 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         .send().await;
 
     match client {
-        //Ok(_) => println!("{}", client.unwrap().text().await.unwrap()),
         Ok(_) => return,
         Err(_) => println!("Err:\n{:?}", client)
     };
@@ -137,9 +136,10 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
         Ok(_) => return,
         Err(_) => println!("Err:\n{:?}", client)
     };    
-          
-          
+            
 }
+
+
 
 
 // converts websocket replies to API compatible replies

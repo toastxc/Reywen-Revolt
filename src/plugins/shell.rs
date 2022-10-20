@@ -2,9 +2,16 @@ use crate::{MainConf, RMessage, bash_masq, rev_send, sudocheck, Auth};
 use std::process::Command;
 pub async fn shell_main(details: MainConf, message: RMessage) {
 
+    let content = match message.content {
+        None => return,
+        Some(ref m) => m,
+    };
+
+
+
     // initalize variables
     let (auth, shell, soc) = (details.auth.clone(), details.shell.clone(), details.shell.shell_channel.clone());
-    let content_vec =  message.content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
+    let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
 
     let sudoer = sudocheck(message.author.clone(), auth.clone()).await;
@@ -26,6 +33,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
         return
     };
 
+// thread 'main' panicked at 'failed to split vec', src/plugins/shell.rs:7:49
 
 
     let mut content_min1 = String::new();
@@ -63,7 +71,7 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     let out = String::from_utf8_lossy(&stdout);
 
-    if out.chars().count() <= 2000 {        
+    if out.chars().count() <= 1900 {        
 
         rev_send(details.auth, message, bash_masq(format!("```text\n{out}")).await).await
 
@@ -101,7 +109,6 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
         let payload = bash_masq(current).await;
 
         rev_send(auth.clone(), message.clone(), payload).await;
-
 
         current = String::new();
 
