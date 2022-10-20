@@ -16,13 +16,13 @@
 		"channel_2": ""
 	},
 	"shell":{
-		"shell_enabled": false,
-		"whitelist_sudoers": false,
+		"enabled": false,
+		"whitelist_sudoers": true,
 		"enable_sudo":false,
-		"shell_only_channel":{
+		"shell_channel":{
 			
-			"soc_enabled": false,
-			"soc_channel": ""
+			"enabled": false,
+			"channel": ""
 		}
 	}
 }
