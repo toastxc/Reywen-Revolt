@@ -46,10 +46,11 @@ Using `match` instead of `else if` is more compact, and allows for more complex 
 # Getting started
 ```bash
 git clone https://github.com/toastxc/Reywen-Revolt.git
-cd Reywen
-vim auth.json 
-vim bridge.json 
+cd Reywen-Revolt
+nohup cargo build &
+vim reywen.json
 cargo run
+
 ```
 
 
