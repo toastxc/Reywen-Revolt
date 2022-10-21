@@ -133,8 +133,9 @@ pub async fn new_main(out: String, details: MainConf) {
 
 
     tokio::join!(
-        br_main(details.clone(), message),
+       br_main(details.clone(), message),
         message_process(details.clone(), message2),
         shell_main(details.clone(), message3)
         );
 }
+

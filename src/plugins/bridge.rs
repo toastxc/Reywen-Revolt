@@ -44,10 +44,19 @@ pub async fn br_main(details: MainConf, input_message: RMessage) {
 
         let user = match user1 {
             Ok(_) => user1.expect("failed to GET user details"),
-            Err(_)  => return
+            Err(e)  => {println!("{e}"); return},
         };
 
-        let pfplink = user.avatar.unwrap().id;
+        //let pfplink = user.avatar.unwrap().id;
+        
+        let pfplink = match user.avatar {
+            None => {println!("pfp error..."); return},
+            Some(r) => r.id,
+        };
+
+//        thread 'main' panicked at 'called `Option::unwrap()` on a `None` value', src/plugins/bridge.rs:50:35
+
+        
 
         let pfp = format!("https://autumn.revolt.chat/avatars/{pfplink}");
 
