@@ -81,7 +81,13 @@ async fn main()  {
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
 
-    websocket(url, details).await;
+    loop {
+        
+        websocket(url.clone(), details.clone()).await;
+
+    };
+
+    
 
 }
 
@@ -101,10 +107,15 @@ pub async fn websocket(url: String, details: MainConf) {
      let (mut _write, read) = ws_stream.split();
 
      let read_future = read.for_each(|message| async {
+       
+         let data = match message {
+             Ok(_) =>  message.unwrap().into_data(),
+             Err(e) => {println!("ERR: {e}"); return},
+         };
         
-        
-        let data = message.unwrap().into_data();
-        let out = from_utf8(&data).unwrap().to_string();
+        //let data = message.unwrap().into_data();
+
+         let out = from_utf8(&data).unwrap().to_string();
 
        // moved websocket main to self contained function for ease of use 
 
