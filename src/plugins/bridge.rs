@@ -2,19 +2,19 @@ use crate::{Auth, RMessage, rev_user, rev_convert_reply, rev_send, lib::message:
 use crate::fs_str;
 use serde::{Serialize, Deserialize};
 
+    
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BrConf {
+    pub enabled: bool,
+    pub channel_1: String,
+    pub channel_2: String,
+}
+
+
 
 //pub fn conf_error(details_in: 
 pub async fn br_main(auth: Auth, input_message: RMessage) {
 
-    #[derive(Serialize, Deserialize, Debug, Clone)]
-    pub struct BrConf {
-        pub enabled: bool,
-        pub channel_1: String,
-        pub channel_2: String,
-    }
-
-
-     
     let conf = fs_str("config/bridge.json");
 
     match conf {

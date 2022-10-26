@@ -16,14 +16,9 @@ pub struct MessageConf {
 // main message engine 
 pub async fn message_process(details: Auth, message_in: RMessage) {
 
-    let conf = fs_str("config/message.json");
+    let conf = fs_str("config/message.json").expect("failed to read config/message.json\n{e}");
 
-    match conf {
-        Ok(_) => {},
-        Err(e) => panic!("failed to read config/message.json\n{e}"),
-    };
-
-    let message: MessageConf = serde_json::from_str(&conf.unwrap())
+    let message: MessageConf = serde_json::from_str(&conf)
             .expect("Failed to deser message.json");
 
 

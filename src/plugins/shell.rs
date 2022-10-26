@@ -22,14 +22,10 @@ pub async fn shell_main(details: Auth, message: RMessage) {
 
     
 
-    let conf = fs_str("config/shell.json");
+    let conf = fs_str("config/shell.json")
+        .expect("failed to read config/shell.json\n{e}");
 
-    match conf {
-        Ok(_) => {},
-        Err(e) => panic!("failed to read config/shell.json\n{e}"),
-    };
-
-    let shell: ShellConf = serde_json::from_str(&conf.unwrap())
+    let shell: ShellConf = serde_json::from_str(&conf)
             .expect("Failed to deser shell.json");
 
 
@@ -37,8 +33,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
         None => return,
         Some(ref m) => m,
     };
-
-    
+ 
     // initalize variables
     let (auth, soc) = (details.clone(),  shell.channel.clone());
     let content_vec =  content.split(' ').collect::<Vec<&str>>();
