@@ -6,7 +6,7 @@ mod lib {
 }
 use crate::lib::{
     message::RMessage,
-    conf::{MainConf, Auth}
+    conf::{Auth}
 };
 
 
@@ -27,7 +27,7 @@ use crate::plugins::{
 
 // reywen fs
 mod fs;
-use fs::{conf_init};
+use fs::{conf_init, fs_str};
 
 // RevX2
 pub mod rev_x;
@@ -62,22 +62,8 @@ async fn main()  {
         Ok(main_conf) => main_conf,
     };
 
-    if details.message.message_enabled == false
-        && details.bridge.bridge_enabled == false 
-            &&details.shell.enabled == false {
-        panic!("No services enabled, reywen shutting down")
-    }else {
-        if details.message.message_enabled == true {
-            println!("init: message")
-        }if details.bridge.bridge_enabled == true {
-            println!("init: bridge")
-        }if details.shell.enabled == true {
-            println!("init: shell")
-        };
-    };
 
-
-    let token = details.auth.token.clone();
+    let token = details.token.clone();
 
     let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
 
@@ -86,7 +72,7 @@ async fn main()  {
 }
 
 // establishes websocket connection
-pub async fn websocket(url: String, details: MainConf) {
+pub async fn websocket(url: String, details: Auth) {
 
 
      let (ws_stream, _response) = connect_async(url).await.expect("Failed to connect");
@@ -118,7 +104,7 @@ pub async fn websocket(url: String, details: MainConf) {
 // websocket main
 // imports messages, cleans them and sends to 
 // bridge and message processing
-pub async fn new_main(out: String, details: MainConf) {
+pub async fn new_main(out: String, details: Auth) {
 
     let raw_message = rev_message_in(out);
 
@@ -133,7 +119,8 @@ pub async fn new_main(out: String, details: MainConf) {
 
 
     tokio::join!(
-        br_main(details.clone(), message),
+
+       br_main(details.clone(), message),
         message_process(details.clone(), message2),
         shell_main(details.clone(), message3)
         );

@@ -1,10 +1,33 @@
 use crate::{
-    MainConf, RMessage, rev_message_clean, send, sendas};
+    Auth, RMessage, rev_message_clean, send, sendas};
+
+use serde::{Serialize, Deserialize};
+
+use crate::fs_str;
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MessageConf {
+
+    pub enabled: bool
+}
+
 
 // main message engine 
-pub async fn message_process(details: MainConf, message_in: RMessage) {
+pub async fn message_process(details: Auth, message_in: RMessage) {
 
-    if details.message.message_enabled == false {
+    let conf = fs_str("config/message.json");
+
+    match conf {
+        Ok(_) => {},
+        Err(e) => panic!("failed to read config/message.json\n{e}"),
+    };
+
+    let message: MessageConf = serde_json::from_str(&conf.unwrap())
+            .expect("Failed to deser message.json");
+
+
+    if message.enabled == false {
         return
     };
 
@@ -12,7 +35,7 @@ pub async fn message_process(details: MainConf, message_in: RMessage) {
     // validity test
     if content == None {
         return
-    }else if message_in.author == details.auth.bot_id {
+    }else if message_in.author == details.bot_id {
         return
     };
     let message = rev_message_clean(message_in).await;
@@ -28,13 +51,14 @@ pub async fn message_process(details: MainConf, message_in: RMessage) {
 
     match &content_vec[0] as &str {
 
-        "?Mog" | "?mog"  => send(details.auth, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
-        "?ver" | "?version" => send(details.auth, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
-        "?echo" => send(details.auth, message, content_min1).await,
-        "?sendas" => sendas(details.auth, message, content_vec).await,
-        "?whydoyounothaveanyfeatures:trol:" => send(details.auth, message, "Reywen1 was an experiment to see if <@01FSRTTGJC1XJ6ZEQJMSX8Q96C> could make a bot for revolt with no libraries in rust\n Reywen2 was a test to see how much better they could make it with more experience in rust... if you want to make add features Reywen is not difficult to develop for \n".to_string()).await,
+        "?Mog" | "?mog"  => send(details, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
+        "?ver" | "?version" => send(details, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
+        "?echo" => send(details, message, content_min1).await,
+        "?sendas" => sendas(details, message, content_vec).await,
+        "?whydoyounothaveanyfeatures:trol:" => send(details, message, "Reywen1 was an experiment to see if <@01FSRTTGJC1XJ6ZEQJMSX8Q96C> could make a bot for revolt with no libraries in rust\n Reywen2 was a test to see how much better they could make it with more experience in rust... if you want to make add features Reywen is not difficult to develop for \n".to_string()).await,
         _ => return
     };
 
 }
+
 

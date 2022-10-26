@@ -1,17 +1,53 @@
-use crate::{MainConf, RMessage, bash_masq, rev_send, sudocheck, Auth};
+use crate::{Auth, RMessage, bash_masq, rev_send, sudocheck};
 use std::process::Command;
-pub async fn shell_main(details: MainConf, message: RMessage) {
+use crate::fs_str;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ShellConf {
+    pub enabled: bool,
+    pub whitelist_sudoers: bool,
+    pub bash_sudo: bool,
+    pub channel: SocConf,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SocConf {
+    pub enabled: bool,
+    pub channel: String,
+}
+
+
+pub async fn shell_main(details: Auth, message: RMessage) {
+
+    
+
+    let conf = fs_str("config/shell.json");
+
+    match conf {
+        Ok(_) => {},
+        Err(e) => panic!("failed to read config/shell.json\n{e}"),
+    };
+
+    let shell: ShellConf = serde_json::from_str(&conf.unwrap())
+            .expect("Failed to deser shell.json");
+
+
+    let content = match message.content {
+        None => return,
+        Some(ref m) => m,
+    };
+
+    
     // initalize variables
-    let (auth, shell, soc) = (details.auth.clone(), details.shell.clone(), details.shell.shell_channel.clone());
-    let content_vec =  message.content.as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
-
+    let (auth, soc) = (details.clone(),  shell.channel.clone());
+    let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
     let sudoer = sudocheck(message.author.clone(), auth.clone()).await;
     
 
     // perm check 
-    if details.shell.enabled == false {
+    if shell.enabled == false {
         return
     }else if message.content == None {
         return
@@ -39,7 +75,7 @@ pub async fn shell_main(details: MainConf, message: RMessage) {
 
 }
 
-pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
+pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
 
     // shell
 
@@ -52,7 +88,7 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     match com.output() {
         Err(e) => {
-            rev_send(details.auth, message, bash_masq(e.to_string()).await).await;
+            rev_send(details, message, bash_masq(e.to_string()).await).await;
             return},
         Ok(_) => {},
     };
@@ -65,11 +101,11 @@ pub async fn bash_exec(input: Vec<&str>, details: MainConf, message: RMessage) {
 
     if out.chars().count() <= 2000 {        
 
-        rev_send(details.auth, message, bash_masq(format!("```text\n{out}")).await).await
+        rev_send(details, message, bash_masq(format!("```text\n{out}")).await).await
 
     }else {
 
-        bash_big_msg(out.to_string(), details.auth.clone(), message.clone()).await;
+        bash_big_msg(out.to_string(), details.clone(), message.clone()).await;
 
         };
 
