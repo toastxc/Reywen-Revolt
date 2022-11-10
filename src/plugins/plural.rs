@@ -72,6 +72,7 @@ pub async fn plural_main(a: Auth, m: RMessage) {
 
  
 
+    
 
     match &content[1] as &str {
 
@@ -79,37 +80,13 @@ pub async fn plural_main(a: Auth, m: RMessage) {
         "send" => pl_send(a, m.clone(), content, c).await,
         "search" => cli_search(a, m.clone(), content[2], c).await,
         "rm" => pl_remove(a, m.clone(), content[2], c).await,
-        "generic" => pl_generic(a, m.clone(), content, c).await,
+        //"generic" => pl_generic(a, m.clone(), content, c).await,
         _ => {},
 
-
     };
-
 
 }
 
-async fn pl_generic(a: Auth, m: RMessage, content: Vec<&str>, c: Plural) {
-
-    
-    let param = format!("mongodb://{}:{}@{}:{}",
-                        c.db_usrname, c.db_pswd, c.db_ip, c.db_port);
-
-    let mut client_options = ClientOptions::parse(param).await.unwrap();
-
-    let client = mongodb::Client::with_options(client_options);
-
-    let client = match client {
-        Ok(_) => client.unwrap(),
-        Err(e) => {println!("failed:\n{e}"); return},
-    };
-
-    let db = client.database("test").collection::<Masquerade>("profiles");
-
-
-
-    ;
-
-}
 
 async fn cli_search(a: Auth, m: RMessage, i: &str, c: Plural)  {
 
@@ -129,6 +106,7 @@ async fn cli_search(a: Auth, m: RMessage, i: &str, c: Plural)  {
 async fn pl_remove(a: Auth, m: RMessage, i: &str, c: Plural)  {
 
 
+    
     let name = i;
     println!("{name}");
     let param = format!("mongodb://{}:{}@{}:{}",
@@ -270,8 +248,5 @@ async fn pl_insert(a: Auth, m: RMessage, c: Plural, i: Vec<&str>){
       }else {
           send(a, m, "**Object valid, inserting...****".to_string()).await;
       };
-
-     
-
 
 }
