@@ -16,12 +16,14 @@ mod plugins {
     pub mod message;
     pub mod shell;
     pub mod bridge;
+    pub mod plural;
 }
 use crate::plugins::{
     lreywen::*,
     message::*,
     shell::*,
     bridge::*,
+    plural::*,
 };
 
 
@@ -108,20 +110,25 @@ pub async fn new_main(out: String, details: Auth) {
 
     let raw_message = rev_message_in(out);
 
-    let (message, message2, message3) = match raw_message {
+    let (message, message2, message3, message4) = match raw_message {
         Err(_) => return,
         Ok(_) => (
             raw_message.as_ref().expect("failed converting message").clone(), 
             raw_message.as_ref().expect("failed converting message").clone(), 
+            raw_message.as_ref().expect("failed converting message").clone(),
             raw_message.as_ref().expect("failed converting message").clone()
+
             )
     };
 
 
     tokio::join!(
 
-       br_main(details.clone(), message),
+        br_main(details.clone(), message),
         message_process(details.clone(), message2),
-        shell_main(details.clone(), message3)
+        shell_main(details.clone(), message3),
+        plural_main(details.clone(), message4)
+        
         );
 }
+

@@ -7,10 +7,9 @@ use crate::lib::{
 
 
 use std::{
-    io::Read,
+    io::{Read, Write},
     fs::File,
 };
-
 
 // import and deserialize message.conf
 
@@ -25,6 +24,17 @@ pub fn fs_str(target: &str) -> Result<String> {
     file.read_to_string(&mut out);
 
     Ok(out)
+
+
+}
+
+pub fn str_fs(target: &str, payload: &str) {
+
+   let mut file = File::create(target)
+        .expect("could not open {target}");
+
+
+   file.write_all(payload.as_bytes()).unwrap();
 
 
 }
