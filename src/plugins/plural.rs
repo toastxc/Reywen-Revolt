@@ -18,6 +18,7 @@ use crate::rev_del;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Plural {
     pub enable: bool,
+    pub channel_only: bool,
     pub channel: String,
     pub db_usrname: String,
     pub db_pswd: String,
@@ -45,13 +46,11 @@ pub async fn plural_main(a: Auth, m: RMessage) {
     // if the config channel matches the channel of the message received AND 
     // if the plugin is enabled, send ID
     if c.enable == false {
-
         return
     
-    }else if m.channel != c.channel {
+    }else if c.channel_only == true && c.channel != m.channel {
         return
-    
-    };
+    }; 
 
     let content_raw = match m.content {
         Some(_) => m.content.as_ref().unwrap(),
@@ -246,7 +245,7 @@ async fn pl_insert(a: Auth, m: RMessage, c: Plural, i: Vec<&str>){
           println!("WARN: pl_insert failed to insert");
 
       }else {
-          send(a, m, "**Object valid, inserting...****".to_string()).await;
+          send(a, m, "**Object valid, inserting...**".to_string()).await;
       };
 
 }
