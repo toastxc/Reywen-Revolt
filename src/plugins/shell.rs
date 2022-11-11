@@ -29,6 +29,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
             .expect("Failed to deser shell.json");
 
 
+
     let content = match message.content {
         None => return,
         Some(ref m) => m,
@@ -57,6 +58,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
         return
     };
 
+// thread 'main' panicked at 'failed to split vec', src/plugins/shell.rs:7:49
 
 
     let mut content_min1 = String::new();
@@ -94,7 +96,7 @@ pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
 
     let out = String::from_utf8_lossy(&stdout);
 
-    if out.chars().count() <= 2000 {        
+    if out.chars().count() <= 1900 {        
 
         rev_send(details, message, bash_masq(format!("```text\n{out}")).await).await
 
@@ -132,7 +134,6 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
         let payload = bash_masq(current).await;
 
         rev_send(auth.clone(), message.clone(), payload).await;
-
 
         current = String::new();
 
