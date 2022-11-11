@@ -1,14 +1,34 @@
-use crate::{MainConf, RMessage, rev_user, rev_convert_reply, rev_send, lib::message::*};
+use crate::{Auth, RMessage, rev_user, rev_convert_reply, rev_send, lib::message::*};
+use crate::fs_str;
+use serde::{Serialize, Deserialize};
+
+    
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct BrConf {
+    pub enabled: bool,
+    pub channel_1: String,
+    pub channel_2: String,
+}
+
+
 
 //pub fn conf_error(details_in: 
-pub async fn br_main(details: MainConf, input_message: RMessage) {
+pub async fn br_main(auth: Auth, input_message: RMessage) {
 
-    if details.bridge.bridge_enabled == false {
-        return
+    let conf = fs_str("config/bridge.json");
+
+    match conf {
+        Ok(_) => {},
+        Err(e) => panic!("failed to read config/message.json\n{e}"),
     };
 
-    let auth = details.auth.clone();
-    let br = details.bridge.clone();
+    let bridge: BrConf = serde_json::from_str(&conf.unwrap())
+        .expect("Failed to deser message.json");
+
+
+    if bridge.enabled == false {
+        return
+    };
 
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade != None {
@@ -16,7 +36,7 @@ pub async fn br_main(details: MainConf, input_message: RMessage) {
     };
 
 
-    let (chan1, chan2) = (br.channel_1, br.channel_2);
+    let (chan1, chan2) = (bridge.channel_1, bridge.channel_2);
 
 
     // channel switch

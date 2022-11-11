@@ -1,28 +1,8 @@
 {
-	"message":{
-		"message_enabled": true
-	},
 
-	"auth":{
-		"token": "",
-		"bot_id": "",
-		"sudoers": [""]
-	
-	},
-	
-	"bridge":{
-		"bridge_enabled": false,
-		"channel_1": "",
-		"channel_2": ""
-	},
-	"shell":{
-		"enabled": false,
-		"whitelist_sudoers": true,
-		"enable_sudo":false,
-		"shell_channel":{
-			
-			"enabled": false,
-			"channel": ""
-		}
-	}
+	"token": "",
+	"bot_id": "",
+	"sudoers": []
+
 }
+	

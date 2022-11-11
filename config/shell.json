@@ -1,0 +1,10 @@
+{
+	"enabled": false,
+	"whitelist_sudoers": true,
+	"bash_sudo":false,
+	"channel":
+	{
+		"enabled": false,
+		"channel": ""
+	}
+}

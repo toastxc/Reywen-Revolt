@@ -25,3 +25,5 @@ futures-channel = "0.3"
 
 tokio-net = "*"
 rand = "0.8.5"
+bson = "*"
+mongodb = "*"
