@@ -37,7 +37,7 @@ Features specific to Messages
 - masqurade (properly implemented)
 - replies with mentioning
 And new features comming soon!
-- Mongodb support (nearly complete)
+- Mongodb support 
 - Discord integration (help wanted)
 
 
