@@ -7,7 +7,7 @@ use crate::lib::{
 
 
 use std::{
-    io::{Read, Write},
+    io::Read,
     fs::File,
 };
 
@@ -21,13 +21,17 @@ pub fn fs_str(target: &str) -> Result<String> {
         .expect("could not open {target}");
 
     let mut out = String::new();
-    file.read_to_string(&mut out);
+    file.read_to_string(&mut out)
+        .expect("could not read {target}");
+
+
+
 
     Ok(out)
 
 
 }
-
+/*
 pub fn str_fs(target: &str, payload: &str) {
 
    let mut file = File::create(target)
@@ -38,7 +42,7 @@ pub fn str_fs(target: &str, payload: &str) {
 
 
 }
-
+*/
 pub fn conf_init() -> Result<Auth> {
 
   

@@ -4,12 +4,11 @@ use crate::{Auth, RMessage, lib::message::*};
 use crate::fs_str;
 use serde::{Serialize, Deserialize};
 use crate::send;
-use mongodb::{Client, options::ClientOptions, bson::doc};
-use crate::fs::str_fs;
-use crate::rev_convert_reply;
+use mongodb::{options::ClientOptions, bson::doc};
+//use crate::rev_convert_reply;
 use crate::rev_send;
 use bson::Document;
-use mongodb::results::CollectionType::Collection;
+//use mongodb::results::CollectionType::Collection;
 use crate::rev_del;
 
 // config struct
@@ -58,7 +57,7 @@ pub async fn plural_main(a: Auth, m: RMessage) {
     };
 
     
-    let mut content: Vec<&str> =  content_raw.split(' ').collect::<Vec<&str>>();
+    let content: Vec<&str> =  content_raw.split(' ').collect::<Vec<&str>>();
 
     if content[0] != "?p" {
            return
@@ -89,7 +88,7 @@ pub async fn plural_main(a: Auth, m: RMessage) {
 
 async fn cli_search(a: Auth, m: RMessage, i: &str, c: Plural)  {
 
-    let res = pl_search(a.clone(), m.clone(), i, c).await;
+    let res = pl_search(i, c).await;
     
     let strr = match res {
         Some(_) => "**Object found**",
@@ -111,7 +110,7 @@ async fn pl_remove(a: Auth, m: RMessage, i: &str, c: Plural)  {
     let param = format!("mongodb://{}:{}@{}:{}",
                         c.db_usrname, c.db_pswd, c.db_ip, c.db_port);
 
-    let mut client_options = ClientOptions::parse(param).await.unwrap();
+    let client_options = ClientOptions::parse(param).await.unwrap();
 
     let client = mongodb::Client::with_options(client_options);
 
@@ -134,17 +133,21 @@ async fn pl_remove(a: Auth, m: RMessage, i: &str, c: Plural)  {
     }else if userquery.unwrap().is_some() != true {
         send(a, m, "**No object found**".to_string()).await
     }else {
-        masks.delete_one(doc!{"name": name}, None ).await;
-        send(a, m, "*Object found, deleting...*".to_string()).await;
-    };
+        let del_res = masks.delete_one(doc!{"name": name}, None ).await;
+        send(a.clone(), m.clone(), "**Object found, deleting...**".to_string()).await;
 
+        match del_res {
+            Ok(_) => send(a, m, "**Successfully deleted**".to_string()).await,
+            Err(e) => send(a, m, format!("**Error**\n```text\n{e}")).await,
+        };
+    };
 
 }
 
 
 
 
-async fn pl_search(a: Auth, m: RMessage, i: &str, c: Plural) -> Option<Masquerade> {
+async fn pl_search(i: &str, c: Plural) -> Option<Masquerade> {
 
 
     let name = i;
@@ -152,7 +155,7 @@ async fn pl_search(a: Auth, m: RMessage, i: &str, c: Plural) -> Option<Masquerad
     let param = format!("mongodb://{}:{}@{}:{}",
                         c.db_usrname, c.db_pswd, c.db_ip, c.db_port);
 
-    let mut client_options = ClientOptions::parse(param).await.unwrap();
+    let client_options = ClientOptions::parse(param).await.unwrap();
 
     let client = mongodb::Client::with_options(client_options);
 
@@ -175,7 +178,7 @@ async fn pl_search(a: Auth, m: RMessage, i: &str, c: Plural) -> Option<Masquerad
 
 async fn pl_send(a: Auth, m: RMessage, i: Vec<&str>, c: Plural) {
 
-    let profile = pl_search(a.clone(), m.clone(), i[2], c).await;
+    let profile = pl_search(i[2], c).await;
 
     if profile != None {
 
@@ -213,7 +216,7 @@ async fn pl_insert(a: Auth, m: RMessage, c: Plural, i: Vec<&str>){
                         c.db_usrname, c.db_pswd, c.db_ip, c.db_port);
 
 
-      let mut client_options = ClientOptions::parse(param).await.unwrap();
+      let client_options = ClientOptions::parse(param).await.unwrap();
 
       let client = mongodb::Client::with_options(client_options);
 
