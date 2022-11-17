@@ -1,5 +1,4 @@
 git clone https://github.com/toastxc/Reywen-Revolt.git
 cd Reywen-Revolt
-nohup cargo build -- release &
-vim reywen.json
-echo "done"
+cargo build --release
+echo "edit reywen.json to get started, all other configs are stored in config/"
