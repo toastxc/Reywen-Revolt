@@ -56,6 +56,8 @@ Sudoers is an optional vector of user IDs, users that are sudoers have access to
 
 }
 ```
+Additionally, each plugin has its own config under `config/*.json`.
+By default every plugin besides Message is disabled.
 
 ```bash
 git clone https://github.com/toastxc/Reywen-Revolt.git
