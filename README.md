@@ -42,6 +42,21 @@ And new features comming soon!
 
 
 # Getting started
+
+The main config file needs to be linked to a bot.
+Both the bot token and ID can be found [here](https://app.revolt.chat/settings/bots)
+
+Sudoers is an optional vector of user IDs, users that are sudoers have access to more commands than regular users
+```json
+{
+
+	"token": "",
+	"bot_id": "",
+	"sudoers": []
+
+}
+```
+
 ```bash
 git clone https://github.com/toastxc/Reywen-Revolt.git
 cd Reywen-Revolt
