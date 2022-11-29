@@ -68,10 +68,6 @@ pub async fn plural_main(a: Auth, m: RMessage) {
         return
     };
 
- 
-
-    
-
     match &content[1] as &str {
 
         "insert" => pl_insert(a, m.clone(), c, content).await,
@@ -183,7 +179,6 @@ async fn pl_send(a: Auth, m: RMessage, i: Vec<&str>, c: Plural) {
     if profile != None {
 
     let mut content = String::new();
-
         
     for x in 0..i.len() -3 {
         content = format!("{content} {}", i[x + 3]);
@@ -208,7 +203,12 @@ async fn pl_send(a: Auth, m: RMessage, i: Vec<&str>, c: Plural) {
 
     };
 
+
+
+
+
 }
+
 
 async fn pl_insert(a: Auth, m: RMessage, c: Plural, i: Vec<&str>){
 

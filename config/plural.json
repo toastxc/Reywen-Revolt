@@ -1,9 +1,9 @@
 {
 	"enable": false,
-	"channel": "",
-	"db_usrname": "",
+    	"channel_only": false,
+    	"channel": "",
+    	"db_usrname": "",
 	"db_pswd": "",
-	"db_ip": "",
-	"db_port": ""
+    	"db_ip": "",
+    	"db_port": ""
 }
-

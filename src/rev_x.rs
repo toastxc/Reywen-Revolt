@@ -4,10 +4,8 @@ use crate::{
     lib::{
         message::{
             RMessage, RMessagePayload, RReplies, 
-           // Masquerade
         },
-            user::RUserFetch},
-//        MainConf,
+        user::RUserFetch},
         Auth};
 
 
@@ -16,6 +14,7 @@ use rand::Rng;
 use serde_json::{Result};
 
 
+// given a user ID, checks if the user is a 'sudoer' or not 
 pub async fn sudocheck(user: String, auth: Auth) -> bool {
 
   
@@ -43,6 +42,8 @@ pub fn rev_message_in(raw: String) -> Result<RMessage> {
 
 
 // cleans invalid characters such as \n and \
+// 
+// This function was vital for RevX1 but is not needed for reqwest
 pub async fn rev_message_clean(mut message: RMessage) -> RMessage {
 
     if message.content == None {
@@ -70,9 +71,10 @@ pub async fn rev_message_clean(mut message: RMessage) -> RMessage {
     return message    
 }
 
-pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
 
-  //  println!("rev: user");
+
+pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch> {
+
    
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new() 
@@ -85,8 +87,6 @@ pub async fn rev_user(auth: Auth, target: String)   -> Result<RUserFetch> {
         Err(_) => "Err:\n{error}".to_string() 
     };   
         
-  
-  //  println!("{:?}", client_res);
 
     let message: Result<RUserFetch> = serde_json::from_str(&client_res);
     match message {
@@ -114,9 +114,11 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
         .body(payload2)
         .send().await;
 
+    
+
     match client {
-        Ok(_) => return,
-        Err(_) => println!("Err:\n{:?}", client)
+        Ok(c) => println!("SEND: {:?}", c),
+        Err(e) => println!("Err:\n{e}")
     };
 }
 
