@@ -60,10 +60,17 @@ pub async fn plural_main(a: Auth, m: RMessage) {
     let content: Vec<&str> =  content_raw.split(' ').collect::<Vec<&str>>();
 
     if content[0] != "?p" {
-           return
-       }else if content.len() < 2 {
+        return
     
-        return 
+    }else if content.len() < 3 {
+        send(a, m, "**Reywen Masq**
+             `search <name>`: Search for an entry in ReywenDB
+             `insert <name> <avatar-url> <color>`: create a new entry
+             `query <name>`: searches for entry and provides details
+             `send <name> <content>`: sends message as a given entry
+             `rm <name>`: removes entry".to_string()).await;
+        return
+    
     }else if m.author == a.bot_id {
         return
     };
@@ -74,13 +81,31 @@ pub async fn plural_main(a: Auth, m: RMessage) {
         "send" => pl_send(a, m.clone(), content, c).await,
         "search" => cli_search(a, m.clone(), content[2], c).await,
         "rm" => pl_remove(a, m.clone(), content[2], c).await,
+        "query" => cli_query(a, m.clone(), content[2], c).await,
         //"generic" => pl_generic(a, m.clone(), content, c).await,
         _ => {},
 
     };
 
 }
+async fn cli_query(auth: Auth, message: RMessage, content: &str, plural: Plural) {
 
+    let search = pl_search(content, plural).await;
+
+    match search {
+        Some(a) => {
+
+            let masq_data = format!("```json\n\"name:\" \"{}\"\n \"avatar\" \"{}\"\n\"colour:\" \"{}\"", 
+                                    a.name.unwrap(), a.avatar.unwrap(), a.colour.unwrap());
+            send(auth, message, masq_data).await;
+        },
+
+        None  => send(auth, message, "**Object not found**".to_string()).await,
+    };
+
+
+
+}
 
 async fn cli_search(a: Auth, m: RMessage, i: &str, c: Plural)  {
 
