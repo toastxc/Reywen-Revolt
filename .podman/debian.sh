@@ -1,7 +1,7 @@
 #!/bin/bash
 reywen=$( echo ls | grep Reywen-Revolt )
 
-if [[ $reywen = "" ]]; then
+if  [ "$reywen" = "" ]; then
 
         apt update -y
         apt upgrade -y
