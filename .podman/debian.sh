@@ -7,6 +7,7 @@ if  [ "$reywen" = "" ]; then
         apt upgrade -y
         apt install git openssl
         git clone https://github.com/toastxc/Reywen-Revolt.git
+        chmod 777 -R /Reywen-Revolt
         cd Reywen-Revolt
         cargo build --release
         cd /
