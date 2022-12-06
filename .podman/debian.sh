@@ -12,6 +12,8 @@ if  [ "$reywen" = "" ]; then
         cd /
         cp Reywen-Revolt/config . -r
 else
+        echo "Starting reywen..."
+        echo "Directory: $PWD"
         ./Reywen-Revolt/target/release/reywen2
 
 
