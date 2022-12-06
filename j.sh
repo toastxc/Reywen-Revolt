@@ -1,2 +1,0 @@
-clear
-cargo build
