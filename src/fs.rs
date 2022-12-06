@@ -24,29 +24,14 @@ pub fn fs_str(target: &str) -> Result<String> {
     file.read_to_string(&mut out)
         .expect("could not read {target}");
 
-
-
-
     Ok(out)
 
 
 }
-/*
-pub fn str_fs(target: &str, payload: &str) {
-
-   let mut file = File::create(target)
-        .expect("could not open {target}");
-
-
-   file.write_all(payload.as_bytes()).unwrap();
-
-
-}
-*/
 pub fn conf_init() -> Result<Auth> {
 
   
-    let mut config_json = File::open("reywen.json")
+    let mut config_json = File::open("config/reywen.json")
         .expect("File not found: reywen.json");
 
     let mut data_str = String::new();
