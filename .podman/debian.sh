@@ -1,3 +1,4 @@
+#!/bin/bash
 reywen=$( echo ls | grep Reywen-Revolt )
 
 if [[ $reywen = "" ]]; then
