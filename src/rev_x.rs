@@ -68,21 +68,26 @@ pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch,  serde_j
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new() 
-    .get(format!("https://api.revolt.chat/users/{target}"))
-    .header("x-bot-token", auth.token)
-    .send().await;
+        .get(format!("https://api.revolt.chat/users/{target}"))
+        .header("x-bot-token", auth.token)
+        .send().await;
+
+    
 
     let client_res = match client {
-        Ok(_) => client.unwrap().text().await.unwrap(),
-        Err(e) => {println!("REV_USER_ERROR:\n{e}"); e.to_string()},
+        Ok(a) => a.text().await.unwrap(),
+        Err(e) => e.to_string(),
     };   
-       
+     
 
     let message: Result<RUserFetch, serde_json::Error> = serde_json::from_str(&client_res);
     return match message {
         Ok(a) => Ok(a),
         Err(e) => Err(e),
     };
+
+
+    // issue  27 
 
 }       
 
@@ -110,6 +115,7 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
 // prints http based error codes to stdout with an optional message
 pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) {
 
+
     // reqwest
     match http {
         Ok(_) => {},
@@ -117,7 +123,6 @@ pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) 
     };
     
     // http
-
     if http.as_ref().unwrap().status().is_success() == false {
     println!("{message}_HTTP_ERROR: {}", http.unwrap().status());
     };
@@ -134,12 +139,9 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
     .delete(format!("https://api.revolt.chat/channels/{channel}/messages/{target}"))
     .header("x-bot-token", auth.token)
     .send().await;
-    
-     match client {
-        Ok(_) => return,
-        Err(e) => println!("REV_DEL_ERROR:\n{e}"),
-    };    
-            
+     
+    http_err(client, "REV_DEL");
+
 }
 
 
