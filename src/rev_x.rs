@@ -1,42 +1,33 @@
-// structs
-
 use crate::{
-    lib::{
+        lib::{
         message::{
-            RMessage, RMessagePayload, RReplies, 
-        },
-        user::RUserFetch},
+            RMessage, RMessagePayload, RReplies, },
+            user::RUserFetch},
         Auth};
 
-
-// dep
 use rand::Rng;
-use serde_json::{Result};
-
 
 // given a user ID, checks if the user is a 'sudoer' or not 
 pub async fn sudocheck(user: String, auth: Auth) -> bool {
 
-  
     for x in 0..auth.sudoers.len() {
         if user == auth.sudoers[x] {
-            return true
+
+            println!("WARN: SUDOER ACTION");
+            return true;
         };
     };
-
-    return false
-
+    false
 }
 
 // deserializes websocket messages
-pub fn rev_message_in(raw: String) -> Result<RMessage> {
+pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
 
-
-    let message: Result<RMessage> = serde_json::from_str(&raw);
+    let message: Result<RMessage, serde_json::Error> = serde_json::from_str(&raw);
 
     match message {
-        Err(rmessage) => Err(rmessage),
-        Ok(ref _rmessage) =>  Ok(message.unwrap())
+        Err(e) => Err(e),
+        Ok(a) =>  Ok(a)
     }
 }
 
@@ -68,14 +59,13 @@ pub async fn rev_message_clean(mut message: RMessage) -> RMessage {
         };
     };
     message.content = Some(out);
-    return message    
+    message    
 }
 
 
+// https://developers.revolt.chat/api/#tag/User-Information/operation/fetch_user_req
+pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch,  serde_json::Error> {
 
-pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch> {
-
-   
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new() 
     .get(format!("https://api.revolt.chat/users/{target}"))
@@ -84,21 +74,20 @@ pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch> {
 
     let client_res = match client {
         Ok(_) => client.unwrap().text().await.unwrap(),
-        Err(_) => "Err:\n{error}".to_string() 
+        Err(e) => {println!("REV_USER_ERROR:\n{e}"); e.to_string()},
     };   
-        
+       
 
-    let message: Result<RUserFetch> = serde_json::from_str(&client_res);
-    match message {
-        Ok(_) => return Ok(message.unwrap()),
-        Err(_) => return message
+    let message: Result<RUserFetch, serde_json::Error> = serde_json::from_str(&client_res);
+    return match message {
+        Ok(a) => Ok(a),
+        Err(e) => Err(e),
     };
 
 }       
 
+// https://developers.revolt.chat/api/#tag/Messaging/operation/message_send_message_send
 pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
-
-    let channel = message.channel;
 
     let mut random = rand::thread_rng();
     let idem: i64 = random.gen();
@@ -107,22 +96,34 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new()
-        .post(format!("https://api.revolt.chat/channels/{channel}/messages"))
+        .post(format!("https://api.revolt.chat/channels/{}/messages", message.channel))
         .header("x-bot-token", auth.token)
         .header("Idempotency-Key", idem)
         .header("Content-Type", "application/json")
         .body(payload2)
         .send().await;
 
-    
+    http_err(client, "REV_SEND");
+}
 
-    match client {
-        Ok(c) => println!("SEND: {:?}", c),
-        Err(e) => println!("Err:\n{e}")
+// for administrators
+// prints http based error codes to stdout with an optional message
+pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) {
+
+    // reqwest
+    match http {
+        Ok(_) => {},
+        Err(e) => {println!("{message}_REQWEST_ERROR:\n{e}"); return},
+    };
+    
+    // http
+
+    if http.as_ref().unwrap().status().is_success() == false {
+    println!("{message}_HTTP_ERROR: {}", http.unwrap().status());
     };
 }
 
-
+// https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
 pub async fn rev_del(auth: Auth, message: RMessage) {
     
     let channel = message.channel;
@@ -136,12 +137,10 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
     
      match client {
         Ok(_) => return,
-        Err(_) => println!("Err:\n{:?}", client)
+        Err(e) => println!("REV_DEL_ERROR:\n{e}"),
     };    
             
 }
-
-
 
 
 // converts websocket replies to API compatible replies
