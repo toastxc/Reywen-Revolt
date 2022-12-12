@@ -17,18 +17,13 @@ pub struct SocConf {
     pub channel: String,
 }
 
-
 pub async fn shell_main(details: Auth, message: RMessage) {
-
-    
 
     let conf = fs_str("config/shell.json")
         .expect("failed to read config/shell.json\n{e}");
 
     let shell: ShellConf = serde_json::from_str(&conf)
             .expect("Failed to deser shell.json");
-
-
 
     let content = match message.content {
         None => return,
@@ -43,9 +38,9 @@ pub async fn shell_main(details: Auth, message: RMessage) {
     
 
     // perm check 
-    if shell.enabled == false {
+    if !shell.enabled {
         return
-    }else if message.content == None {
+    }else if message.content.is_none() {
         return
    }else if soc.enabled == true && soc.channel != message.channel {
        return
@@ -53,7 +48,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
        return
    }else if content_vec.len() <= 1 {
         return
-    }else if shell.whitelist_sudoers == true && sudoer != true {
+    }else if shell.whitelist_sudoers == true && !sudoer {
         rev_send(auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
         return
     };
@@ -82,17 +77,12 @@ pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
         com.arg(input[x+2]);
     };
 
+    if let Err(e) = com.output() {
+        rev_send(details, message, bash_masq(e.to_string()).await).await;
+        return};
 
-    match com.output() {
-        Err(e) => {
-            rev_send(details, message, bash_masq(e.to_string()).await).await;
-            return},
-        Ok(_) => {},
-    };
 
     let stdout = com.output().expect("error with stdout").stdout;
-
-
 
     let out = String::from_utf8_lossy(&stdout);
 
@@ -126,7 +116,7 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
         for _ in 0..b {
 
             current += &vec[(iter) as usize].to_string();
-            iter = iter + 1;
+            iter += 1;
         };
         print!("{current}");
 
@@ -153,8 +143,7 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
         rev_send(auth.clone(), message.clone(), payload).await;
 
     };
-
-    print!("\n");
+    println!();
 
 }
 
@@ -164,6 +153,6 @@ pub fn convert(a: i32) -> (i32, i32, i32){
         return (1, a, 0)
     };
    
-    return (a / 1900, 1900,  a % 1900);
+    (a / 1900, 1900,  a % 1900)
 }
 

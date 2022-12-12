@@ -23,12 +23,7 @@ pub async fn sudocheck(user: String, auth: Auth) -> bool {
 // deserializes websocket messages
 pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
 
-    let message: Result<RMessage, serde_json::Error> = serde_json::from_str(&raw);
-
-    match message {
-        Err(e) => Err(e),
-        Ok(a) =>  Ok(a)
-    }
+     serde_json::from_str(&raw)
 }
 
 // https://developers.revolt.chat/api/#tag/User-Information/operation/fetch_user_req
@@ -46,13 +41,8 @@ pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch,  serde_j
         Err(e) => e.to_string(),
     };   
      
-
-    let message: Result<RUserFetch, serde_json::Error> = serde_json::from_str(&client_res);
-    return match message {
-        Ok(a) => Ok(a),
-        Err(e) => Err(e),
-    };
-
+        
+    serde_json::from_str(&client_res)
     // issue  27 
 }       
 
@@ -108,10 +98,11 @@ pub async fn rev_del(auth: Auth, message: RMessage) {
 // converts websocket replies to API compatible replies
 pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
 
-    if input != None {
+    if input.is_some() {
 
-        let mut repstruct = Vec::new()
-            ;
+        let mut repstruct = Vec::new();
+
+
         let iter = input.clone()?.len();
 
         for x in 0..iter {

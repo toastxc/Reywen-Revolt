@@ -1,7 +1,6 @@
 use crate::{Auth, RMessage, rev_user, rev_convert_reply, rev_send, lib::message::*};
 use crate::fs_str;
 use serde::{Serialize, Deserialize};
-
     
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BrConf {
@@ -9,8 +8,6 @@ pub struct BrConf {
     pub channel_1: String,
     pub channel_2: String,
 }
-
-
 
 //pub fn conf_error(details_in: 
 pub async fn br_main(auth: Auth, input_message: RMessage) {
@@ -26,7 +23,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
         .expect("Failed to deser message.json");
 
 
-    if bridge.enabled == false {
+    if !bridge.enabled  {
         return
     };
 
@@ -56,7 +53,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
 
     // masq switch - if user has no masquerade: pull from user info API
     // else - port over masquerade details 
-    if input_message.masquerade == None {
+    if input_message.masquerade.is_none()  {
 
         // API get masq
         

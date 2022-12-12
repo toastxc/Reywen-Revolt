@@ -1,10 +1,8 @@
 // a library for high level non essential functions
 
-use crate::{Auth, lib::{
-    message::{RMessage, RReplies, RMessagePayload, Masquerade},
-}};
-
-
+use crate::{
+    Auth, lib::message::{RMessage, RReplies, RMessagePayload, Masquerade},
+};
 use crate::rev_x::*;
 
 
@@ -16,14 +14,12 @@ pub async fn bash_masq(out: String) -> RMessagePayload {
         colour: None,
     };
 
-    let payload = RMessagePayload {
-        content: Some(out.to_string()),
+    RMessagePayload {
+        content: Some(out),
         attachments: None,
         replies: None,
         masquerade:  Some(masq)
-    };
-
-    return payload
+    }
 
 }
 
@@ -59,7 +55,7 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
         "bingus"    | "cheese"  | "dad" |
         "deeznuts"  |  "insert" | "joe_biden" |
         "valence"   | "walter"  | "woof" => format!("https://toastxc.xyz/TXCS/{masq}.jpg"),
-        _ => format!("https://toastxc.xyz/TXCS/default.png")
+        _ => String::from("https://toastxc.xyz/TXCS/default.png")
     };
 
     for x in 0..content_vec.len() -2 {

@@ -19,13 +19,11 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
             .expect("Failed to deser message.json");
 
 
-    if message.enabled == false {
-        return
-    };
+    if !message.enabled  { return };
 
     let content = message_in.content.clone();
-    // validity test
-    if content == None {
+    
+    if content.is_none() {
         return
     }else if message_in.author == details.bot_id {
         return
@@ -40,14 +38,13 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
 
-    match &content_vec[0] as &str {
+    match content_vec[0] as &str {
 
         "?Mog" | "?mog"  => send(details, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
         "?ver" | "?version" => send(details, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
         "?echo" =>  send(details, message, content_min1).await,
         "?sendas" => sendas(details, message, content_vec).await,
-        _ => return
-    };
-
+        _ => ()
+    }
 }
 

@@ -26,7 +26,7 @@ pub struct RMessage {
 
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Masquerade {
 
     #[serde(skip_serializing_if = "Option::is_none")]

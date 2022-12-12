@@ -34,10 +34,10 @@ pub async fn plural_main(auth: Auth, message: RMessage) {
 
     // if the config channel matches the channel of the message received AND 
     // if the plugin is enabled, send ID
-    if plural.enable == false {
+    if !plural.enable {
         return
     
-    }else if plural.channel_only == true && plural.channel != message.channel {
+    }else if plural.channel_only && plural.channel != message.channel {
         return
     }; 
 
@@ -64,7 +64,7 @@ pub async fn plural_main(auth: Auth, message: RMessage) {
         return
     };
 
-    match &content[1] as &str {
+    match content[1] as &str {
 
         "insert" => pl_insert(auth, message.clone(), plural, content).await,
         "send" => pl_send(auth, message.clone(), content, plural).await,
@@ -116,11 +116,11 @@ async fn pl_remove(auth: Auth, message: RMessage, content: &str, plural: Plural)
 
     let userquery = masks.find_one(doc! { "name": content }, None).await;
 
-    if userquery.is_ok() != true {
+    if !userquery.is_ok() {
         send(auth, message, "**Failed to get details**".to_string()).await;
         println!("WARN: pl_remove failed to connect");
     
-    }else if userquery.unwrap().is_some() != true {
+    }else if userquery.unwrap().is_none() {
         send(auth, message, "**No object found**".to_string()).await
     }else {
         let del_res = masks.delete_one(doc!{"name": content}, None ).await;
@@ -153,16 +153,16 @@ async fn pl_search(content: &str, plural: Plural) -> Option<Masquerade> {
     let userquery = masks.find_one(doc! { "name": content }, None).await;
 
     match userquery {
-        Ok(a) => return a,
-        Err(e) => {println!("{e}"); return None},
-    };
+        Ok(a) => a,
+        Err(e) => {println!("{e}"); None},
+    }
 }
 
 async fn pl_send(auth: Auth, message: RMessage, i: Vec<&str>, c: Plural) {
 
     let profile = pl_search(i[2], c).await;
 
-    if profile != None {
+    if profile.is_some() {
 
     let mut content = String::new();
         
@@ -217,7 +217,7 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
 
      let userquery = collection.insert_many(data, None).await;
 
-      if userquery.is_ok() != true {
+      if userquery.is_err() {
           send(auth, message, "**Failed to connect**".to_string()).await;
           println!("WARN: pl_insert failed to insert");
 
