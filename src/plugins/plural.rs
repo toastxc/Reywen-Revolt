@@ -116,7 +116,7 @@ async fn pl_remove(auth: Auth, message: RMessage, content: &str, plural: Plural)
 
     let userquery = masks.find_one(doc! { "name": content }, None).await;
 
-    if !userquery.is_ok() {
+    if userquery.is_err() {
         send(auth, message, "**Failed to get details**".to_string()).await;
         println!("WARN: pl_remove failed to connect");
     

@@ -28,7 +28,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
     };
 
     // removing feedback loop
-    if input_message.author == auth.bot_id && input_message.masquerade != None {
+    if input_message.author == auth.bot_id && input_message.masquerade.is_none() {
         return
     };
 

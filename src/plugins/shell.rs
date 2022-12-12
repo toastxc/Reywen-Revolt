@@ -42,13 +42,13 @@ pub async fn shell_main(details: Auth, message: RMessage) {
         return
     }else if message.content.is_none() {
         return
-   }else if soc.enabled == true && soc.channel != message.channel {
+   }else if soc.enabled && soc.channel != message.channel {
        return
    }else if content_vec[0] != "?/" {
        return
    }else if content_vec.len() <= 1 {
         return
-    }else if shell.whitelist_sudoers == true && !sudoer {
+    }else if shell.whitelist_sudoers && !sudoer {
         rev_send(auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
         return
     };

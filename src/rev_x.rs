@@ -77,7 +77,7 @@ pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) 
     };
 
     // http
-    if http.as_ref().unwrap().status().is_success() == false {
+    if !http.as_ref().unwrap().status().is_success() {
         println!("{message}_HTTP_ERROR: {}", http.unwrap().status());
     };
 }
