@@ -1,7 +1,7 @@
 // an abstraction layer for RevX2
 
 use crate::{
-    Auth, lib::message::{RMessage, RReplies, RMessagePayload, Masquerade},
+    lib::message::{RMessage, RReplies, RMessagePayload, Masquerade},
 };
 use crate::rev_x::*;
 
@@ -35,7 +35,7 @@ pub async fn send(token: &str, message: &RMessage , content: &str) {
           masquerade: None
     };
 
-    rev_send(&token, &message.channel, payload2).await;
+    rev_send(token, &message.channel, payload2).await;
 
 }
 // masq wrapper for rev_send this is outdated and has been replaced by the plugin plural
@@ -76,8 +76,8 @@ pub async fn sendas(token: &str, message: &RMessage, content_vec: &Vec<&str>) {
     };
 
     tokio::join!( 
-        rev_send(&token, &message.channel, returner),
-        rev_del(&token, &message),
+        rev_send(token, &message.channel, returner),
+        rev_del(token, message),
     );
 }
 

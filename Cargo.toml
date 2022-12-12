@@ -27,3 +27,10 @@ tokio-net = "*"
 rand = "0.8.5"
 bson = "*"
 mongodb = "*"
+
+
+[profile.release]
+opt-level = 3
+debug = false
+debug-assertions = false
+lto = "fat"
