@@ -1,8 +1,6 @@
 // an abstraction layer for RevX2
 
-use crate::{
-    lib::message::{RMessage, RReplies, RMessagePayload, Masquerade},
-};
+use crate::lib::message::{RMessage, RReplies, RMessagePayload, Masquerade};
 use crate::rev_x::*;
 
 pub fn reyshell_masq(content: &str) -> RMessagePayload {

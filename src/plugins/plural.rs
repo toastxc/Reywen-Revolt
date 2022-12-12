@@ -226,4 +226,11 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
       }else {
           send(&auth.token, &message, "**Object valid, inserting...**").await;
       };
+      
+      
+
+      
+      
+      
+      
 }
