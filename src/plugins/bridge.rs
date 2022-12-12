@@ -57,7 +57,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
 
         // API get masq
         
-        let user1 = rev_user(auth.clone(), input_message.author.clone()).await;
+        let user1 = rev_user(&auth.token, &input_message.author).await;
 
         let user = match user1 {
             Ok(_) => user1.expect("failed to GET user details"),
@@ -102,7 +102,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
         masquerade: Some(br_masq),
     };
 
-    rev_send(auth, message, payload).await;
+    rev_send(&auth.token, &message.channel, payload).await;
 
 }
 

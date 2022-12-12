@@ -1,19 +1,21 @@
-use crate::{
-        lib::{
-        message::{
-            RMessage, RMessagePayload, RReplies, },
-            user::RUserFetch},
-        Auth};
+
+use crate::RMessage;
+
+use crate::lib::{
+    user::RUserFetch,
+    message::RMessagePayload,
+    message::RReplies
+};
 
 use rand::Rng;
 
 // given a user ID, checks if the user is a 'sudoer' or not 
-pub fn sudocheck(user: &str, sudoers: &Vec<String>) -> bool {
+pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
 
-    for x in 0..sudoers.len() {
-        if user == sudoers[x] {
+    for x in sudoers.iter() {
+        if user == x {
 
-            println!("WARN: SUDOER ACTION from {user}");
+            println!("WARN: SUDOER ACTION FROM {user} in {comment}");
             return true;
         };
     };
@@ -27,12 +29,12 @@ pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
 }
 
 // https://developers.revolt.chat/api/#tag/User-Information/operation/fetch_user_req
-pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch,  serde_json::Error> {
+pub async fn rev_user(token: &str, target: &str) -> Result<RUserFetch,  serde_json::Error> {
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new() 
         .get(format!("https://api.revolt.chat/users/{target}"))
-        .header("x-bot-token", auth.token)
+        .header("x-bot-token", token)
         .send().await;
 
 
@@ -47,7 +49,7 @@ pub async fn rev_user(auth: Auth, target: String) -> Result<RUserFetch,  serde_j
 }       
 
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_send_message_send
-pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  {
+pub async fn rev_send(token: &str, channel: &str, payload: RMessagePayload)  {
 
     let mut random = rand::thread_rng();
     let idem: i64 = random.gen();
@@ -56,8 +58,8 @@ pub async fn rev_send(auth: Auth, message: RMessage, payload: RMessagePayload)  
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new()
-        .post(format!("https://api.revolt.chat/channels/{}/messages", message.channel))
-        .header("x-bot-token", auth.token)
+        .post(format!("https://api.revolt.chat/channels/{}/messages", channel))
+        .header("x-bot-token", token)
         .header("Idempotency-Key", idem)
         .header("Content-Type", "application/json")
         .body(payload2)
@@ -83,12 +85,12 @@ pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) 
 }
 
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
-pub async fn rev_del(auth: Auth, message: RMessage) {
+pub async fn rev_del(token: &str, message: &RMessage) {
     
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new()
     .delete(format!("https://api.revolt.chat/channels/{}/messages/{}", message.channel, message._id))
-    .header("x-bot-token", auth.token)
+    .header("x-bot-token", token)
     .send().await;
      
     http_err(client, "REV_DEL");
@@ -101,7 +103,6 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
     if input.is_some() {
 
         let mut repstruct = Vec::new();
-
 
         let iter = input.clone()?.len();
 

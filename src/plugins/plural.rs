@@ -180,8 +180,8 @@ async fn pl_send(auth: Auth, message: RMessage, i: Vec<&str>, c: Plural) {
     
     tokio::join!(
 
-        rev_send(auth.clone(), message.clone(), payload),
-        rev_del(auth, message),
+        rev_send(&auth.token, &message.channel, payload),
+        rev_del(&auth.token, &message),
         );
 
     }else {

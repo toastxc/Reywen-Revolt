@@ -6,19 +6,19 @@ use crate::{
 use crate::rev_x::*;
 
 
-pub async fn bash_masq(out: String) -> RMessagePayload {
+pub fn reyshell_masq(content: &str) -> RMessagePayload {
 
       let masq = Masquerade {
-        name: Some("ReyShell".to_string()),
-        avatar: Some("https://toastxc.xyz/TXCS/reyshell.png".to_string()),
+        name: Some(String::from("ReyShell")),
+        avatar: Some(String::from("https://toastxc.xyz/TXCS/reyshell.png")),
         colour: None,
-    };
+      };
 
     RMessagePayload {
-        content: Some(out),
+        content: Some(String::from(content)),
         attachments: None,
         replies: None,
-        masquerade:  Some(masq)
+        masquerade:  Some(masq),
     }
 
 }
@@ -36,20 +36,18 @@ pub async fn send(auth: Auth, message: RMessage, content: String) {
           masquerade: None
     };
 
-    rev_send(auth, message, payload2).await;
+    rev_send(&auth.token, &message.channel, payload2).await;
 
 }
-// masq wrapper for rev_send
+// masq wrapper for rev_send this is outdated and has been replaced by the plugin plural
 pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
 
     if content_vec.len() < 3 {
         send(auth, message, "invalid use of sendas".to_string()).await;
         return
     };
-    //let from = message._id.clone();
     let masq = content_vec[1];
     let mut content = String::new();
-    //content = "placeholder".to_string();
 
     let link = match masq {
         "bingus"    | "cheese"  | "dad" |
@@ -78,7 +76,9 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
           masquerade: Some(masq_s)
     };
 
-    rev_send(auth.clone(), message.clone(), returner).await;
-    rev_del(auth.clone(), message.clone()).await;
+    tokio::join!( 
+        rev_send(&auth.token, &message.channel, returner),
+        rev_del(&auth.token, &message),
+    );
 }
 

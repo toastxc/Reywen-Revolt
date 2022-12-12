@@ -1,4 +1,4 @@
-use crate::{Auth, RMessage, bash_masq, rev_send, sudocheck};
+use crate::{Auth, RMessage, rev_send, sudocheck, reyshell_masq};
 use std::process::Command;
 use crate::fs_str;
 use serde::{Serialize, Deserialize};
@@ -34,7 +34,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
     let (auth, soc) = (details.clone(),  shell.channel.clone());
     let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
-    let sudoer = sudocheck(&message.author, &auth.sudoers);
+    let sudoer = sudocheck(&message.author, "SHELL", &auth.sudoers);
     
 
     // perm check 
@@ -49,12 +49,9 @@ pub async fn shell_main(details: Auth, message: RMessage) {
    }else if content_vec.len() <= 1 {
         return
     }else if shell.whitelist_sudoers && !sudoer {
-        rev_send(auth, message, bash_masq("**Only sudoers allowed**".to_string()).await).await;
+        rev_send(&auth.token, &message.channel, reyshell_masq("**Only sudoers allowed**")).await;
         return
     };
-
-// thread 'main' panicked at 'failed to split vec', src/plugins/shell.rs:7:49
-
 
     let mut content_min1 = String::new();
 
@@ -78,7 +75,7 @@ pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
     };
 
     if let Err(e) = com.output() {
-        rev_send(details, message, bash_masq(e.to_string()).await).await;
+        rev_send(&details.token, &message.channel, reyshell_masq(&e.to_string())).await;
         return};
 
 
@@ -88,7 +85,7 @@ pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
 
     if out.chars().count() <= 1900 {        
 
-        rev_send(details, message, bash_masq(format!("```text\n{out}")).await).await
+        rev_send(&details.token, &message.channel, reyshell_masq(&format!("```text\n{out}"))).await
 
     }else {
 
@@ -118,12 +115,10 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
             current += &vec[(iter) as usize].to_string();
             iter += 1;
         };
-        print!("{current}");
 
-        current = format!("```\\n\\n{current}");
-        let payload = bash_masq(current).await;
+        //let payload = reyshell_masq(format!("```\\n\\n{current}"));
 
-        rev_send(auth.clone(), message.clone(), payload).await;
+        rev_send(&auth.token, &message.channel, reyshell_masq(&format!("```\\n\\n{current}"))).await;
 
         current = String::new();
 
@@ -138,9 +133,9 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
 
           current = format!("```\\n\\n{current}");
 
-        let payload = bash_masq(current).await;
+        let payload = reyshell_masq(&current);
 
-        rev_send(auth.clone(), message.clone(), payload).await;
+        rev_send(&auth.token, &message.channel, payload).await;
 
     };
     println!();
@@ -155,4 +150,5 @@ pub fn convert(a: i32) -> (i32, i32, i32){
    
     (a / 1900, 1900,  a % 1900)
 }
+
 
