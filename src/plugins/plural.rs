@@ -52,18 +52,20 @@ pub async fn plural_main(auth: Auth, message: RMessage) {
         return
     
     }else if content.len() < 3 {
-        send(auth, message, "**Reywen Masq**
+        send(&auth.token, &message, "**Reywen Masq**
              `search <name>`: Search for an entry in ReywenDB
              `insert <name> <avatar-url> <color>`: create a new entry
              `query <name>`: searches for entry and provides details
              `send <name> <content>`: sends message as a given entry
-             `rm <name>`: removes entry".to_string()).await;
+             `rm <name>`: removes entry").await;
         return
     
     }else if message.author == auth.bot_id {
         return
     };
 
+    // i should replace the clones with borrows or references, but that would require 
+    // a big rewrite and the benefit is minimal
     match content[1] as &str {
 
         "insert" => pl_insert(auth, message.clone(), plural, content).await,
@@ -83,9 +85,9 @@ async fn cli_query(auth: Auth, message: RMessage, content: &str, plural: Plural)
         Some(a) => {
             let masq_data = format!("```json\n\"name:\" \"{}\"\n \"avatar\" \"{}\"\n\"colour:\" \"{}\"", 
                                     a.name.unwrap(), a.avatar.unwrap(), a.colour.unwrap());
-            send(auth, message, masq_data).await;
+            send(&auth.token, &message, &masq_data).await;
         },
-        None  => send(auth, message, "**Object not found**".to_string()).await,
+        None  => send(&auth.token, &message, "**Object not found**").await,
     };
 }
 
@@ -98,7 +100,7 @@ async fn cli_search(auth: Auth, message: RMessage, content: &str, plural: Plural
         None => "**Object not found**",
     };
 
-    send(auth, message, strr.to_string()).await
+    send(&auth.token, &message, strr).await
 }
 async fn pl_remove(auth: Auth, message: RMessage, content: &str, plural: Plural)  {
 
@@ -117,18 +119,18 @@ async fn pl_remove(auth: Auth, message: RMessage, content: &str, plural: Plural)
     let userquery = masks.find_one(doc! { "name": content }, None).await;
 
     if userquery.is_err() {
-        send(auth, message, "**Failed to get details**".to_string()).await;
+        send(&auth.token, &message, "**Failed to get details**").await;
         println!("WARN: pl_remove failed to connect");
     
     }else if userquery.unwrap().is_none() {
-        send(auth, message, "**No object found**".to_string()).await
+        send(&auth.token, &message, "**No object found**").await
     }else {
         let del_res = masks.delete_one(doc!{"name": content}, None ).await;
-        send(auth.clone(), message.clone(), "**Object found, deleting...**".to_string()).await;
+        send(&auth.token, &message, "**Object found, deleting...**").await;
 
         match del_res {
-            Ok(_) => send(auth, message, "**Successfully deleted**".to_string()).await,
-            Err(e) => send(auth, message, format!("**Error**\n```text\n{e}")).await,
+            Ok(_) => send(&auth.token, &message, "**Successfully deleted**").await,
+            Err(e) => send(&auth.token, &message, &format!("**Error**\n```text\n{e}")).await,
         };
     };
 }
@@ -186,7 +188,7 @@ async fn pl_send(auth: Auth, message: RMessage, i: Vec<&str>, c: Plural) {
 
     }else {
         
-        send(auth, message, "**Object  not found**".to_string()).await;
+        send(&auth.token, &message, "**Object  not found**").await;
     };
 }
 
@@ -218,10 +220,10 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
      let userquery = collection.insert_many(data, None).await;
 
       if userquery.is_err() {
-          send(auth, message, "**Failed to connect**".to_string()).await;
+          send(&auth.token, &message, "**Failed to connect**").await;
           println!("WARN: pl_insert failed to insert");
 
       }else {
-          send(auth, message, "**Object valid, inserting...**".to_string()).await;
+          send(&auth.token, &message, "**Object valid, inserting...**").await;
       };
 }

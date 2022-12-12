@@ -1,10 +1,9 @@
-// a library for high level non essential functions
+// an abstraction layer for RevX2
 
 use crate::{
     Auth, lib::message::{RMessage, RReplies, RMessagePayload, Masquerade},
 };
 use crate::rev_x::*;
-
 
 pub fn reyshell_masq(content: &str) -> RMessagePayload {
 
@@ -23,27 +22,27 @@ pub fn reyshell_masq(content: &str) -> RMessagePayload {
 
 }
 
-pub async fn send(auth: Auth, message: RMessage, content: String) {
+pub async fn send(token: &str, message: &RMessage , content: &str) {
 
     let reply = RReplies {
         id: message._id.clone(),
         mention: false,
     };
     let payload2 = RMessagePayload {
-        content: Some(content),
+        content: Some(String::from(content)),
         replies: Some(vec![reply]),
           attachments: None,
           masquerade: None
     };
 
-    rev_send(&auth.token, &message.channel, payload2).await;
+    rev_send(&token, &message.channel, payload2).await;
 
 }
 // masq wrapper for rev_send this is outdated and has been replaced by the plugin plural
-pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
+pub async fn sendas(token: &str, message: &RMessage, content_vec: &Vec<&str>) {
 
     if content_vec.len() < 3 {
-        send(auth, message, "invalid use of sendas".to_string()).await;
+        send(token, message, "invalid use of sendas").await;
         return
     };
     let masq = content_vec[1];
@@ -77,8 +76,8 @@ pub async fn sendas(auth: Auth, message: RMessage, content_vec: Vec<&str>) {
     };
 
     tokio::join!( 
-        rev_send(&auth.token, &message.channel, returner),
-        rev_del(&auth.token, &message),
+        rev_send(&token, &message.channel, returner),
+        rev_del(&token, &message),
     );
 }
 

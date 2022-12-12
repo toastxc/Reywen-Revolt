@@ -40,10 +40,10 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
 
     match content_vec[0] as &str {
 
-        "?Mog" | "?mog"  => send(details, message, ":01G7MT5B978E360NB6VWAS9SJ6:".to_string()).await,
-        "?ver" | "?version" => send(details, message, "**Version**\nReywen: `2`\nRevX: `2`".to_string()).await,
-        "?echo" =>  send(details, message, content_min1).await,
-        "?sendas" => sendas(details, message, content_vec).await,
+        "?Mog" | "?mog"  => send(&details.token, &message, ":01G7MT5B978E360NB6VWAS9SJ6:").await,
+        "?ver" | "?version" => send(&details.token, &message, "**Version**\nReywen: `2`\nRevX: `2`").await,
+        "?echo" =>  send(&details.token, &message, &content_min1).await,
+        "?sendas" => sendas(&details.token, &message, &content_vec).await,
         _ => ()
     }
 }
