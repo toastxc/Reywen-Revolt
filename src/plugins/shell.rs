@@ -34,7 +34,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
     let (auth, soc) = (details.clone(),  shell.channel.clone());
     let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
-    let sudoer = sudocheck(message.author.clone(), auth.clone()).await;
+    let sudoer = sudocheck(&message.author, &auth.sudoers);
     
 
     // perm check 

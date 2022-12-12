@@ -8,12 +8,12 @@ use crate::{
 use rand::Rng;
 
 // given a user ID, checks if the user is a 'sudoer' or not 
-pub async fn sudocheck(user: String, auth: Auth) -> bool {
+pub fn sudocheck(user: &str, sudoers: &Vec<String>) -> bool {
 
-    for x in 0..auth.sudoers.len() {
-        if user == auth.sudoers[x] {
+    for x in 0..sudoers.len() {
+        if user == sudoers[x] {
 
-            println!("WARN: SUDOER ACTION");
+            println!("WARN: SUDOER ACTION from {user}");
             return true;
         };
     };
