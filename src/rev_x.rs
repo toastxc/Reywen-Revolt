@@ -29,7 +29,7 @@ pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
 }
 
 // https://developers.revolt.chat/api/#tag/User-Information/operation/fetch_user_req
-pub async fn rev_user(token: &str, target: &str) -> Result<RUserFetch,  serde_json::Error> {
+pub async fn rev_user(token: &str, target: &str) -> Option<RUserFetch> {
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
     reqwest::Client::new() 
@@ -38,13 +38,19 @@ pub async fn rev_user(token: &str, target: &str) -> Result<RUserFetch,  serde_js
         .send().await;
 
 
-    let client_res = match client {
-        Ok(a) => a.text().await.unwrap(),
-        Err(e) => e.to_string(),
-    };   
-     
+    if client.is_ok() {
         
-    serde_json::from_str(&client_res)
+        let client_res = client.unwrap().text().await.unwrap();
+         
+        let json:RUserFetch = serde_json::from_str(&client_res).unwrap();
+         
+        return Some(json)
+        
+    };
+        
+      http_err(client, "REV_USER_ERR");
+        
+        None
     // issue  27 
 }       
 

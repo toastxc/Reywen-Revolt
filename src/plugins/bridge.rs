@@ -28,7 +28,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
     };
 
     // removing feedback loop
-    if input_message.author == auth.bot_id && input_message.masquerade.is_none() {
+    if input_message.author == auth.bot_id && input_message.masquerade.is_some() {
         return
     };
 
@@ -58,28 +58,23 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
         // API get masq
         
         let user1 = rev_user(&auth.token, &input_message.author).await;
-
+        
         let user = match user1 {
-            Ok(_) => user1.expect("failed to GET user details"),
-            Err(e)  => {println!("{e}"); return},
+          
+            Some(a) =>  a,
+            None => {println!("REV_USER_ERR: failed to get details for {}", input_message.author); return},  
+        };
+        
+        let pfplink:String = match user.avatar {
+            None => "https://api.revolt.chat/users/01GKWVQP8JP1TEZ52AR1NZVM1J/default_avatar".to_string(),
+            Some(r) =>  format!("https://autumn.revolt.chat/avatars/{}", r.id),
         };
 
-        //let pfplink = user.avatar.unwrap().id;
-        
-        let pfplink = match user.avatar {
-            None => {println!("pfp error..."); return},
-            Some(r) => r.id,
-        };
-
-//        thread 'main' panicked at 'called `Option::unwrap()` on a `None` value', src/plugins/bridge.rs:50:35
-
-        
-
-        let pfp = format!("https://autumn.revolt.chat/avatars/{pfplink}");
+        //let pfp = format!("https://autumn.revolt.chat/avatars/{}", pfplink);
 
         br_masq = Masquerade {
             name: Some(user.username),
-            avatar: Some(pfp),
+            avatar: Some(pfplink),
             colour: None
         };
         
@@ -96,7 +91,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
 
     // message for rev_send
     let payload = RMessagePayload {
-        content: message.content.clone(),
+        content: message.content,
         attachments: None,
         replies: rev_convert_reply(input_message.replies).await,
         masquerade: Some(br_masq),

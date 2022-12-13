@@ -17,13 +17,12 @@ pub fn reyshell_masq(content: &str) -> RMessagePayload {
         replies: None,
         masquerade:  Some(masq),
     }
-
 }
 
 pub async fn send(token: &str, message: &RMessage , content: &str) {
 
     let reply = RReplies {
-        id: message._id.clone(),
+        id: message._id.to_string(),
         mention: false,
     };
     let payload2 = RMessagePayload {
@@ -34,7 +33,6 @@ pub async fn send(token: &str, message: &RMessage , content: &str) {
     };
 
     rev_send(token, &message.channel, payload2).await;
-
 }
 // masq wrapper for rev_send this is outdated and has been replaced by the plugin plural
 pub async fn sendas(token: &str, message: &RMessage, content_vec: &Vec<&str>) {

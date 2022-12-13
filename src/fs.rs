@@ -1,21 +1,14 @@
 // library for interacting with the filesystem
 
-use serde_json::{Result};
-use crate::lib::{
-    conf::Auth
-};
+use serde_json::Result;
+use crate::lib::conf::Auth;
+use std::io::Read;
+use std::fs::File;
 
 
-use std::{
-    io::Read,
-    fs::File,
-};
 
 // import and deserialize message.conf
-
-
 pub fn fs_str(target: &str) -> Result<String> {
-
 
     let mut file = File::open(target)
         .expect("could not open {target}");
@@ -30,7 +23,6 @@ pub fn fs_str(target: &str) -> Result<String> {
 }
 pub fn conf_init() -> Result<Auth> {
 
-  
     let mut config_json = File::open("config/reywen.json")
         .expect("File not found: reywen.json");
 
