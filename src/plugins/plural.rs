@@ -213,7 +213,7 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
     for x in 0..3 {
     
         if content[x + 2].chars().count() > not_regex[x].1 {
-            send(&auth.token, &message, &format!("**INVALID PAYLOAD: {} URL TOO LONG**", not_regex[x].0)).await;
+            send(&auth.token, &message, &format!("**invalid insert: {} string is too long (limit: {})**", not_regex[x].0, not_regex[x].1)).await;
             return
         }; 
     };
