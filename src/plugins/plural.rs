@@ -204,9 +204,19 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
         Ok(a) => a,
         Err(e) => {println!("MONGODB_insert:\n{e}"); return},
     
-     };
+    };
       
-     let collection = client.database("test").collection::<Document>("profiles");
+    let collection = client.database("test").collection::<Document>("profiles");
+    
+    let not_regex = vec![("NAME", 10), ("AVATAR", 128), ("COLOR", 10)];
+    
+    for x in 0..3 {
+    
+        if content[x].chars().count() > not_regex[x].1 {
+            send(&auth.token, &message, &format!("**INVALID PAYLOAD: {} URL TOO LONG**", not_regex[x].0)).await;
+        }; 
+    };
+       
       
      let data: Vec<Document> =
          vec![
