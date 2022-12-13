@@ -34,7 +34,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
     let (auth, soc) = (details.clone(),  shell.channel.clone());
     let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
-    let sudoer = sudocheck(&message.author, "SHELL", &auth.sudoers);
+
     
 
     // perm check 
@@ -48,7 +48,7 @@ pub async fn shell_main(details: Auth, message: RMessage) {
        return
    }else if content_vec.len() <= 1 {
         return
-    }else if shell.whitelist_sudoers && !sudoer {
+    }else if shell.whitelist_sudoers && sudocheck(&message.author, "SHELL", &auth.sudoers) {
         rev_send(&auth.token, &message.channel, reyshell_masq("**Only sudoers allowed**")).await;
         return
     };
@@ -104,7 +104,6 @@ pub async fn bash_big_msg(out: String, auth: Auth, message: RMessage, ) {
     // iterator
     // payload
     // remainder
-
 
     let mut current = String::new();
     let mut iter = 0;

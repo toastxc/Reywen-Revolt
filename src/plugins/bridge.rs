@@ -26,7 +26,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
     if !bridge.enabled  {
         return
     };
-
+    
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade.is_some() {
         return

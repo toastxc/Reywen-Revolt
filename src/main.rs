@@ -25,7 +25,6 @@ use crate::plugins::{
     plural::*,
 };
 
-
 // reywen fs
 mod fs;
 use fs::{conf_init, fs_str};
@@ -33,7 +32,6 @@ use fs::{conf_init, fs_str};
 // RevX2
 pub mod rev_x;
 use rev_x::*;
-
 
 // network
 use futures_util::StreamExt;
@@ -43,9 +41,7 @@ use futures_util::SinkExt;
 
 use std::str::from_utf8;
 
-//use tokio;
 use tokio::time::Duration;
-
 
 
 const PING: &str = r#"{
@@ -58,22 +54,13 @@ const PING: &str = r#"{
 async fn main()  {
 
     println!("booting...");
+    
+    let details:Auth = conf_init()
+        .expect("Failed to import config/reywen.json");
 
-    // import
-    let details_in = conf_init();
-
-    let details = match details_in {
-        Err(_main_conf) => panic!("failed to import json"),
-        Ok(main_conf) => main_conf,
-    };
-
-
-    let token = details.token.clone();
-
-    let url = format!("wss://ws.revolt.chat/?format=json&version=1&token={token}");
-
-        websocket(url.clone(), details.clone()).await; 
-
+    let url:String = format!("wss://ws.revolt.chat/?format=json&version=1&token={}", details.token);    
+        
+    websocket(url, details).await; 
 
 }
 
@@ -81,15 +68,19 @@ async fn main()  {
 pub async fn websocket(url: String, details: Auth) {
 
 
+     loop {
      let (ws_stream, _response) = connect_async(url.clone()).await.expect("Failed to connect (websocket)");
-     let (ws_stream_ping, _response) = connect_async(url).await.expect("Failed to connect (websocket)");
+     let (ws_stream_ping, _response) = connect_async(url.clone()).await.expect("Failed to connect (websocket)");
 
      println!("init: websocket");
 
+     
      tokio::join! ( 
-         websocket_sub(ws_stream, details),
+         websocket_sub(ws_stream, details.clone()),
          webocket_ping(ws_stream_ping),
          );
+         
+     };     
 
 
 }
@@ -109,7 +100,11 @@ pub async fn webocket_ping(mut ws_stream: WebSocketStream<tokio_tungstenite::May
 }
 
 pub async fn websocket_sub(ws_stream: WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>, details: Auth) {
-
+    
+          
+          
+          
+ 
           
     let (mut _write, read) = ws_stream.split();
 
@@ -132,6 +127,7 @@ pub async fn websocket_sub(ws_stream: WebSocketStream<tokio_tungstenite::MaybeTl
 
     read_future.await;
 
+  
 }
 
 // websocket main
