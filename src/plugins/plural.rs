@@ -208,7 +208,7 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
       
     let collection = client.database("test").collection::<Document>("profiles");
     
-    let not_regex = vec![("NAME", 10), ("AVATAR", 128), ("COLOR", 10)];
+    let not_regex = vec![("name", 10), ("avatar", 128), ("color", 10)];
     
     for x in 0..3 {
     
@@ -238,11 +238,5 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
       }else {
           send(&auth.token, &message, "**Object valid, inserting...**").await;
       };
-      
-      
-
-      
-      
-      
       
 }

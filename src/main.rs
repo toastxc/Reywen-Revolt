@@ -68,7 +68,6 @@ async fn main()  {
 pub async fn websocket(url: String, details: Auth) {
 
 
-     loop {
      let (ws_stream, _response) = connect_async(url.clone()).await.expect("Failed to connect (websocket)");
      let (ws_stream_ping, _response) = connect_async(url.clone()).await.expect("Failed to connect (websocket)");
 
@@ -76,13 +75,9 @@ pub async fn websocket(url: String, details: Auth) {
 
      
      tokio::join! ( 
-         websocket_sub(ws_stream, details.clone()),
+         websocket_sub(ws_stream, details),
          webocket_ping(ws_stream_ping),
          );
-         
-     };     
-
-
 }
 
 pub async fn webocket_ping(mut ws_stream: WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>) {
@@ -90,10 +85,9 @@ pub async fn webocket_ping(mut ws_stream: WebSocketStream<tokio_tungstenite::May
     loop {
         tokio::time::sleep(Duration::from_secs(30)).await;
         let send_res = ws_stream.send(tokio_tungstenite::tungstenite::Message::Text(PING.to_string())).await;
-
-        match send_res {
-            Ok(_) => println!("pinged successfully"),
-            Err(e) => println!("WARN: {e}"),
+        
+        if send_res.is_err() {
+            panic!("Failed to ping websocket, restarting");
         };
     };
 
@@ -101,10 +95,6 @@ pub async fn webocket_ping(mut ws_stream: WebSocketStream<tokio_tungstenite::May
 
 pub async fn websocket_sub(ws_stream: WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>, details: Auth) {
     
-          
-          
-          
- 
           
     let (mut _write, read) = ws_stream.split();
 

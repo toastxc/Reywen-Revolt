@@ -37,5 +37,6 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
         "?sendas" => sendas(&details.token, &message_in, &content_vec).await,
         _ => ()
     }
+    
 }
 
