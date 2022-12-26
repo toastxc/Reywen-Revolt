@@ -151,7 +151,7 @@ pub async fn new_main(out: String, details: Auth) {
         message_process(details.clone(), message2),
         shell_main(details.clone(), message3),
         plural_main(details.clone(), message4),
-        oop_main(details.clone(), message5)
+        oop_main(details.clone(), message5),
         
         );
 }
