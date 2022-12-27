@@ -28,7 +28,7 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
         return
     };
   
-    let content_vec: Vec<&str> =  (&message_in.content).as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
+    let content_vec: Vec<&str> =  (message_in.content).as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
     match content_vec[0] as &str {
 

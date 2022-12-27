@@ -102,6 +102,16 @@ pub async fn rev_del(token: &str, message: &RMessage) {
     http_err(client, "REV_DEL");
 }
 
+pub async fn rev_del_2(token: &str, channel: &str, message: &str) {
+    
+let client: std::result::Result<reqwest::Response, reqwest::Error> =
+    reqwest::Client::new()
+    .delete(format!("https://api.revolt.chat/channels/{}/messages/{}", channel, message))
+    .header("x-bot-token", token)
+    .send().await;
+     
+    http_err(client, "REV_DEL");
+}
 
 // converts websocket replies to API compatible replies
 pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
