@@ -12,6 +12,7 @@ use rand::Rng;
 // given a user ID, checks if the user is a 'sudoer' or not 
 pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
 
+    /*
     for x in sudoers.iter() {
         if user == x {
 
@@ -20,6 +21,17 @@ pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
         };
     };
     false
+    
+    */
+    let user1 = user.to_string();
+    if sudoers.contains(&user1) {
+        println!("WARN: SUDOER ACTION FROM {user} in {comment}");
+        return true
+    };
+    false 
+        
+    
+    
 }
 
 // deserializes websocket messages
@@ -73,6 +85,20 @@ pub async fn rev_send(token: &str, channel: &str, payload: RMessagePayload)  {
     http_err(client, "REV_SEND");
 }
 
+// https://developers.revolt.chat/api/#tag/Server-Members/operation/member_remove_req
+pub async fn rev_kick(token: &str, user: &str, server: &str) {
+
+    
+    let client: std::result::Result<reqwest::Response, reqwest::Error> =
+        reqwest::Client::new()
+        .delete(format!("https://api.revolt.chat/servers/{}/members/{}", server, user))
+        .header("x-bot-token", token) 
+        .send().await;
+       
+    http_err(client, "REV_KICK");
+}
+
+
 // for administrators
 // prints http based error codes to stdout with an optional message
 pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) {
@@ -89,7 +115,7 @@ pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) 
     };
 }
 
-// https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
+// DEPRICATED
 pub async fn rev_del(token: &str, message: &RMessage) {
     
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
@@ -101,6 +127,7 @@ pub async fn rev_del(token: &str, message: &RMessage) {
     http_err(client, "REV_DEL");
 }
 
+// https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
 pub async fn rev_del_2(token: &str, channel: &str, message: &str) {
     
 let client: std::result::Result<reqwest::Response, reqwest::Error> =

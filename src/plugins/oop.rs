@@ -1,7 +1,7 @@
   // a sandbox for experimenting with OOP design patterns for abstraction and DX
     // lets create a simple hello world thingo
 
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2}};
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2, rev_kick, sudocheck}};
 use crate::send;
 
 #[derive(Debug)]
@@ -62,14 +62,24 @@ impl ReyCLI {
         colour: None,            
     };
          
+  
          
     match &convec[0] as &str {
+        
+        // send message normally
         "?mog" => ReyCLI::Send { content: (":01G7MT5B978E360NB6VWAS9SJ6:") },
         "?ver" => ReyCLI::Send { content: ("Rolling release ([here](https://github.com/toastxc/Reywen-Revolt))") },
+        // send message with masquerade (requires a masq object)
         "?mogus" => ReyCLI::SendMasq { content: ("sus"), masq: (masq) },
+        // deletes a given message
         "?del" => ReyCLI::Delete { message: (convec[1].clone()) },
+        //nothing
         _ => ReyCLI::None,
     }.run(auth, input_message).await;
-
+    
+    
+    
+  
+    
 }
 

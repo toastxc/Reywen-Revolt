@@ -7,8 +7,6 @@ use crate::rev_send;
 use bson::Document;
 use crate::rev_del;
 
-use super::oop::ReywenSys;
-
 // config struct
 // this optional struct adds configurable paramaters that are hot changeable, config files are
 // jsons and usually stored in config/
