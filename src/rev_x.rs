@@ -51,7 +51,6 @@ pub async fn rev_user(token: &str, target: &str) -> Option<RUserFetch> {
       http_err(client, "REV_USER_ERR");
         
         None
-    // issue  27 
 }       
 
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_send_message_send
