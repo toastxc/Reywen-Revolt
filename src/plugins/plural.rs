@@ -7,6 +7,8 @@ use crate::rev_send;
 use bson::Document;
 use crate::rev_del;
 
+use super::oop::ReywenSys;
+
 // config struct
 // this optional struct adds configurable paramaters that are hot changeable, config files are
 // jsons and usually stored in config/
@@ -83,7 +85,7 @@ async fn cli_query(auth: Auth, message: RMessage, content: &str, plural: Plural)
 
     match search {
         Some(a) => {
-            let masq_data = format!("```json\n\"name:\" \"{}\"\n \"avatar\" \"{}\"\n\"colour:\" \"{}\"", 
+            let masq_data = format!("```json\n{{\"name:\" \"{}\"\n \"avatar\" \"{}\"\n\"colour:\" \"{}\"}}", 
                                     a.name.unwrap(), a.avatar.unwrap(), a.colour.unwrap());
             send(&auth.token, &message, &masq_data).await;
         },
@@ -238,5 +240,9 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
       }else {
           send(&auth.token, &message, "**Object valid, inserting...**").await;
       };
+      
+      
+      
+
       
 }
