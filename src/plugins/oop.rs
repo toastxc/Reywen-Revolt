@@ -5,7 +5,7 @@ use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}},
 use crate::send;
 
 #[derive(Debug)]
-pub enum ReywenSys{
+pub enum ReyCLI{
 
     Send{content: & 'static str},
     SendMasq{content:  & 'static str, masq: Masquerade},
@@ -15,14 +15,14 @@ pub enum ReywenSys{
 }
 pub async fn oop_main(auth: Auth, input_message: RMessage ) {
     
-impl ReywenSys {
+impl ReyCLI {
 
     
     pub async fn run(&self, auth: Auth, message_input: RMessage) {
         match self {
 
-            Self::Send{content: c } => {
-                send(&auth.token, &message_input, c ).await
+            Self::Send{content } => {
+                send(&auth.token, &message_input, content ).await
             },
                         
             Self::SendMasq { content, masq } => {
@@ -42,6 +42,7 @@ impl ReywenSys {
                 
                 rev_del_2(&auth.token, &message_input.channel, message).await;
             },
+
             
             Self::None => {},
             
@@ -63,11 +64,11 @@ impl ReywenSys {
          
          
     match &convec[0] as &str {
-        "?mog" => ReywenSys::Send { content: (":01G7MT5B978E360NB6VWAS9SJ6:") },
-        "?ver" => ReywenSys::Send { content: ("Rolling release ([here](https://github.com/toastxc/Reywen-Revolt))") },
-        "?mogus" => ReywenSys::SendMasq { content: ("sus"), masq: (masq) },
-        "?del" => ReywenSys::Delete { message: (convec[1].clone()) },
-        _ => ReywenSys::None,
+        "?mog" => ReyCLI::Send { content: (":01G7MT5B978E360NB6VWAS9SJ6:") },
+        "?ver" => ReyCLI::Send { content: ("Rolling release ([here](https://github.com/toastxc/Reywen-Revolt))") },
+        "?mogus" => ReyCLI::SendMasq { content: ("sus"), masq: (masq) },
+        "?del" => ReyCLI::Delete { message: (convec[1].clone()) },
+        _ => ReyCLI::None,
     }.run(auth, input_message).await;
 
 }
