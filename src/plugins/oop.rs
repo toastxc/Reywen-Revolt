@@ -100,9 +100,9 @@ impl ReyCLI {
 */
 
 
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 pub struct Reywen {
-    auth: Auth
+  auth: Auth
 }
 
 impl Reywen {
