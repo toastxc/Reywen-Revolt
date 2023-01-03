@@ -1,16 +1,17 @@
 
 const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
-use crate::fs_str;
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send};
+
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send, fs::fs_str};
 use reqwest::header::USER_AGENT;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
+
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct E6Conf {
     pub enabled: bool,
     pub url: String,
 }
-
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -181,12 +182,10 @@ pub struct Relationships {
     pub children: Option<Vec<i32>>,
 }
 
-
 pub async fn e6main(auth: Auth, input_message: RMessage) {
      
      
      let conf: String = fs_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
-
 
      let e6: E6Conf = serde_json::from_str(&conf)
             .expect("Failed to deser e6.json");
@@ -265,41 +264,37 @@ async fn ping_test(url: &str) -> bool {
         
 
         
-        if client.is_ok() {
+        if !client.is_ok() { return String::new() };
+            
             let payload = client.unwrap().text().await.unwrap();
-        
-     
+            
             let res: Root = serde_json::from_str(&payload)
                 .expect("failed to interpret E6 data");
                 
-                   if res.posts.len() == 0 {
-                    return "**No Results!**".to_string()
-                }
+            if res.posts.len() == 0 {
+                return "**No Results!**".to_string()
+            };
+            // ?e search fox 23
+            return match (convec.len(), res.posts.len()) {
+               (0, _) | (1, _) | (2, _) => format!("**Invalid query!**"),
+               (_, 0)                   => format!("**No results!**"),
+               (3, _)                   => format!("**UwU**\n[]({})", res.posts[0].file.url.clone().unwrap()),
+               (4, 1)                   => format!("**UwU**\narg ignored, one result found\n[]({})", res.posts[0].file.url.clone().unwrap()),
+               (4, _)                   => querycheck(convec, res),
+                _ => "womp".to_string(),
+            }
             
-            
-            if convec.len() > 3 {
-            
-             
-                
-                let conum: usize = convec[3].parse().unwrap();
-                if res.posts[conum].preview.url == None {
-                    return format!("**Invalid post!**\n[]({})", DURL);  
-                }else {
-                  return format!("**UwU**\n[]({})", res.posts[conum].file.url.clone().unwrap());  
-                };
-                  
-            }else {
-                if res.posts[0].preview.url == None {
-                     return format!("**Invalid post!**\n[]({})", DURL);  
-                }else {
-                return format!("**UwU**\n[]({})", res.posts[0].file.url.clone().unwrap());
-                
-          
-              }}
-        };
-        
-        String::new()
   }
   
  
+ fn querycheck(convec: &Vec<&str>, res: Root) -> String {
+     
+ 
+        let number = convec[3].parse::<u32>();
+        if number.is_ok() && res.posts.len() >= number.clone().unwrap() as usize {
+             return format!("**UwU**\n[]({})", res.posts[number.unwrap() as usize].file.url.clone().unwrap()); 
+        };
+        
+        String::from("**Invalid request!**")
+ }
  
