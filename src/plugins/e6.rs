@@ -251,10 +251,9 @@ async fn ping_test(url: &str) -> bool {
     };
     
     rev_send(token, channel, payload).await;
- } 
-
+} 
   
-  async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
+async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
       
       let client: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new() 
@@ -262,37 +261,43 @@ async fn ping_test(url: &str) -> bool {
         .header(USER_AGENT, "libsixgrid/1.1.1")
         .send().await;
         
-
-        
         if !client.is_ok() { return String::new() };
             
-            let payload = client.unwrap().text().await.unwrap();
+        let payload = client.unwrap().text().await.unwrap();
             
-            let res: Root = serde_json::from_str(&payload)
-                .expect("failed to interpret E6 data");
-                
-            if res.posts.len() == 0 {
-                return "**No Results!**".to_string()
-            };
-            // ?e search fox 23
-            return match (convec.len(), res.posts.len()) {
-               (0, _) | (1, _) | (2, _) => format!("**Invalid query!**"),
-               (_, 0)                   => format!("**No results!**"),
-               (3, _)                   => format!("**UwU**\n[]({})", res.posts[0].file.url.clone().unwrap()),
-               (4, 1)                   => format!("**UwU**\narg ignored, one result found\n[]({})", res.posts[0].file.url.clone().unwrap()),
-               (4, _)                   => querycheck(convec, res),
-                _ => "womp".to_string(),
-            }
+        let res: Root = serde_json::from_str(&payload)
+            .expect("failed to interpret E6 data");
             
+        let img1: String = match &res.posts[0].file.url {
+            None => DURL.to_string(),
+            Some(a) => a.to_string()
+        };
+        
+        match (convec.len(), res.posts.len()) {
+            // invalid
+            (0, _) | (1, _) | (2, _) => format!("**Invalid query!**"),
+            (_, 0)                   => format!("**No results!**"),
+            // first result
+            (3, _)                   => format!("**UwU**\n[]({})", img1),
+            (4, 1)                   => format!("**UwU**\narg ignored, one result found\n[]({})", img1),
+            // other result
+            (4, _)                   => querycheck(convec, res),
+            _ => "womp".to_string(),
+        }   
   }
   
  
  fn querycheck(convec: &Vec<&str>, res: Root) -> String {
      
- 
         let number = convec[3].parse::<u32>();
         if number.is_ok() && res.posts.len() >= number.clone().unwrap() as usize {
-             return format!("**UwU**\n[]({})", res.posts[number.unwrap() as usize].file.url.clone().unwrap()); 
+             
+            let img1: String = match &res.posts[number.unwrap() as usize].file.url {
+                None => DURL.to_string(),
+                Some(a) => a.to_string()
+            };
+            return format!("**UwU**\n[]({})", img1);             
+            
         };
         
         String::from("**Invalid request!**")
