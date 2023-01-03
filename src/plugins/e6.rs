@@ -182,7 +182,7 @@ pub struct Relationships {
     pub children: Option<Vec<i32>>,
 }
 
-pub async fn e6main(auth: Auth, input_message: RMessage) {
+pub async fn e6_main(auth: Auth, input_message: RMessage) {
      
      
      let conf: String = fs_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
@@ -262,12 +262,16 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
         .send().await;
         
         if client.is_err() { return String::new() };
+      
             
         let payload = client.unwrap().text().await.unwrap();
             
         let res: Root = serde_json::from_str(&payload)
             .expect("failed to interpret E6 data");
             
+        if res.posts.len() == 0 {
+            return "**No results!**".to_string();
+        };
         let img1: String = match &res.posts[0].file.url {
             None => DURL.to_string(),
             Some(a) => a.to_string()
@@ -297,7 +301,6 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
                 Some(a) => a.to_string()
             };
             return format!("**UwU**\n[]({})", img1);             
-            
         };
         
         String::from("**Invalid request!**")
