@@ -191,10 +191,10 @@ pub async fn e6main(auth: Auth, input_message: RMessage) {
             .expect("Failed to deser e6.json");
      
      // fail conditions
-     if e6.enabled == false {
+     if !e6.enabled {
          return
          
-     }else if input_message.content == None {
+     }else if input_message.content.is_none() {
          return
      };
      let temp = input_message.content.unwrap();
@@ -210,7 +210,7 @@ pub async fn e6main(auth: Auth, input_message: RMessage) {
          e6_send(&input_message.channel, &auth.token, "could not reach e6!!").await;
      }
      
-     let var = match &convec[1] as &str {
+     let var = match convec[1] as &str {
          "search" => e6_search(&convec, &e6.url).await,
          _ => return,
          
@@ -261,7 +261,7 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
         .header(USER_AGENT, "libsixgrid/1.1.1")
         .send().await;
         
-        if !client.is_ok() { return String::new() };
+        if client.is_err() { return String::new() };
             
         let payload = client.unwrap().text().await.unwrap();
             
@@ -275,8 +275,8 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
         
         match (convec.len(), res.posts.len()) {
             // invalid
-            (0, _) | (1, _) | (2, _) => format!("**Invalid query!**"),
-            (_, 0)                   => format!("**No results!**"),
+            (0, _) | (1, _) | (2, _) => "**Invalid query!**".to_string(),
+            (_, 0)                   => "**No results!**".to_string(),
             // first result
             (3, _)                   => format!("**UwU**\n[]({})", img1),
             (4, 1)                   => format!("**UwU**\narg ignored, one result found\n[]({})", img1),
@@ -287,10 +287,10 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
   }
   
  
- fn querycheck(convec: &Vec<&str>, res: Root) -> String {
+ fn querycheck(convec: &[&str], res: Root) -> String {
      
         let number = convec[3].parse::<u32>();
-        if number.is_ok() && res.posts.len() >= number.clone().unwrap() as usize {
+        if  number.is_ok() && res.posts.len() >= number.clone().unwrap() as usize {
              
             let img1: String = match &res.posts[number.unwrap() as usize].file.url {
                 None => DURL.to_string(),
