@@ -16,7 +16,8 @@ mod plugins {
     pub mod shell;
     pub mod bridge;
     pub mod plural;
-    pub mod oop;
+    pub mod e6;
+
 
 }
 use crate::plugins::{
@@ -25,7 +26,8 @@ use crate::plugins::{
     shell::*,
     bridge::*,
     plural::*,
-    oop::oop_main
+    e6::e6main,
+
     
 };
 
@@ -151,7 +153,7 @@ pub async fn new_main(out: String, details: Auth) {
         message_process(details.clone(), message2),
         shell_main(details.clone(), message3),
         plural_main(details.clone(), message4),
-        oop_main(details.clone(), message5),
+        e6main(details.clone(), message5),
         
         );
 }
