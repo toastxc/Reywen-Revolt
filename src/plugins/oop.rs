@@ -1,13 +1,15 @@
-  // a sandbox for experimenting with OOP design patterns for abstraction and DX
+    // a sandbox for experimenting with OOP design patterns for abstraction and DX
     // lets create a simple hello world thingo
 
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2}};
-use crate::send;
+//use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2}};
+//use crate::send;
 
-struct oop {
-    enabled: bool,
-}
 
+
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send};
+
+
+/*
 #[derive(Debug)]
 pub enum ReyCLI{
 
@@ -56,7 +58,7 @@ impl ReyCLI {
 
 }
 
-    let config = oop{enabled: false};
+    let config = Oop{enabled: false};
     
     if config.enabled == false {
         return
@@ -95,3 +97,64 @@ impl ReyCLI {
     
 }
 
+*/
+
+
+#[derive(Default)]
+pub struct Reywen {
+    auth: Auth
+}
+
+impl Reywen {
+    
+    pub fn new(auth: Auth) -> Self {
+        Reywen
+        {
+            auth
+        }
+    }
+    
+  
+    pub async fn send(self, payload: RMessagePayload, channel: &str) -> Self {
+        //self.send = payload;
+        
+        rev_send(&self.auth.token, channel, payload).await;
+        self
+    }
+}
+
+impl RMessagePayload {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn content(mut self, content: &'static str) -> Self {
+        self.content = Some(content.to_string());
+        self
+    }
+    
+    pub fn masq(mut self, masq: Masquerade) -> Self {
+        self.masquerade = Some(masq);
+        self
+        
+    }
+}
+
+
+
+
+pub async fn oop_main(auth: Auth, input_message: RMessage) {
+    
+    
+    let client = Reywen::new(auth);
+  
+    let payload  = RMessagePayload::new()
+        .content("yayaya");
+   
+    if input_message.content == Some("?tester".to_string()) {
+        client.send(payload, &input_message.channel).await;
+    }
+    
+}
+    
+  
