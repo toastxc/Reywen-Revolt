@@ -12,25 +12,12 @@ use rand::Rng;
 // given a user ID, checks if the user is a 'sudoer' or not 
 pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
 
-    /*
-    for x in sudoers.iter() {
-        if user == x {
-
-            println!("WARN: SUDOER ACTION FROM {user} in {comment}");
-            return true;
-        };
-    };
-    false
-    
-    */
-    let user1 = user.to_string();
-    if sudoers.contains(&user1) {
+    if sudoers.contains(&user.to_string()) {
         println!("WARN: SUDOER ACTION FROM {user} in {comment}");
         return true
     };
     false 
         
-    
     
 }
 
