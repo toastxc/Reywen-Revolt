@@ -1,8 +1,12 @@
   // a sandbox for experimenting with OOP design patterns for abstraction and DX
     // lets create a simple hello world thingo
 
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2, rev_kick, sudocheck}};
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2}};
 use crate::send;
+
+struct oop {
+    enabled: bool,
+}
 
 #[derive(Debug)]
 pub enum ReyCLI{
@@ -52,10 +56,15 @@ impl ReyCLI {
 
 }
 
+    let config = oop{enabled: false};
+    
+    if config.enabled == false {
+        return
+    };
+
       let convec: Vec<String> = input_message.content.clone().unwrap().split_whitespace().map(str::to_string).collect();
       
-  
-    
+
     let masq: Masquerade  = Masquerade {
         avatar: Some("https://autumn.revolt.chat/avatars/tpDMc0zLiHzg9ZBLCHwF-7a50PRWwy9dsUMZaGi_2m".to_string()),
         name: Some("Reywen-MASQ".to_string()),
@@ -76,6 +85,9 @@ impl ReyCLI {
         //nothing
         _ => ReyCLI::None,
     }.run(auth, input_message).await;
+    
+    
+    
     
     
     
