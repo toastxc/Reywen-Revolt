@@ -272,10 +272,15 @@ async fn ping_test(url: &str) -> bool {
             let res: Root = serde_json::from_str(&payload)
                 .expect("failed to interpret E6 data");
                 
+                   if res.posts.len() == 0 {
+                    return "**No Results!**".to_string()
+                }
             
             
             if convec.len() > 3 {
             
+             
+                
                 let conum: usize = convec[3].parse().unwrap();
                 if res.posts[conum].preview.url == None {
                     return format!("**Invalid post!**\n[]({})", DURL);  
@@ -289,7 +294,8 @@ async fn ping_test(url: &str) -> bool {
                 }else {
                 return format!("**UwU**\n[]({})", res.posts[0].file.url.clone().unwrap());
                 
-            }}
+          
+              }}
         };
         
         String::new()
