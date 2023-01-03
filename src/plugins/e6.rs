@@ -187,7 +187,7 @@ pub async fn e6main(auth: Auth, input_message: RMessage) {
      
      let conf: String = fs_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
 
-     println!("{}", conf);
+
      let e6: E6Conf = serde_json::from_str(&conf)
             .expect("Failed to deser e6.json");
      
@@ -268,7 +268,7 @@ async fn ping_test(url: &str) -> bool {
         if client.is_ok() {
             let payload = client.unwrap().text().await.unwrap();
         
-            println!("{}", &payload);
+     
             let res: Root = serde_json::from_str(&payload)
                 .expect("failed to interpret E6 data");
                 
@@ -278,16 +278,17 @@ async fn ping_test(url: &str) -> bool {
             
                 let conum: usize = convec[3].parse().unwrap();
                 if res.posts[conum].preview.url == None {
-                    return format!("**UwU**\n[]({})", DURL);  
+                    return format!("**Invalid post!**\n[]({})", DURL);  
                 }else {
                   return format!("**UwU**\n[]({})", res.posts[conum].file.url.clone().unwrap());  
                 };
                   
             }else {
                 if res.posts[0].preview.url == None {
-                     return format!("**UwU**\n[]({})", DURL);  
+                     return format!("**Invalid post!**\n[]({})", DURL);  
                 }else {
                 return format!("**UwU**\n[]({})", res.posts[0].file.url.clone().unwrap());
+                
             }}
         };
         
