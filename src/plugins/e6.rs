@@ -269,7 +269,7 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
         let res: Root = serde_json::from_str(&payload)
             .expect("failed to interpret E6 data");
             
-        if res.posts.len() == 0 {
+        if res.posts.is_empty() {
             return "**No results!**".to_string();
         };
         let img1: String = match &res.posts[0].file.url {

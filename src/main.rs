@@ -17,6 +17,7 @@ mod plugins {
     pub mod bridge;
     pub mod plural;
     pub mod e6;
+    pub mod oop;
 
 
 }
@@ -26,9 +27,8 @@ use crate::plugins::{
     shell::*,
     bridge::*,
     plural::*,
-    e6::e6main,
-
-    
+    e6::e6_main,
+    oop::oop_main,
 };
 
 // reywen fs
@@ -133,11 +133,12 @@ pub async fn new_main(out: String, details: Auth) {
 
     let raw_message = rev_message_in(out);
 
-    let (message, message2, message3, message4, message5) = match raw_message {
+    let (message, message2, message3, message4, message5, message6) = match raw_message {
         Err(_) => return,
         Ok(_) => (
             raw_message.as_ref().expect("failed converting message").clone(), 
             raw_message.as_ref().expect("failed converting message").clone(), 
+            raw_message.as_ref().expect("failed converting message").clone(),
             raw_message.as_ref().expect("failed converting message").clone(),
             raw_message.as_ref().expect("failed converting message").clone(),
             raw_message.as_ref().expect("failed converting message").clone()
@@ -153,7 +154,9 @@ pub async fn new_main(out: String, details: Auth) {
         message_process(details.clone(), message2),
         shell_main(details.clone(), message3),
         plural_main(details.clone(), message4),
-        e6main(details.clone(), message5),
+        e6_main(details.clone(), message5),
+        oop_main(details.clone(), message6)
+        
         
         );
 }
