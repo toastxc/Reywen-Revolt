@@ -1,5 +1,5 @@
 use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload, RReplies}}, rev_x::rev_send};
-
+use crate::plugins::lreywen::reply_from;
 #[derive(Debug, Clone, Default)]
 pub struct Reywen {
   auth: Auth
@@ -58,8 +58,8 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
     // new client based on stored auth keys
     let client = Reywen::new(auth);
   
-    // clients can be constructed from hard coded values like so
-    let other_client = Reywen::new(Auth {token: String::from("TOKEN"), bot_id: String::from("ID"), sudoers: Vec::new()});
+    // clients can be constructed from hard coded values like so (commented for warning)
+    //let other_client = Reywen::new(Auth {token: String::from("TOKEN"), bot_id: String::from("ID"), sudoers: Vec::new()});
   
     // Masquerade is a feature in revolt for sending messages with a 
     // different profile, requires permissions from a server

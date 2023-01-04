@@ -22,11 +22,12 @@ mod plugins {
 
 }
 use crate::plugins::{
-    lreywen::*,
-    message::*,
-    shell::*,
-    bridge::*,
-    plural::*,
+    //lreywen::*,
+    lreywen::{send, reyshell_masq},
+    message::message_process,
+    shell::shell_main,
+    bridge::br_main,
+    plural::plural_main,
     e6::e6_main,
     oop::oop_main,
 };
