@@ -16,9 +16,22 @@ impl Reywen {
     
   
     pub async fn send(self, payload: RMessagePayload, channel: &str) -> Self {
-        //self.send = payload;
+    
         
         rev_send(&self.auth.token, channel, payload).await;
+        self
+    }
+    pub async fn sender(self, content: &str, input_message: &RMessage) -> Self {
+        
+        let payload = RMessagePayload {
+            content: Some(String::from(content)),
+            attachments: None,
+            replies: Some(vec![reply_from(input_message)]),
+            masquerade: None,
+        };
+        
+        
+        rev_send(&self.auth.token, &input_message.channel, payload).await;
         self
     }
 }
@@ -40,7 +53,7 @@ impl RMessagePayload {
     }
     
     pub fn reply(mut self, input: &RMessage) -> Self {
-        self.replies = Some(vec![reply_from(&input)]);
+        self.replies = Some(vec![reply_from(input)]);
         self
     }
     
@@ -73,8 +86,6 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
            mention: false,
        }  
    ];
-   
-    
     
     
     // RMessagePayload is the type for sending messages to Revolt API
@@ -92,8 +103,44 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
     //this is a simple example of message logic
     // if the content of the previous message from websocket == "?tester"
     // send payload as defined ^
-    if input_message.content == Some("?tester".to_string()) {
-        client.send(payload, &input_message.channel).await;
-    }
+    if input_message.content == Some(String::from("?tester")) {
+        client.clone().send(payload, &input_message.channel).await;
+    };
+    
+    // another method, sender is even simpler but grants less control over options
+    client.clone().sender("owo", &input_message).await;
+    
+    
+    // usually bots have many commands and operations, and for this
+    // a match is much more practical
+    // another thing we'll do  is split the input message into a vector
+    // seperated by spaces, unfortunately handling vectors the wrong way
+    // can lead to crashes so we will handle that too
+    
+    // this closes the function if there is no content
+    let input = match input_message.clone().content {
+        None => return,
+        Some(a) => a,
+    };
+    
+    // cconvec short for content vector (self explanatory)
+    let convec: Vec<&str> = input.split(" ").collect();
+    if convec.len() < 1 {return};
+    
+    // matches make code a lot cleaner for multiple arguements
+    let sender_content = match convec[0] {
+        
+        // if input == ?mog, define sender as AMOGUS
+        "?mog" => "AMOGUS",
+        "i dont like reywen" => "meanie ;w;",
+        
+        // if no conditions are met, return an empty string
+        _ => return
+    };
+    
+    client.sender(sender_content, &input_message).await;
+    
+    
+    
     
 }
