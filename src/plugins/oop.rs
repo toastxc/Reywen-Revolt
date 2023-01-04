@@ -1,104 +1,4 @@
-    // a sandbox for experimenting with OOP design patterns for abstraction and DX
-    // lets create a simple hello world thingo
-
-//use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::{rev_send, rev_del_2}};
-//use crate::send;
-
-
-
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send};
-
-
-/*
-#[derive(Debug)]
-pub enum ReyCLI{
-
-    Send{content: & 'static str},
-    SendMasq{content:  & 'static str, masq: Masquerade},
-    Delete{message: String},
-    None,
-    
-}
-pub async fn oop_main(auth: Auth, input_message: RMessage ) {
-    
-impl ReyCLI {
-
-    
-    pub async fn run(&self, auth: Auth, message_input: RMessage) {
-        match self {
-
-            Self::Send{content } => {
-                send(&auth.token, &message_input, content ).await
-            },
-                        
-            Self::SendMasq { content, masq } => {
-      
-                let payload = RMessagePayload {
-                    content: Some(content.to_string()),
-                    attachments: None,
-                    replies: None,
-                    masquerade: Some(masq.to_owned()),   
-                    
-                };
-                rev_send(&auth.token, &message_input.channel, payload).await          
-            },
-            
-            Self::Delete{message} => {
-                
-                
-                rev_del_2(&auth.token, &message_input.channel, message).await;
-            },
-
-            
-            Self::None => {},
-            
-        };
-    }
-
-
-}
-
-    let config = Oop{enabled: false};
-    
-    if config.enabled == false {
-        return
-    };
-
-      let convec: Vec<String> = input_message.content.clone().unwrap().split_whitespace().map(str::to_string).collect();
-      
-
-    let masq: Masquerade  = Masquerade {
-        avatar: Some("https://autumn.revolt.chat/avatars/tpDMc0zLiHzg9ZBLCHwF-7a50PRWwy9dsUMZaGi_2m".to_string()),
-        name: Some("Reywen-MASQ".to_string()),
-        colour: None,            
-    };
-         
-  
-         
-    match &convec[0] as &str {
-        
-        // send message normally
-        "?mog" => ReyCLI::Send { content: (":01G7MT5B978E360NB6VWAS9SJ6:") },
-        "?ver" => ReyCLI::Send { content: ("Rolling release ([here](https://github.com/toastxc/Reywen-Revolt))") },
-        // send message with masquerade (requires a masq object)
-        "?mogus" => ReyCLI::SendMasq { content: ("sus"), masq: (masq) },
-        // deletes a given message
-        "?del" => ReyCLI::Delete { message: (convec[1].clone()) },
-        //nothing
-        _ => ReyCLI::None,
-    }.run(auth, input_message).await;
-    
-    
-    
-    
-    
-    
-  
-    
-}
-
-*/
-
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload, RReplies}}, rev_x::rev_send};
 
 #[derive(Debug, Clone, Default)]
 pub struct Reywen {
@@ -133,10 +33,20 @@ impl RMessagePayload {
         self
     }
     
-    pub fn masq(mut self, masq: Masquerade) -> Self {
+    pub fn masquerade(mut self, masq: Masquerade) -> Self {
         self.masquerade = Some(masq);
         self
         
+    }
+    
+    pub fn reply(mut self, input: &RMessage) -> Self {
+        self.replies = Some(vec![reply_from(&input)]);
+        self
+    }
+    
+    pub fn replies(mut self, replies: Vec<RReplies>) -> Self {
+        self.replies = Some(replies);
+        self
     }
 }
 
@@ -145,16 +55,58 @@ impl RMessagePayload {
 
 pub async fn oop_main(auth: Auth, input_message: RMessage) {
     
-    
+    // new client based on stored auth keys
     let client = Reywen::new(auth);
   
-    let payload  = RMessagePayload::new()
-        .content("yayaya");
+    // clients can be constructed from hard coded values like so
+    let other_client = Reywen::new(Auth {token: String::from("TOKEN"), bot_id: String::from("ID"), sudoers: Vec::new()});
+  
+    // Masquerade is a feature in revolt for sending messages with a 
+    // different profile, requires permissions from a server
+    let masq = Masquerade { name: Some(String::from("Greg")), avatar: None, colour: None };
+    
+  
+   // replies payload
+   let replies = vec![
+       RReplies {
+           id: input_message._id.to_owned(),
+           mention: false,
+       }  
+   ];
    
+    
+    
+    
+    // RMessagePayload is the type for sending messages to Revolt API
+    // all fields are optional
+    let payload  = RMessagePayload::new()
+        // message content
+        .content("Hello i am greg!")
+        .masquerade(masq)
+        // reply from constructs a reply payload based on an input message
+        .reply(&input_message)
+        // replies allows manual control values for replies
+        .replies(replies);
+        
+   
+    //this is a simple example of message logic
+    // if the content of the previous message from websocket == "?tester"
+    // send payload as defined ^
     if input_message.content == Some("?tester".to_string()) {
         client.send(payload, &input_message.channel).await;
     }
     
 }
     
-  
+ 
+pub fn reply_from(input: &RMessage) -> RReplies {
+    
+    RReplies {
+        id: input._id.to_owned(),
+        mention: false,
+    }
+}
+
+pub fn link_to_embed(input: &str) -> String {
+    format!("[]({input})")
+}
