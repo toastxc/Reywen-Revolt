@@ -97,16 +97,3 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
     }
     
 }
-    
- 
-pub fn reply_from(input: &RMessage) -> RReplies {
-    
-    RReplies {
-        id: input._id.to_owned(),
-        mention: false,
-    }
-}
-
-pub fn link_to_embed(input: &str) -> String {
-    format!("[]({input})")
-}
