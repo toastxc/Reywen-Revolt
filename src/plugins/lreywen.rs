@@ -34,46 +34,16 @@ pub async fn send(token: &str, message: &RMessage , content: &str) {
 
     rev_send(token, &message.channel, payload2).await;
 }
-// masq wrapper for rev_send this is outdated and has been replaced by the plugin plural
-pub async fn sendas(token: &str, message: &RMessage, content_vec: &Vec<&str>) {
-
-    if content_vec.len() < 3 {
-        send(token, message, "invalid use of sendas").await;
-        return
-    };
-    let masq = content_vec[1];
-    let mut content = String::new();
-
-    let link = match masq {
-        "bingus"    | "cheese"  | "dad" |
-        "deeznuts"  |  "insert" | "joe_biden" |
-        "valence"   | "walter"  | "woof" => format!("https://toastxc.xyz/TXCS/{masq}.jpg"),
-        _ => String::from("https://toastxc.xyz/TXCS/default.png")
-    };
-
-    for x in 0..content_vec.len() -2 {
-        content += &format!(" {}", content_vec[x + 2]);
-    };
-
-    let masq_s = Masquerade {
-        name: Some(masq.to_string()),
-        avatar: Some(link),
-        colour: None,
-    };
 
 
-    let replier = rev_convert_reply(message.replies.clone()).await;
-
-    let returner = RMessagePayload {
-          content: Some(content),
-          replies: replier,
-          attachments: None,
-          masquerade: Some(masq_s)
-    };
-
-    tokio::join!( 
-        rev_send(token, &message.channel, returner),
-        rev_del(token, message),
-    );
+pub fn reply_from(input: &RMessage) -> RReplies {
+    
+    RReplies {
+        id: input._id.to_owned(),
+        mention: false,
+    }
 }
 
+pub fn link_to_embed(input: &str) -> String {
+    format!("[]({input})")
+}
