@@ -1,6 +1,7 @@
 
 const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
 
+use urlencoding::encode;
 use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send, fs::fs_str};
 use reqwest::header::USER_AGENT;
 use serde::{Serialize, Deserialize};
@@ -255,15 +256,16 @@ async fn ping_test(url: &str) -> bool {
   
 async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
       
+      let query = &format!("{url}/posts.json?tags={}", encode(convec[2])).to_string();
+      
       let client: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new() 
-        .get(format!("{url}/posts.json?tags={}", convec[2]))
+        .get(query)
         .header(USER_AGENT, "libsixgrid/1.1.1")
         .send().await;
         
         if client.is_err() { return String::new() };
       
-            
         let payload = client.unwrap().text().await.unwrap();
             
         let res: Root = serde_json::from_str(&payload)
