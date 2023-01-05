@@ -10,7 +10,7 @@ pub struct MessageConf {
 }
 
 // main message engine 
-pub async fn message_process(details: Auth, message_in: RMessage) {
+pub async fn message_process(details: Auth, message_in: &RMessage) {
 
     let conf = fs_str("config/message.json").expect("failed to read config/message.json\n{e}");
 
@@ -32,8 +32,8 @@ pub async fn message_process(details: Auth, message_in: RMessage) {
 
     match content_vec[0] as &str {
 
-        "?Mog" | "?mog"  => send(&details.token, &message_in, ":01G7MT5B978E360NB6VWAS9SJ6:").await,
-        "?ver" | "?version" => send(&details.token, &message_in, "**Version**\nReywen: `2`\nRevX: `2`").await,
+        "?Mog" | "?mog"  => send(&details.token, message_in, ":01G7MT5B978E360NB6VWAS9SJ6:").await,
+        "?ver" | "?version" => send(&details.token, message_in, "**Version**\nReywen: `2`\nRevX: `2`").await,
         _ => ()
     }
     

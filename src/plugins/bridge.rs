@@ -10,7 +10,7 @@ pub struct BrConf {
 }
 
 //pub fn conf_error(details_in: 
-pub async fn br_main(auth: Auth, input_message: RMessage) {
+pub async fn br_main(auth: Auth, input_message: &RMessage) {
 
     let conf = fs_str("config/bridge.json");
 
@@ -93,7 +93,7 @@ pub async fn br_main(auth: Auth, input_message: RMessage) {
     let payload = RMessagePayload {
         content: message.content,
         attachments: None,
-        replies: rev_convert_reply(input_message.replies).await,
+        replies: rev_convert_reply(input_message.replies.clone()).await,
         masquerade: Some(br_masq),
     };
 

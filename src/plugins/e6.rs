@@ -183,7 +183,7 @@ pub struct Relationships {
     pub children: Option<Vec<i32>>,
 }
 
-pub async fn e6_main(auth: Auth, input_message: RMessage) {
+pub async fn e6_main(auth: Auth, input_message: &RMessage) {
      
      
      let conf: String = fs_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
@@ -198,7 +198,7 @@ pub async fn e6_main(auth: Auth, input_message: RMessage) {
      }else if input_message.content.is_none() {
          return
      };
-     let temp = input_message.content.unwrap();
+     let temp = input_message.content.clone().unwrap();
      let convec: Vec<&str> = temp.split(' ').collect();
      
      if convec.len() < 3 {

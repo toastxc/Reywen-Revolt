@@ -93,9 +93,8 @@ pub async fn webocket_ping(mut ws_stream: WebSocketStream<tokio_tungstenite::May
         tokio::time::sleep(Duration::from_secs(30)).await;
         let send_res = ws_stream.send(tokio_tungstenite::tungstenite::Message::Text(PING.to_string())).await;
         
-        if send_res.is_err() {
-            panic!("Failed to ping websocket, restarting");
-        };
+        
+        send_res.expect("Failed to ping websocket, restarting");
     };
 
 }
@@ -134,31 +133,21 @@ pub async fn new_main(out: String, details: Auth) {
 
     let raw_message = rev_message_in(out);
 
-    let (message, message2, message3, message4, message5, message6) = match raw_message {
-        Err(_) => return,
-        Ok(_) => (
-            raw_message.as_ref().expect("failed converting message").clone(), 
-            raw_message.as_ref().expect("failed converting message").clone(), 
-            raw_message.as_ref().expect("failed converting message").clone(),
-            raw_message.as_ref().expect("failed converting message").clone(),
-            raw_message.as_ref().expect("failed converting message").clone(),
-            raw_message.as_ref().expect("failed converting message").clone()
- 
-
-            )
-    };
-
+    let message = raw_message.expect("failed to process websocket message");
 
     tokio::join!(
 
-        br_main(details.clone(), message),
-        message_process(details.clone(), message2),
-        shell_main(details.clone(), message3),
-        plural_main(details.clone(), message4),
-        e6_main(details.clone(), message5),
-        oop_main(details.clone(), message6)
+        br_main(details.clone(), &message),
+        message_process(details.clone(), &message),
+        shell_main(details.clone(), &message),
+        plural_main(details.clone(), &message),
+        e6_main(details.clone(), &message),
+        oop_main(details.clone(), &message)
+    );
+        
+    
         
         
-        );
+    
 }
 

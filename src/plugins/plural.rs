@@ -23,7 +23,7 @@ struct Plural {
 }
 
 // plugin main is responsible for getting details and activiating functions based on conditions
-pub async fn plural_main(auth: Auth, message: RMessage) {
+pub async fn plural_main(auth: Auth, message: &RMessage) {
 
     let conf = fs_str("config/plural.json")
         .expect("failed to read config/plural.json\n{e}");
@@ -52,7 +52,7 @@ pub async fn plural_main(auth: Auth, message: RMessage) {
         return
     
     }else if content.len() < 3 {
-        send(&auth.token, &message, "**Reywen Masq**
+        send(&auth.token, message, "**Reywen Masq**
              `search <name>`: Search for an entry in ReywenDB
              `insert <name> <avatar-url> <color>`: create a new entry
              `query <name>`: searches for entry and provides details
@@ -217,8 +217,7 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
             return
         }; 
     };
-       
-      
+    
       
      let data: Vec<Document> =
          vec![
@@ -238,9 +237,5 @@ async fn pl_insert(auth: Auth, message: RMessage, plural: Plural, content: Vec<&
       }else {
           send(&auth.token, &message, "**Object valid, inserting...**").await;
       };
-      
-      
-      
-
-      
+           
 }

@@ -17,7 +17,7 @@ pub struct SocConf {
     pub channel: String,
 }
 
-pub async fn shell_main(details: Auth, message: RMessage) {
+pub async fn shell_main(details: Auth, message: &RMessage) {
 
     let conf = fs_str("config/shell.json")
         .expect("failed to read config/shell.json\n{e}");
