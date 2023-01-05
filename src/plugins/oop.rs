@@ -1,4 +1,6 @@
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload, RReplies}}, rev_x::rev_send};
+
+
+use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload, RReplies}}, rev_x::{rev_send, rev_del_2}};
 use crate::plugins::lreywen::reply_from;
 #[derive(Debug, Clone, Default)]
 pub struct Reywen {
@@ -29,9 +31,11 @@ impl Reywen {
             replies: Some(vec![reply_from(input_message)]),
             masquerade: None,
         };
-        
-        
         rev_send(&self.auth.token, &input_message.channel, payload).await;
+        self
+    }
+    pub async fn delete_msg(self, message_id: &str, input_message: &RMessage, ) -> Self {
+        rev_del_2(&self.auth.token, message_id, &input_message.channel).await;
         self
     }
 }
@@ -66,7 +70,9 @@ impl RMessagePayload {
 
 
 
-pub async fn oop_main(auth: Auth, input_message: RMessage) {
+pub async fn oop_main(auth: Auth, input_message: &RMessage) {
+    // stops function from running
+    return;
     
     // new client based on stored auth keys
     let client = Reywen::new(auth);
@@ -95,7 +101,7 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
         .content("Hello i am greg!")
         .masquerade(masq)
         // reply from constructs a reply payload based on an input message
-        .reply(&input_message)
+        .reply(input_message)
         // replies allows manual control values for replies
         .replies(replies);
         
@@ -108,7 +114,7 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
     };
     
     // another method, sender is even simpler but grants less control over options
-    client.clone().sender("owo", &input_message).await;
+    client.clone().sender("owo", input_message).await;
     
     
     // usually bots have many commands and operations, and for this
@@ -124,8 +130,8 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
     };
     
     // cconvec short for content vector (self explanatory)
-    let convec: Vec<&str> = input.split(" ").collect();
-    if convec.len() < 1 {return};
+    let convec: Vec<&str> = input.split(' ').collect();
+    if convec.is_empty() {return};
     
     // matches make code a lot cleaner for multiple arguements
     let sender_content = match convec[0] {
@@ -138,9 +144,27 @@ pub async fn oop_main(auth: Auth, input_message: RMessage) {
         _ => return
     };
     
-    client.sender(sender_content, &input_message).await;
+    client.sender(sender_content, input_message).await;
     
     
+    // the message input is a bad word, remove it
+    if convec.contains(&"badword") {
+        client.delete_msg(&input_message._id, input_message).await;  
+    };
+    
+    // a more robust solution for banned words
+    let wordlist = vec!["?word1", "?word1", "?word1", "?word1", "?word1"];
+    
+    for x in wordlist.iter() {
+        if convec.contains(x) {
+            client.delete_msg(&input_message._id, input_message).await;  
+        }
+    };
+    
+    
+    
+    
+     
     
     
 }
