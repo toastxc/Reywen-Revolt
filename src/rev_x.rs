@@ -12,13 +12,11 @@ use rand::Rng;
 // given a user ID, checks if the user is a 'sudoer' or not 
 pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
 
-    if sudoers.contains(&user.to_string()) {
+    if sudoers.contains(&user.to_owned()) {
         println!("WARN: SUDOER ACTION FROM {user} in {comment}");
         return true
     };
     false 
-        
-    
 }
 
 // deserializes websocket messages
@@ -40,9 +38,7 @@ pub async fn rev_user(token: &str, target: &str) -> Option<RUserFetch> {
     if client.is_ok() {
         
         let client_res = client.unwrap().text().await.unwrap();
-         
         let json:RUserFetch = serde_json::from_str(&client_res).unwrap();
-         
         return Some(json)
         
     };
@@ -90,14 +86,12 @@ pub async fn rev_kick(token: &str, user: &str, server: &str) {
 // prints http based error codes to stdout with an optional message
 pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) {
 
-    // reqwest
-    match http {
-        Ok(_) => {},
-        Err(e) => {println!("{message}_REQWEST_ERROR:\n{e}"); return},
-    };
-
-    // http
-    if !http.as_ref().unwrap().status().is_success() {
+    // reqwest error    
+    if http.is_err() {
+        println!("{message}_REQWEST_ERROR:\n{}", http.err().unwrap());
+    
+    // http error
+    }else if !http.as_ref().unwrap().status().is_success() {
         println!("{message}_HTTP_ERROR: {}", http.unwrap().status());
     };
 }
@@ -128,25 +122,19 @@ let client: std::result::Result<reqwest::Response, reqwest::Error> =
 
 // converts websocket replies to API compatible replies
 pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
-
-    if input.is_some() {
-
-        let mut repstruct = Vec::new();
-
-        let iter = input.clone()?.len();
-
-        for x in 0..iter {
-
-            let input_iter = &input.as_ref().expect("failed to convert input wstoapi")[x];
-
-            let reply = RReplies {
-                id: input_iter.to_string(),
-                mention: false,
-            };
-            repstruct.push(reply);
-        };
-
-        return Some(repstruct)
+    
+    // return on none
+    input.as_ref()?;
+    
+    let mut reply_vec: Vec<RReplies> = Vec::new();
+    
+    for x in input.unwrap().iter() {
+        
+         let temp = RReplies {
+           id: x.to_owned(),
+           mention: false,  
+         };
+         reply_vec.push(temp)
     };
-    None
+    Some(reply_vec)
 }
