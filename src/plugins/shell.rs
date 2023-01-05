@@ -7,17 +7,11 @@ use serde::{Serialize, Deserialize};
 pub struct ShellConf {
     pub enabled: bool,
     pub whitelist_sudoers: bool,
-    pub bash_sudo: bool,
-    pub channel: SocConf,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct SocConf {
-    pub enabled: bool,
+    pub channel_only: bool,
     pub channel: String,
 }
 
-pub async fn shell_main(details: Auth, message: &RMessage) {
+pub async fn shell_main(auth: Auth, message: &RMessage) {
 
     let conf = fs_str("config/shell.json")
         .expect("failed to read config/shell.json\n{e}");
@@ -31,18 +25,16 @@ pub async fn shell_main(details: Auth, message: &RMessage) {
     };
  
     // initalize variables
-    let (auth, soc) = (details.clone(),  shell.channel.clone());
     let content_vec =  content.split(' ').collect::<Vec<&str>>();
 
 
-    
 
     // perm check 
     if !shell.enabled {
         return
     }else if message.content.is_none() {
         return
-   }else if soc.enabled && soc.channel != message.channel {
+   }else if shell.channel_only && shell.channel != message.channel {
        return
    }else if content_vec[0] != "?/" {
        return
@@ -59,12 +51,11 @@ pub async fn shell_main(details: Auth, message: &RMessage) {
         content_min1 += &format!("{} ", content_vec[x + 1])
     };
 
-    bash_exec(content_vec, details.clone(), message.clone()).await;
+    bash_exec(content_vec, &auth, message.clone()).await;
                
-
 }
 
-pub async fn bash_exec(input: Vec<&str>, details: Auth, message: RMessage) {
+pub async fn bash_exec(input: Vec<&str>, details: &Auth, message: RMessage) {
 
     // shell
 

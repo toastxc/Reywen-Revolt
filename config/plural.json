@@ -1,9 +1,11 @@
 {
-	"enable": false,
-    	"channel_only": false,
-    	"channel": "",
-    	"db_usrname": "",
-	"db_pswd": "",
-    	"db_ip": "",
-    	"db_port": ""
+	"enabled": false,
+    
+    "channel_only": false,
+    "channel": "",
+    	
+    "db_usrname": "reywen",
+	"db_pswd": "PASSWORD",
+    "db_ip": "localhost",
+    "db_port": "27017"
 }
