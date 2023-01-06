@@ -132,8 +132,11 @@ pub async fn websocket_sub(ws_stream: WebSocketStream<tokio_tungstenite::MaybeTl
 pub async fn new_main(out: String, details: Auth) {
 
     let raw_message = rev_message_in(out);
+    
+    if raw_message.is_err() {return};
+    
+    let message = raw_message.expect("failed to process ws message");
 
-    let message = raw_message.expect("failed to process websocket message");
 
     tokio::join!(
 

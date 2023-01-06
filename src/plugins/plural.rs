@@ -12,7 +12,7 @@ use crate::rev_del;
 // jsons and usually stored in config/
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Plural {
-    pub enable: bool,
+    pub enabled: bool,
     pub channel_only: bool,
     pub channel: String,
     pub db_usrname: String,
@@ -34,7 +34,7 @@ pub async fn plural_main(auth: Auth, message: &RMessage) {
 
     // if the config channel matches the channel of the message received AND 
     // if the plugin is enabled, send ID
-    if !plural.enable {
+    if !plural.enabled {
         return
     
     }else if plural.channel_only && plural.channel != message.channel {
@@ -147,6 +147,7 @@ async fn pl_search(content: &str, plural: Plural) -> Option<Masquerade> {
         Ok(a) => a,
         Err(e) => panic!("MONGODB_FAILED_SEARCH:\n{e}"),
     };
+
 
     let db = client.database("test");
 
