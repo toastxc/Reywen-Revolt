@@ -1,6 +1,7 @@
 
 use crate::RMessage;
 
+use crate::lib::message::RChannelFetch;
 use crate::lib::{
     user::RUserFetch,
     message::RMessagePayload,
@@ -8,6 +9,8 @@ use crate::lib::{
 };
 
 use rand::Rng;
+
+
 
 // given a user ID, checks if the user is a 'sudoer' or not 
 pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
@@ -29,7 +32,7 @@ pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
 pub async fn rev_user(token: &str, target: &str) -> Option<RUserFetch> {
 
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new() 
+    reqwest::Client::new()
         .get(format!("https://api.revolt.chat/users/{target}"))
         .header("x-bot-token", token)
         .send().await;
@@ -70,7 +73,7 @@ pub async fn rev_send(token: &str, channel: &str, payload: RMessagePayload)  {
 
 // https://developers.revolt.chat/api/#tag/Server-Members/operation/member_remove_req
 pub async fn rev_kick(token: &str, user: &str, server: &str) {
-
+  //  https://api.revolt.chat/servers/{target}/members/{member}
     
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new()
@@ -137,4 +140,27 @@ pub async fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplie
          reply_vec.push(temp)
     };
     Some(reply_vec)
+}
+
+
+pub async fn rev_fetch_channel(channel: &str, token: &str) -> Option<RChannelFetch>  {
+    let client =
+    reqwest::Client::new()
+    .get(format!("https://api.revolt.chat/channels/{}", channel))
+    .header("x-bot-token", token)
+    .send().await;
+
+
+    if client.is_ok() {
+
+        let client_res = client.unwrap().text().await.unwrap();
+        let json: RChannelFetch = serde_json::from_str(&client_res).unwrap();
+        return Some(json)
+
+    };
+
+    http_err(client, "REV_CHANNEL_FETCH");
+    None
+
+
 }
