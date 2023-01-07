@@ -47,3 +47,37 @@ pub fn reply_from(input: &RMessage) -> RReplies {
 pub fn link_to_embed(input: &str) -> String {
     format!("[]({input})")
 }
+
+
+// if the input message is not usable for reywen then return
+pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> bool {
+
+    if input_message.content.is_none() {
+        return true
+    };
+
+    let temp_convec: Vec<&str> =  input_message.content.as_ref().unwrap().split(' ').collect::<Vec<&str>>();
+
+    let mut length = 1;
+
+    if character.is_none() {
+        length = 2;
+    }
+
+    if temp_convec.len() < length {
+        return true
+    };
+
+    if character.is_some() {
+        if temp_convec[0] != character.unwrap() {
+            return true
+        };
+    }
+    false
+}
+
+
+
+pub fn convec(input_message: &RMessage) -> Vec<&str> {
+    input_message.content.as_ref().unwrap().split(' ').collect::<Vec<&str>>()
+}
