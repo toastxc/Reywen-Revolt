@@ -12,12 +12,9 @@ pub struct Reywen {
 
 impl Reywen {
 
+    #[allow(dead_code)]
     pub fn new(auth: Auth, input_message: &RMessage) -> Self {
-
-
-
         let input_message = input_message.to_owned();
-
 
         Reywen
         {
@@ -25,13 +22,14 @@ impl Reywen {
         }
     }
 
-
+    #[allow(dead_code)]
     pub async fn send(self, payload: RMessagePayload) -> Self {
 
 
         rev_send(&self.auth.token, &self.input_message.channel, payload).await;
         self
     }
+    #[allow(dead_code)]
     pub async fn sender(self, content: &str) -> Self {
 
 
@@ -44,11 +42,13 @@ impl Reywen {
         rev_send(&self.auth.token, &self.input_message.channel, payload).await;
         self
     }
+    #[allow(dead_code)]
     pub async fn delete_msg(self, message_id: &str) -> Self {
         rev_del_2(&self.auth.token, message_id, &self.input_message.channel).await;
         self
     }
 
+    #[allow(dead_code)]
     pub async fn member_kick(self, user: &str) -> Self {
 
         let server = rev_fetch_channel(&self.input_message.channel, &self.auth.token).await.unwrap().server;
@@ -64,29 +64,33 @@ impl Reywen {
 }
 
 impl RMessagePayload {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[allow(dead_code)]
     pub fn content(mut self, content: &'static str) -> Self {
         self.content = Some(content.to_string());
         self
     }
 
+    #[allow(dead_code)]
     pub fn masquerade(mut self, masq: Masquerade) -> Self {
         self.masquerade = Some(masq);
         self
 
     }
 
+    #[allow(dead_code)]
     pub fn reply_from(mut self, input: &RMessage) -> Self {
         self.replies = Some(vec![reply_from(input)]);
         self
     }
 
+    #[allow(dead_code)]
     pub fn replies(mut self, replies: Vec<RReplies>) -> Self {
         self.replies = Some(replies);
         self
     }
 }
-

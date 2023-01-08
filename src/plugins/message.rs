@@ -2,7 +2,7 @@
 use serde::{Serialize, Deserialize};
 
 // internal
-use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::{lreywen::send, mongo::{RMongo, mongo_db}}};
+use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::lreywen::send};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageConf {
@@ -21,13 +21,13 @@ pub async fn message_process(details: Auth, message_in: &RMessage) {
     if !message_conf.enabled  { return };
 
     let content = &message_in.content;
-    
+
     if content.is_none() {
         return
     }else if message_in.author == details.bot_id {
         return
     };
-  
+
     let content_vec: Vec<&str> =  (message_in.content).as_ref().expect("failed to split vec").split(' ').collect::<Vec<&str>>();
 
     match content_vec[0] as &str {
@@ -36,3 +36,4 @@ pub async fn message_process(details: Auth, message_in: &RMessage) {
         "?ver" | "?version" => send(&details.token, message_in, "**Version**\nReywen: `2`\nRevX: `2`").await,
         _ => ()
     };
+}

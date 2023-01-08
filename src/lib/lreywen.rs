@@ -36,7 +36,7 @@ pub async fn send(token: &str, message: &RMessage , content: &str) {
     rev_send(token, &message.channel, payload2).await;
 }
 
-
+#[allow(dead_code)]
 pub fn reply_from(input: &RMessage) -> RReplies {
 
     RReplies {
@@ -44,13 +44,14 @@ pub fn reply_from(input: &RMessage) -> RReplies {
         mention: false,
     }
 }
-
+#[allow(dead_code)]
 pub fn link_to_embed(input: &str) -> String {
     format!("[]({input})")
 }
 
 
 // if the input message is not usable for reywen then return
+#[allow(dead_code)]
 pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> bool {
 
     if input_message.content.is_none() {
@@ -68,17 +69,14 @@ pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> boo
     if temp_convec.len() < length {
         return true
     };
-
-    if character.is_some() {
-        if temp_convec[0] != character.unwrap() {
-            return true
-        };
-    }
+    if character.is_some() && temp_convec[0] != character.unwrap() {
+        return true
+    };
     false
 }
 
 
-
+#[allow(dead_code)]
 pub fn convec(input_message: &RMessage) -> Vec<&str> {
     input_message.content.as_ref().unwrap().split(' ').collect::<Vec<&str>>()
 }
