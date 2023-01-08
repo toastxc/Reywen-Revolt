@@ -1,54 +1,47 @@
-// quark structs
-mod lib {
-    pub mod message;
-    pub mod user;
-    pub mod conf;
-}
-use crate::lib::{
-    message::RMessage,
-    conf::Auth};
-
-
-// reywen plugins
+// plugins
 mod plugins {
-    pub mod lreywen;
-    pub mod message;
-    pub mod shell;
     pub mod bridge;
-    pub mod plural;
     pub mod e6;
-    pub mod oop;
-
+    pub mod message;
+    pub mod plural;
+    pub mod shell;
 
 }
 use crate::plugins::{
-    //lreywen::*,
-    lreywen::{send, reyshell_masq},
-    message::message_process,
-    shell::shell_main,
     bridge::br_main,
-    plural::plural_main,
     e6::e6_main,
-    oop::oop_main,
+    message::message_process,
+    plural::plural_main,
+    shell::shell_main,
 };
 
-// reywen fs
-mod fs;
-use fs::{conf_init, fs_str};
 
-// RevX2
-pub mod rev_x;
-use rev_x::*;
+// libraries
+mod lib {
+    pub mod fs;
+    pub mod lreywen;
+    pub mod oop;
+    pub mod rev_x;
+}
+use crate::lib::fs::*;
+use crate::lib::rev_x::rev_message_in;
 
-// network
-use futures_util::StreamExt;
-use tokio_tungstenite::connect_async;
-use tokio_tungstenite::WebSocketStream;
-use futures_util::SinkExt;
 
+// structs
+mod structs {
+    pub mod auth;
+    pub mod message;
+    pub mod user;
+}
+use structs::auth::Auth;
+
+
+// external crates
+use futures_util::{StreamExt, SinkExt};
+use tokio_tungstenite::{connect_async, WebSocketStream};
 use std::str::from_utf8;
-
 use tokio::time::Duration;
+
 
 
 const PING: &str = r#"{
@@ -139,13 +132,11 @@ pub async fn new_main(out: String, details: Auth) {
 
 
     tokio::join!(
-
         br_main(details.clone(), &message),
         message_process(details.clone(), &message),
         shell_main(details.clone(), &message),
         plural_main(details.clone(), &message),
         e6_main(details.clone(), &message),
-        oop_main(details.clone(), &message)
     );
         
     

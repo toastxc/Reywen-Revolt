@@ -1,7 +1,8 @@
 // an abstraction layer for RevX2
+use crate::structs::message::{RMessagePayload, RMessage, RReplies, Masquerade};
 
-use crate::lib::message::{RMessage, RReplies, RMessagePayload, Masquerade};
-use crate::rev_x::*;
+use super::rev_x::rev_send;
+
 
 pub fn reyshell_masq(content: &str) -> RMessagePayload {
 
@@ -37,7 +38,7 @@ pub async fn send(token: &str, message: &RMessage , content: &str) {
 
 
 pub fn reply_from(input: &RMessage) -> RReplies {
-    
+
     RReplies {
         id: input._id.to_owned(),
         mention: false,

@@ -1,8 +1,8 @@
-use crate::{Auth, RMessage, send};
-
+// external
 use serde::{Serialize, Deserialize};
 
-use crate::fs_str;
+// internal
+use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::lreywen::send};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageConf {

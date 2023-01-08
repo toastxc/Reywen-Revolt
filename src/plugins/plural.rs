@@ -1,11 +1,11 @@
-use crate::{Auth, RMessage, lib::message::*};
-use crate::fs_str;
+// internal
+use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, lreywen::send, rev_x::{rev_send, rev_del}}};
+
+// external
 use serde::{Serialize, Deserialize};
-use crate::send;
 use mongodb::{options::ClientOptions, bson::doc};
-use crate::rev_send;
 use bson::Document;
-use crate::rev_del;
+
 
 // config struct
 // this optional struct adds configurable paramaters that are hot changeable, config files are

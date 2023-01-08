@@ -1,7 +1,9 @@
-use crate::{Auth, RMessage, rev_user, rev_convert_reply, rev_send, lib::message::*};
-use crate::fs_str;
+// external
 use serde::{Serialize, Deserialize};
-    
+// internal
+use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, rev_x::{rev_user, rev_convert_reply, rev_send}}};
+
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BrConf {
     pub enabled: bool,
@@ -93,7 +95,7 @@ pub async fn br_main(auth: Auth, input_message: &RMessage) {
     let payload = RMessagePayload {
         content: message.content,
         attachments: None,
-        replies: rev_convert_reply(input_message.replies.clone()).await,
+        replies: rev_convert_reply(input_message.replies.clone()),
         masquerade: Some(br_masq),
     };
 

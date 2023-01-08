@@ -1,7 +1,9 @@
-use crate::{Auth, RMessage, rev_send, sudocheck, reyshell_masq};
+// external
 use std::process::Command;
-use crate::fs_str;
 use serde::{Serialize, Deserialize};
+
+// internal
+use crate::{fs_str, structs::{message::RMessage, auth::Auth}, lib::{rev_x::{sudocheck, rev_send}, lreywen::reyshell_masq}};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ShellConf {

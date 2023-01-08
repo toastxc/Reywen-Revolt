@@ -1,9 +1,9 @@
 // library for interacting with the filesystem
 
 use serde_json::Result;
-use crate::lib::conf::Auth;
 use std::io::Read;
 use std::fs::File;
+use crate::structs::auth::Auth;
 
 
 

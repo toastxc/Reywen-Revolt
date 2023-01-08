@@ -1,13 +1,13 @@
-
-const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
-
+// external
 use urlencoding::encode;
-use crate::{lib::{conf::Auth, message::{RMessage, Masquerade, RMessagePayload}}, rev_x::rev_send, fs::fs_str};
 use reqwest::header::USER_AGENT;
 use serde::{Serialize, Deserialize};
 use serde_json::Value;
 
+// internal
+use crate::{lib::{fs::fs_str, rev_x::rev_send}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
 
+const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct E6Conf {
     pub enabled: bool,
