@@ -36,14 +36,3 @@ pub async fn message_process(details: Auth, message_in: &RMessage) {
         "?ver" | "?version" => send(&details.token, message_in, "**Version**\nReywen: `2`\nRevX: `2`").await,
         _ => ()
     };
-
-
-    // beyond here is mongo only
-
-    if content_vec[0] != "mongotest" { return };
-
-   
-
-    
-}
-
