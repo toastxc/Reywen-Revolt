@@ -1,24 +1,8 @@
 // an abstraction layer for RevX2
-use crate::structs::message::{RMessagePayload, RMessage, RReplies, Masquerade};
+use crate::structs::message::{RMessagePayload, RMessage, RReplies};
 
 use super::rev_x::rev_send;
 
-
-pub fn reyshell_masq(content: &str) -> RMessagePayload {
-
-      let masq = Masquerade {
-        name: Some(String::from("ReyShell")),
-        avatar: Some(String::from("https://toastxc.xyz/TXCS/reyshell.png")),
-        colour: None,
-      };
-
-    RMessagePayload {
-        content: Some(String::from(content)),
-        attachments: None,
-        replies: None,
-        masquerade:  Some(masq),
-    }
-}
 
 pub async fn send(token: &str, message: &RMessage , content: &str) {
 
@@ -64,12 +48,14 @@ pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> boo
 
     if character.is_none() {
         length = 1;
-    }
+    };
 
     if temp_convec.len() < length {
         return true
     };
+
     if character.is_some() && temp_convec[0] != character.unwrap() {
+        println!("{} {}", temp_convec[0], character.unwrap());
         return true
     };
     false
