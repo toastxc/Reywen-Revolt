@@ -10,7 +10,7 @@ mod plugins {
 use crate::plugins::{
     bridge::br_main,
     e6::e6_main,
-    message::message_process,
+    message::message_main,
     plural::plural_main,
     shell::shell_main,
 };
@@ -134,15 +134,11 @@ pub async fn new_main(out: String, details: Auth) {
 
     tokio::join!(
         br_main(details.clone(), &message),
-        message_process(details.clone(), &message),
+        message_main(details.clone(), &message),
         shell_main(details.clone(), &message),
         plural_main(details.clone(), &message),
         e6_main(details.clone(), &message),
     );
         
-    
-        
-        
-    
 }
 
