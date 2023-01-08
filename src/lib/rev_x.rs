@@ -90,18 +90,6 @@ pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) 
     };
 }
 
-// DEPRICATED
-pub async fn rev_del(token: &str, message: &RMessage) {
-
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new()
-    .delete(format!("https://api.revolt.chat/channels/{}/messages/{}", message.channel, message._id))
-    .header("x-bot-token", token)
-    .send().await;
-
-    http_err(client, "REV_DEL");
-}
-
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
 pub async fn rev_del_2(token: &str, channel: &str, message: &str) {
 
