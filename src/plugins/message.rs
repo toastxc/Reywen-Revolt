@@ -2,7 +2,7 @@
 use serde::{Serialize, Deserialize};
 
 // internal
-use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::{lreywen::{crash_condition, convec}, oop::Reywen}};
+use crate::{fs_to_str, structs::{auth::Auth, message::RMessage}, lib::{lreywen::{crash_condition, convec}, oop::Reywen}};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageConf {
@@ -13,7 +13,7 @@ pub struct MessageConf {
 pub async fn message_main(auth: Auth, input_message: &RMessage) {
 
     // import config
-    let conf = fs_str("config/message.json")
+    let conf = fs_to_str("config/message.json")
         .expect("failed to read config/message.json\n{e}");
 
     let message_conf: MessageConf = serde_json::from_str(&conf)

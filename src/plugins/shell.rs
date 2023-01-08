@@ -3,7 +3,7 @@ use std::process::Command;
 use serde::{Serialize, Deserialize};
 
 // internal
-use crate::{fs_str, structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{rev_x::{sudoer}, lreywen::{crash_condition, convec}, oop::Reywen}};
+use crate::{fs_to_str, structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{rev_x::{sudoer}, lreywen::{crash_condition, convec}, oop::Reywen}};
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -17,7 +17,7 @@ pub struct ShellConf {
 pub async fn shell_main(auth: Auth, input_message: &RMessage) {
 
     // import config
-    let conf = fs_str("config/shell.json")
+    let conf = fs_to_str("config/shell.json")
         .expect("failed to read config/shell.json\n{e}");
 
     let shell: ShellConf = serde_json::from_str(&conf)

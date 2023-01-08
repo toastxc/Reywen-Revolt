@@ -8,7 +8,7 @@ use crate::structs::auth::Auth;
 
 
 // import and deserialize message.conf
-pub fn fs_str(target: &str) -> Result<String> {
+pub fn fs_to_str(target: &str) -> Result<String> {
 
     let mut file = File::open(target)
         .expect("could not open {target}");

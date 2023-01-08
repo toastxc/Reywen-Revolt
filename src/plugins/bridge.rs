@@ -1,7 +1,8 @@
 // external
 use serde::{Serialize, Deserialize};
 // internal
-use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, rev_x::{rev_user, rev_convert_reply}, lreywen::crash_condition, oop::Reywen}};
+use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::{fs_to_str}, rev_x::{rev_user, rev_convert_reply}, lreywen::crash_condition, oop::Reywen}};
+
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -15,7 +16,7 @@ pub struct BrConf {
 pub async fn br_main(auth: Auth, input_message: &RMessage) {
 
     // import config
-    let conf_str = fs_str("config/bridge.json")
+    let conf_str = fs_to_str("config/bridge.json")
         .expect("failed to read config/message.json\n{e}");
 
     let conf: BrConf = serde_json::from_str(&conf_str)

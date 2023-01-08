@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::Value;
 
 // internal
-use crate::{lib::{fs::fs_str, lreywen::{crash_condition, convec, lte}, oop::Reywen}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
+use crate::{lib::{fs::fs_to_str, lreywen::{crash_condition, convec, lte}, oop::Reywen}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
 
 const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -118,7 +118,7 @@ pub struct Relationships {
 pub async fn e6_main(auth: Auth, input_message: &RMessage) {
      
      // import config
-     let conf: String = fs_str("config/e6.json")
+     let conf: String = fs_to_str("config/e6.json")
         .expect("failed to read config/e6.json\n{e}");
 
      let e6: E6Conf = serde_json::from_str(&conf)

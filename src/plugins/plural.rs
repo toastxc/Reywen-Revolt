@@ -1,5 +1,5 @@
 // internal
-use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, lreywen::send, rev_x::{rev_send, rev_del}}};
+use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_to_str, lreywen::send, rev_x::{rev_send, rev_del}}};
 
 // external
 use serde::{Serialize, Deserialize};
@@ -25,7 +25,7 @@ struct Plural {
 // plugin main is responsible for getting details and activiating functions based on conditions
 pub async fn plural_main(auth: Auth, message: &RMessage) {
 
-    let conf = fs_str("config/plural.json")
+    let conf = fs_to_str("config/plural.json")
         .expect("failed to read config/plural.json\n{e}");
 
     let plural: Plural = serde_json::from_str(&conf)
