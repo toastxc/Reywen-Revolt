@@ -1,7 +1,7 @@
 // external
 use serde::{Serialize, Deserialize};
 // internal
-use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, rev_x::{rev_user, rev_convert_reply, rev_send}}};
+use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_str, rev_x::{rev_user, rev_convert_reply}, lreywen::crash_condition, oop::Reywen}};
 
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -11,95 +11,106 @@ pub struct BrConf {
     pub channel_2: String,
 }
 
-//pub fn conf_error(details_in: 
+
 pub async fn br_main(auth: Auth, input_message: &RMessage) {
 
-    let conf = fs_str("config/bridge.json");
+    // import config
+    let conf_str = fs_str("config/bridge.json")
+        .expect("failed to read config/message.json\n{e}");
 
-    match conf {
-        Ok(_) => {},
-        Err(e) => panic!("failed to read config/message.json\n{e}"),
-    };
-
-    let bridge: BrConf = serde_json::from_str(&conf.unwrap())
+    let conf: BrConf = serde_json::from_str(&conf_str)
         .expect("Failed to deser message.json");
 
 
-    if !bridge.enabled  {
+    // fail conditions
+    if !conf.enabled  {
         return
     };
     
+    crash_condition(input_message, None);
+
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade.is_some() {
         return
     };
 
-
-    let (chan1, chan2) = (bridge.channel_1, bridge.channel_2);
-
-
-    // channel switch
+    // channel switcher
+    // i want a better solution but cant think of one
     let mut chan_rec = String::new();
-    if input_message.channel == chan1 {
-       chan_rec = chan2;
-    }else if input_message.channel == chan2 {
-       chan_rec = chan1;
+    if input_message.channel == conf.channel_1 {
+       chan_rec = conf.channel_2;
+    }else if input_message.channel == conf.channel_2 {
+        chan_rec = conf.channel_1;
     };
 
-    
+
+    // made input mutable for the input channel to be changed
     let mut message = input_message.clone();
-    
     message.channel = chan_rec;
 
-    let br_masq: Masquerade;
+    // due to how weird this plugin is by nature, the client needs to be created later
+    let client = Reywen::new(auth.clone(), &message);
 
-    // masq switch - if user has no masquerade: pull from user info API
-    // else - port over masquerade details 
+    let mut br_masq: Masquerade =  Masquerade::new();
+
+    //if user has no masquerade: pull from user info API
     if input_message.masquerade.is_none()  {
 
-        // API get masq
-        
-        let user1 = rev_user(&auth.token, &input_message.author).await;
-        
-        let user = match user1 {
-          
-            Some(a) =>  a,
-            None => {println!("REV_USER_ERR: failed to get details for {}", input_message.author); return},  
-        };
-        
-        let pfplink:String = match user.avatar {
-            None => "https://api.revolt.chat/users/01GKWVQP8JP1TEZ52AR1NZVM1J/default_avatar".to_string(),
-            Some(r) =>  format!("https://autumn.revolt.chat/avatars/{}", r.id),
-        };
+        // moved to external function (its awful)
+        br_masq = masq_from_user(&input_message.author, &auth.token).await;
 
-        //let pfp = format!("https://autumn.revolt.chat/avatars/{}", pfplink);
-
-        br_masq = Masquerade {
-            name: Some(user.username),
-            avatar: Some(pfplink),
-            colour: None
-        };
-        
+        // else - port over masquerade details from input message
     }else {
         
-        // translate masq
-        br_masq = Masquerade {
-            name: message.masquerade.as_ref().unwrap().name.clone(),
-            avatar: message.masquerade.as_ref().unwrap().avatar.clone(),
-            colour: None
-        };  
+        let in_masq = message.masquerade.unwrap();
 
+        // translates masq values if applicable
+        if in_masq.name.is_some() {
+            br_masq = br_masq.name(&in_masq.name.unwrap());
+        };
+        if in_masq.avatar.is_some() {
+            br_masq = br_masq.name(&in_masq.avatar.unwrap());
+        };
+        if in_masq.colour.is_some() {
+            br_masq = br_masq.name(&in_masq.colour.unwrap());
+        };
     };
 
-    // message for rev_send
-    let payload = RMessagePayload {
-        content: message.content,
-        attachments: None,
-        replies: rev_convert_reply(input_message.replies.clone()),
-        masquerade: Some(br_masq),
+    // construct payload and send
+    let mut payload = RMessagePayload::new()
+        .content(&input_message.clone().content.unwrap())
+        .masquerade(br_masq);
+
+    // weird custom method - converts replies from websocket to API
+    let replies = rev_convert_reply(input_message.replies.clone());
+
+    if replies.is_some() {
+        payload = payload.replies(replies.unwrap());
     };
-
-    rev_send(&auth.token, &message.channel, payload).await;
-
+    client.send(payload).await;
 }
 
+
+async fn masq_from_user(author: &str, token: &str) -> Masquerade {
+
+    let user = rev_user(token, author).await;
+
+    if user.is_some() {
+        let user = user.unwrap();
+
+        let avatar = match user.avatar {
+            None => None,
+            Some(r) =>  Some(format!("https://autumn.revolt.chat/avatars/{}", r.id)),
+        };
+
+        let mut masq = Masquerade::new()
+            .name(&user.username);
+
+        if avatar.is_some() {
+            masq =  masq.avatar(&avatar.unwrap());
+        };
+        return masq
+    };
+
+    Masquerade::new()
+}
