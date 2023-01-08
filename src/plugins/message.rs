@@ -38,7 +38,7 @@ pub async fn message_main(auth: Auth, input_message: &RMessage) {
         _ => ""
     };
    // if applicable, send
-   if mes != "" {
+   if !mes.is_empty() {
        client.sender(mes).await;
    };
 }
