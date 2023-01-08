@@ -2,7 +2,7 @@
 use serde::{Serialize, Deserialize};
 
 // internal
-use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::lreywen::send};
+use crate::{fs_str, structs::{auth::Auth, message::RMessage}, lib::{lreywen::send, mongo::{RMongo, mongo_db}}};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageConf {
@@ -35,7 +35,15 @@ pub async fn message_process(details: Auth, message_in: &RMessage) {
         "?Mog" | "?mog"  => send(&details.token, message_in, ":01G7MT5B978E360NB6VWAS9SJ6:").await,
         "?ver" | "?version" => send(&details.token, message_in, "**Version**\nReywen: `2`\nRevX: `2`").await,
         _ => ()
-    }
+    };
+
+
+    // beyond here is mongo only
+
+    if content_vec[0] != "mongotest" { return };
+
+   
+
     
 }
 
