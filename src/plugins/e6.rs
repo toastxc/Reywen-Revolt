@@ -15,7 +15,6 @@ pub struct E6Conf {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Root {
     #[serde(rename = "posts")]
     pub posts: Vec<Post>,
@@ -23,163 +22,96 @@ pub struct Root {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Post {
-    #[serde(rename = "id")]
     pub id: i64,
-    #[serde(rename = "created_at")]
     pub created_at: String,
-    #[serde(rename = "updated_at")]
     pub updated_at: String,
-    #[serde(rename = "file")]
     pub file: File,
-    #[serde(rename = "preview")]
     pub preview: Preview,
-    #[serde(rename = "sample")]
     pub sample: Sample,
-    #[serde(rename = "score")]
     pub score: Score,
-    #[serde(rename = "tags")]
     pub tags: Tags,
-    #[serde(rename = "locked_tags")]
     pub locked_tags: Vec<Value>,
-    #[serde(rename = "change_seq")]
     pub change_seq: i64,
-    #[serde(rename = "flags")]
     pub flags: Flags,
-    #[serde(rename = "rating")]
     pub rating: String,
-    #[serde(rename = "fav_count")]
     pub fav_count: i64,
-    #[serde(rename = "sources")]
     pub sources: Vec<String>,
-    #[serde(rename = "pools")]
     pub pools: Vec<Value>,
-    #[serde(rename = "relationships")]
     pub relationships: Relationships,
-    #[serde(rename = "approver_id")]
     pub approver_id: Option<i64>,
-    #[serde(rename = "uploader_id")]
     pub uploader_id: Option<i64>,
-    #[serde(rename = "description")]
     pub description: String,
-    #[serde(rename = "comment_count")]
     pub comment_count: i64,
-    #[serde(rename = "is_favorited")]
     pub is_favorited: bool,
-    #[serde(rename = "has_notes")]
     pub has_notes: bool,
-    #[serde(rename = "duration")]
     pub duration: Option<f64>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct File {
-    #[serde(rename = "width")]
     pub width: i64,
-    #[serde(rename = "height")]
     pub height: i64,
-    #[serde(rename = "ext")]
     pub ext: String,
-    #[serde(rename = "size")]
     pub size: i64,
-    #[serde(rename = "md5")]
     pub md5: String,
-    #[serde(rename = "url")]
     pub url: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Preview {
-    #[serde(rename = "width")]
     pub width: i64,
-    #[serde(rename = "height")]
     pub height: i64,
-    #[serde(rename = "url")]
     pub url: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Sample {
-    #[serde(rename = "has")]
     pub has: bool,
-    #[serde(rename = "height")]
     pub height: i64,
-    #[serde(rename = "width")]
     pub width: i64,
-    #[serde(rename = "url")]
     pub url: Option<String>,
-    #[serde(rename = "alternates")]
     pub alternates: Alternates,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Alternates {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Score {
-    #[serde(rename = "up")]
     pub up: i64,
-    #[serde(rename = "down")]
     pub down: i64,
-    #[serde(rename = "total")]
     pub total: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Tags {
-    #[serde(rename = "general")]
     pub general: Option<Vec<String>>,
-    #[serde(rename = "species")]
     pub species: Option<Vec<String>>,
-    #[serde(rename = "character")]
     pub character: Option<Vec<String>>,
-    #[serde(rename = "copyright")]
     pub copyright: Option<Vec<String>>,
-    #[serde(rename = "artist")]
     pub artist: Option<Vec<String>>,
-    #[serde(rename = "invalid")]
     pub invalid: Option<Vec<String>>,
-    #[serde(rename = "lore")]
     pub lore: Option<Vec<String>>,
-    #[serde(rename = "meta")]
     pub meta: Option<Vec<String>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Flags {
-    #[serde(rename = "pending")]
     pub pending: bool,
-    #[serde(rename = "flagged")]
     pub flagged: bool,
-    #[serde(rename = "note_locked")]
     pub note_locked: bool,
-    #[serde(rename = "status_locked")]
     pub status_locked: bool,
-    #[serde(rename = "rating_locked")]
     pub rating_locked: bool,
-    #[serde(rename = "comment_disabled")]
     pub comment_disabled: bool,
-    #[serde(rename = "deleted")]
     pub deleted: bool,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 pub struct Relationships {
-    #[serde(rename = "parent_id")]
     pub parent_id: Option<i64>,
-    #[serde(rename = "has_children")]
     pub has_children: bool,
-    #[serde(rename = "has_active_children")]
     pub has_active_children: bool,
-    #[serde(rename = "children")]
     pub children: Option<Vec<i32>>,
 }
 
@@ -214,6 +146,7 @@ pub async fn e6_main(auth: Auth, input_message: &RMessage) {
      
      let var = match convec[1] as &str {
          "search" => e6_search(&convec, &e6.url).await,
+         "help"   => String::from("**Hewo!**\n`?e search <>` to search"),
          _ => return,
      };
      
