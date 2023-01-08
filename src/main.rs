@@ -22,6 +22,7 @@ mod lib {
     pub mod lreywen;
     pub mod oop;
     pub mod rev_x;
+    pub mod mongo;
 }
 use crate::lib::fs::*;
 use crate::lib::rev_x::rev_message_in;
