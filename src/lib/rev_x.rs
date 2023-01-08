@@ -4,7 +4,7 @@ use crate::structs::{message::{RMessage, RMessagePayload, RReplies, RChannelFetc
 
 
 // given a user ID, checks if the user is a 'sudoer' or not
-pub fn sudocheck(user: &str, comment: &str, sudoers: &[String]) -> bool {
+pub fn sudoer(user: &str, comment: &str, sudoers: &[String]) -> bool {
 
     if sudoers.contains(&user.to_owned()) {
         println!("WARN: SUDOER ACTION FROM {user} in {comment}");
