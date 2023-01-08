@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use serde_json::Value;
 
 // internal
-use crate::{lib::{fs::fs_str, rev_x::rev_send}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
+use crate::{lib::{fs::fs_str, lreywen::{crash_condition, convec, lte}, oop::Reywen}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
 
 const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -185,43 +185,43 @@ pub struct Relationships {
 
 pub async fn e6_main(auth: Auth, input_message: &RMessage) {
      
-     
-     let conf: String = fs_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
+     // import config
+     let conf: String = fs_str("config/e6.json")
+        .expect("failed to read config/e6.json\n{e}");
 
      let e6: E6Conf = serde_json::from_str(&conf)
             .expect("Failed to deser e6.json");
      
-     // fail conditions
-     if !e6.enabled {
-         return
-         
-     }else if input_message.content.is_none() {
-         return
-     };
-     let temp = input_message.content.clone().unwrap();
-     let convec: Vec<&str> = temp.split(' ').collect();
+
+     let masq = Masquerade::new()
+        .name("E621")
+        .avatar("https://avatars.githubusercontent.com/u/105477506?s=200&v=4");
+
+
+     let payload = RMessagePayload::new()
+        .masquerade(masq);
      
-     if convec.len() < 3 {
-         return
-     }else if convec[0] != "?e" {
-         return 
-     };
-     
+    if crash_condition(input_message, Some("?e")) {return};
+
+    let convec = convec(input_message);
+
+    let client = Reywen::new(auth.clone(), input_message);
+
+    // determines if e6 is allive
      if ping_test(&e6.url).await {
-         e6_send(&input_message.channel, &auth.token, "could not reach e6!!").await;
-     }
+         client.clone().send(payload.clone().content(&format!("**Could not reach {}", e6.url))).await;
+     };
      
      let var = match convec[1] as &str {
          "search" => e6_search(&convec, &e6.url).await,
          _ => return,
-         
      };
      
      if var != String::new() {
-          e6_send(&input_message.channel, &auth.token, &var).await;
+          client.send(payload.content(&var)).await;
      };
-    
 }
+
 
 async fn ping_test(url: &str) -> bool {
     
@@ -237,23 +237,7 @@ async fn ping_test(url: &str) -> bool {
 
 }
 
- async fn e6_send(channel: &str, token: &str, content: &str) {
-    let masq: Masquerade =  Masquerade {
-        name: Some("E621".to_string()),
-        avatar: Some(String::from("https://avatars.githubusercontent.com/u/105477506?s=200&v=4")),
-        colour: None,
-    };
-    let payload = RMessagePayload {
-        content: Some(content.to_string()),
-        replies: None,
-        masquerade: Some(masq),
-        attachments: None,
-        
-    };
-    
-    rev_send(token, channel, payload).await;
-} 
-  
+
 async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
       
       let query = &format!("{url}/posts.json?tags={}", encode(convec[2])).to_string();
@@ -284,8 +268,8 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
             (0, _) | (1, _) | (2, _) => "**Invalid query!**".to_string(),
             (_, 0)                   => "**No results!**".to_string(),
             // first result
-            (3, _)                   => format!("**UwU**\n[]({})", img1),
-            (4, 1)                   => format!("**UwU**\narg ignored, one result found\n[]({})", img1),
+            (3, _)                   => format!("**UwU**\n{}", lte(&img1)),
+            (4, 1)                   => format!("**UwU**\narg ignored, one result found\n{}", lte(&img1)),
             // other result
             (4, _)                   => querycheck(convec, res),
             _ => "womp".to_string(),
@@ -302,9 +286,7 @@ async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
                 None => DURL.to_string(),
                 Some(a) => a.to_string()
             };
-            return format!("**UwU**\n[]({})", img1);             
+            return format!("**UwU**\n{}", lte(&img1));
         };
-        
         String::from("**Invalid request!**")
  }
- 

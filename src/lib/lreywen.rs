@@ -45,7 +45,7 @@ pub fn reply_from(input: &RMessage) -> RReplies {
     }
 }
 #[allow(dead_code)]
-pub fn link_to_embed(input: &str) -> String {
+pub fn lte(input: &str) -> String {
     format!("[]({input})")
 }
 
@@ -60,10 +60,10 @@ pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> boo
 
     let temp_convec: Vec<&str> =  input_message.content.as_ref().unwrap().split(' ').collect::<Vec<&str>>();
 
-    let mut length = 1;
+    let mut length = 2;
 
     if character.is_none() {
-        length = 2;
+        length = 1;
     }
 
     if temp_convec.len() < length {
