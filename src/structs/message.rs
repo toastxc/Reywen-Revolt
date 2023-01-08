@@ -26,7 +26,7 @@ pub struct RMessage {
 
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 pub struct Masquerade {
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -39,6 +39,7 @@ pub struct Masquerade {
     pub colour: Option<String>,
 
 }
+
 
 
 // skip embed

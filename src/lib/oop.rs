@@ -70,7 +70,7 @@ impl RMessagePayload {
     }
 
     #[allow(dead_code)]
-    pub fn content(mut self, content: &'static str) -> Self {
+    pub fn content(mut self, content: &str) -> Self {
         self.content = Some(content.to_string());
         self
     }
@@ -93,4 +93,41 @@ impl RMessagePayload {
         self.replies = Some(replies);
         self
     }
+}
+
+
+
+impl Masquerade {
+    #[allow(dead_code)]
+    pub fn new() -> Self {
+        Self::default()
+    }
+    #[allow(dead_code)]
+    pub fn name(mut self, name: &str) -> Self {
+        self.name = Some(String::from(name));
+        self
+    }
+    #[allow(dead_code)]
+    pub fn avatar(mut self, avatar: &str) -> Self {
+        self.avatar = Some(String::from(avatar));
+        self
+    }
+    #[allow(dead_code)]
+    pub fn colour(mut self, colour: &str) -> Self {
+        self.colour = Some(String::from(colour));
+        self
+    }
+}
+
+#[allow(dead_code)]
+fn testing(auth: Auth, input_message: &RMessage) {
+
+
+    let client = Reywen::new(auth, input_message);
+
+    let masq = Masquerade::new();
+
+    let payload = RMessagePayload::new()
+        .content("helo")
+        .masquerade(masq);
 }
