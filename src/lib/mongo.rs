@@ -1,6 +1,8 @@
 // external
 use mongodb::{options::ClientOptions, bson::doc};
-#[derive(Debug, Default)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct RMongo {
     pub username: String,
     pub password: String,

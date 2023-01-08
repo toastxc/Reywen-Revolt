@@ -31,8 +31,6 @@ impl Reywen {
     }
     #[allow(dead_code)]
     pub async fn sender(self, content: &str) -> Self {
-
-
         let payload = RMessagePayload {
             content: Some(String::from(content)),
             attachments: None,
@@ -44,7 +42,7 @@ impl Reywen {
     }
     #[allow(dead_code)]
     pub async fn delete_msg(self, message_id: &str) -> Self {
-        rev_del_2(&self.auth.token, message_id, &self.input_message.channel).await;
+        rev_del_2(&self.auth.token,&self.input_message.channel, message_id, ).await;
         self
     }
 
@@ -117,17 +115,4 @@ impl Masquerade {
         self.colour = Some(String::from(colour));
         self
     }
-}
-
-#[allow(dead_code)]
-fn testing(auth: Auth, input_message: &RMessage) {
-
-
-    let client = Reywen::new(auth, input_message);
-
-    let masq = Masquerade::new();
-
-    let payload = RMessagePayload::new()
-        .content("helo")
-        .masquerade(masq);
 }
