@@ -23,8 +23,7 @@ futures-channel = "0.3.25"
 
 
 # mongodb
-#mongodb = "2.3.1"
-mongodb = {default-features = false, version = "2.3.1", features = ["tokio-sync"]}
+mongodb = {default-features = false, version = "2.3.1", features = ["tokio-runtime"]}
 bson = "2.4.0"
 
 # https

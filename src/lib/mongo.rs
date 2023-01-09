@@ -24,11 +24,10 @@ pub async fn mongo_db(mut mongo: RMongo) -> mongodb::Database {
     let options = format!("mongodb://{}:{}@{}:{}",
                         mongo.username, mongo.password, mongo.ip.unwrap(), mongo.port.unwrap());
 
-    let client = mongodb::Client::with_options(ClientOptions::parse(options).unwrap())
+    let client = mongodb::Client::with_options(ClientOptions::parse(options).await.unwrap())
         .expect("could not connect to database");
 
     client.database(&mongo.database)
-
 }
 
 impl RMongo {
