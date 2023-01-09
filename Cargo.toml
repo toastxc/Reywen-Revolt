@@ -6,28 +6,32 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+
+# serilizing
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.91"
+optional_struct = "0.2.0"
+validator = { version = "0.16.0", features = ["derive"] }
+
+# async
+tokio = { version = "1.24.1", features = ["full"] }
+tokio-tungstenite = { version = "0.18.0", features = ["native-tls"] }
+tokio-net = "0.0.0"
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+futures-channel = "0.3.25"
+
+
+# mongodb
+#mongodb = "2.3.1"
+mongodb = {default-features = false, version = "2.3.1", features = ["tokio-sync"]}
+bson = "2.4.0"
+
+# https
+urlencoding = "2.1.2"
+rand = "0.8.5"
 reqwest = { version = "0.11", features = ["json", "native-tls"] }
 
-serde_json="*"
-serde = { version = "1.0", features = ["derive"] }
-
-optional_struct = "*"
-
-validator = { version = "0.14", features = ["derive"] }
-
-
-tokio = { version = "1", features = ["full"] }
-tokio-tungstenite = { version = "*", features = ["native-tls"]}
-
-futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
-
-futures-channel = "0.3"
-
-tokio-net = "*"
-rand = "0.8.5"
-bson = "*"
-mongodb = "*"
-urlencoding = "2.1.2"
 
 
 [profile.release]
