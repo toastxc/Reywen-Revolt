@@ -100,7 +100,6 @@ async fn pl_remove(client: Reywen, db: mongodb::Database, input_message: &RMessa
         client.sender("**No results found!**").await;
     }else {
         let del_res = collection.delete_one(doc!{"name": convec[2]}, None ).await;
-        println!("{}", convec[2]);
         client.clone().sender("**Profile found, deleting...**").await;
 
         let str = match del_res {
@@ -199,15 +198,15 @@ async fn pl_query(input_message: &RMessage, db: mongodb::Database, client: Reywe
     };
     let userquery = userquery.unwrap();
 
-    let mut str = format!("```json\n\n\"name\": \"{}\"", userquery.name.unwrap());
+    let mut str = format!("```json\n{{\n\"name\": \"{}\"", userquery.name.unwrap());
 
     if userquery.avatar.is_some() {
-        str += &format!("\n\"avatar\": \"{}\"", userquery.avatar.unwrap());
+        str += &format!(",\n\"avatar\": \"{}\"", userquery.avatar.unwrap());
     };
     if userquery.colour.is_some() {
-        str += &format!("\n\"colour: \"{}\"", userquery.colour.unwrap());
+        str += &format!(",\n\"colour\": \"{}\"", userquery.colour.unwrap());
     };
 
-    str += "\n```\n";
+    str += "\n}\n```\n";
     client.sender(&str).await;
 }
