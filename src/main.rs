@@ -114,16 +114,14 @@ pub async fn websocket_sub(ws_stream: WebSocketStream<tokio_tungstenite::MaybeTl
         new_main(out, details.clone()).await;
      
     });
-
     read_future.await;
-
   
 }
 
 // websocket main
 // imports messages, cleans them and sends to 
 // bridge and message processing
-pub async fn new_main(out: String, details: Auth) {
+pub async fn new_main(out: String, auth: Auth) {
 
     let raw_message = rev_message_in(out);
     
@@ -133,11 +131,11 @@ pub async fn new_main(out: String, details: Auth) {
 
 
     tokio::join!(
-        br_main(details.clone(), &message),
-        message_main(details.clone(), &message),
-        shell_main(details.clone(), &message),
-        plural_main(details.clone(), &message),
-        e6_main(details.clone(), &message),
+        br_main(auth.clone(), &message),
+        message_main(auth.clone(), &message),
+        shell_main(auth.clone(), &message),
+        plural_main(auth.clone(), &message),
+        e6_main(auth, &message),
     );
         
 }
