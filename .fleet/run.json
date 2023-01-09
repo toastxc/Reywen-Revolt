@@ -8,7 +8,11 @@
             "name": "build"
         },
 
-
+        {
+            "type": "cargo",
+            "cargoArgs": ["run"],
+            "name": "run"
+        }
 
     ]
 }
