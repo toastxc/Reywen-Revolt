@@ -53,11 +53,9 @@ pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> boo
         return true
     };
 
-   if character.is_some() {
-       if temp_convec[0] != character.unwrap() {
-           return true
-       };
-   };
+    if character.is_some() && character != Some(temp_convec[0]) {
+        return true
+    };
    false
 }
 
