@@ -3,7 +3,6 @@ use crate::structs::message::{RMessagePayload, RMessage, RReplies};
 
 use super::rev_x::rev_send;
 
-
 pub async fn send(token: &str, message: &RMessage , content: &str) {
 
     let reply = RReplies {
@@ -54,10 +53,12 @@ pub fn crash_condition(input_message: &RMessage, character: Option<&str>) -> boo
         return true
     };
 
-    if character.is_some() && temp_convec[0] != character.unwrap() {
-        return true
-    };
-    false
+   if character.is_some() {
+       if temp_convec[0] != character.unwrap() {
+           return true
+       };
+   };
+   false
 }
 
 
