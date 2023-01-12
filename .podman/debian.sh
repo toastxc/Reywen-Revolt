@@ -26,5 +26,5 @@ else
         # start reywen
         echo "Starting reywen..."
         echo "Directory: $PWD"
-        ./Reywen-Revolt/target/release/reywen
+        cargo r -r
 fi
