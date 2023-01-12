@@ -25,6 +25,7 @@ if  [ "$reywen" = "" ]; then
 else
         # start reywen
         echo "Starting reywen..."
+        cd Reywen-Revolt
         echo "Directory: $PWD"
         cargo r -r
 fi
