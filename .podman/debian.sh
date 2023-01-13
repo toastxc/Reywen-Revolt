@@ -7,10 +7,10 @@ if  [ "$reywen" = "" ]; then
         apt update -y
         apt upgrade -y
         apt install git openssl
-        cargo update
         git clone https://github.com/toastxc/Reywen-Revolt.git
         chmod 777 -R /Reywen-Revolt
         cd Reywen-Revolt
+        cargo update
         cargo build --release
         cd /
 
@@ -27,5 +27,6 @@ else
         echo "Starting reywen..."
         cd Reywen-Revolt
         echo "Directory: $PWD"
+        cargo update
         cargo r -r
 fi
