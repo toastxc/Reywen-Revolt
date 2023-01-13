@@ -15,9 +15,10 @@ pub struct E6Conf {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Root {
-    #[serde(rename = "posts")]
-    pub posts: Vec<Post>,
+pub struct Poster {
+
+    #[serde(skip_serializing_if = "Option::is_none", rename = "posts")]
+    post: Option<Vec<Post>>
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -149,10 +150,8 @@ pub async fn e6_main(auth: Auth, input_message: &RMessage) {
          "help"   => String::from("**Hewo!**\n`?e search <>` to search"),
          _ => return,
      };
-     
-     if var != String::new() {
-          client.send(payload.content(&var)).await;
-     };
+     client.send(payload.content(&var)).await;
+
 }
 
 
@@ -172,54 +171,58 @@ async fn ping_test(url: &str) -> bool {
 
 
 async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
-      
-      let query = &format!("{url}/posts.json?tags={}", encode(convec[2])).to_string();
-      
-      let client: std::result::Result<reqwest::Response, reqwest::Error> =
+
+
+   // https://e926.net/posts?tags=fox&limit=1&page=2
+    // ?e search fox 2
+
+    // query payload url - tags - page number
+    let query = &format!("{url}/posts.json?tags={}&limit=1&page={}", encode(convec[2]).to_string(), numcheck(convec));
+
+   // http request
+    let http: std::result::Result<reqwest::Response, reqwest::Error> =
         reqwest::Client::new() 
         .get(query)
+        // user agent used with permission
         .header(USER_AGENT, "libsixgrid/1.1.1")
         .send().await;
         
-        if client.is_err() { return String::new() };
+    if http.is_err() { return String::new() };
       
-        let payload = client.unwrap().text().await.unwrap();
+    let http_payload = http.unwrap().text().await.unwrap();
+
+    if http_payload.is_empty() {return String::new()};
+
+    println!("\n\n\n\n{}\n\n\n", http_payload);
             
-        let res: Root = serde_json::from_str(&payload)
-            .expect("failed to interpret E6 data");
-            
-        if res.posts.is_empty() {
-            return "**No results!**".to_string();
-        };
-        let img1: String = match &res.posts[0].file.url {
-            None => DURL.to_string(),
-            Some(a) => a.to_string()
-        };
-        
-        match (convec.len(), res.posts.len()) {
-            // invalid
-            (0, _) | (1, _) | (2, _) => "**Invalid query!**".to_string(),
-            (_, 0)                   => "**No results!**".to_string(),
-            // first result
-            (3, _)                   => format!("**UwU**\n{}", lte(&img1)),
-            (4, 1)                   => format!("**UwU**\narg ignored, one result found\n{}", lte(&img1)),
-            // other result
-            (4, _)                   => querycheck(convec, res),
-            _ => "womp".to_string(),
-        }   
-  }
-  
- 
- fn querycheck(convec: &[&str], res: Root) -> String {
-     
-        let number = convec[3].parse::<u32>();
-        if  number.is_ok() && res.posts.len() >= number.clone().unwrap() as usize {
-             
-            let img1: String = match &res.posts[number.unwrap() as usize].file.url {
-                None => DURL.to_string(),
-                Some(a) => a.to_string()
-            };
-            return format!("**UwU**\n{}", lte(&img1));
-        };
-        String::from("**Invalid request!**")
- }
+    let res: Poster = serde_json::from_str(&http_payload)
+        .expect("failed to interpret E6 data");
+
+
+    if res.post.is_none() {
+        return String::from("**No Results!**");
+    };
+    let res = res.post.expect("Failed to get resuls");
+
+    let image: String = match &res[0].file.url {
+        None => DURL.to_string(),
+        Some(a) => a.to_string()
+    };
+
+    format!("**UwU**\n{}", lte(&image))
+}
+
+fn numcheck(convec: &[&str]) -> String {
+
+    if convec.len() < 4 {
+        return  1.to_string()
+    };
+
+    let maybe_number = convec[3].parse::<usize>();
+
+    match maybe_number {
+        Err(_) => 1,
+        Ok(a) => if a >= 750 {1} else {a}
+    }.to_string()
+
+}
