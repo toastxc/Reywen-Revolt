@@ -22,7 +22,7 @@ impl RWebsocket {
         >,
     > {
         let url = format!(
-            "wss://{}/?format={}&version=1&token={}",
+            "wss://{}/?version=1format={}&&token={}",
             self.domain, self.format, self.token
         );
         let ws = connect_async(url.clone())
@@ -40,7 +40,6 @@ pub fn from_ws(
 ) -> String {
     match message {
         Ok(a) => a
-            .to_owned()
             .into_text()
             .expect("websocket message failed (report to developer)"),
         Err(e) => {
