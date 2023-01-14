@@ -170,14 +170,14 @@ async fn ping_test(url: &str) -> bool {
 }
 
 
-async fn e6_search(convec: &Vec<&str>,  url: &str) -> String {
+async fn e6_search(convec: &[&str],  url: &str) -> String {
 
 
    // https://e926.net/posts?tags=fox&limit=1&page=2
     // ?e search fox 2
 
     // query payload url - tags - page number
-    let query = &format!("{url}/posts.json?tags={}&limit=1&page={}", encode(convec[2]).to_string(), numcheck(convec));
+    let query = &format!("{url}/posts.json?tags={}&limit=1&page={}", encode(convec[2]), numcheck(convec));
 
    // http request
     let http: std::result::Result<reqwest::Response, reqwest::Error> =
