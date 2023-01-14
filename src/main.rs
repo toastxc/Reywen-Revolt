@@ -19,10 +19,12 @@ mod lib {
     pub mod rev_x;
     pub mod websocket;
 }
-use crate::lib::fs::*;
-use crate::lib::rev_x::rev_message_in;
-use crate::lib::websocket::from_ws;
-use lib::websocket::RWebsocket;
+
+use crate::lib::{
+    fs::{conf_init, ws_init},
+    rev_x::rev_message_in,
+    websocket::{from_ws, RWebsocket},
+};
 
 // structs
 mod structs {
@@ -43,7 +45,6 @@ async fn main() {
 
     let websocket = RWebsocket::new(ws_conf);
 
-
     loop {
         println!("starting websocket");
         websocket
@@ -53,7 +54,7 @@ async fn main() {
             .for_each(|message| async {
                 let data = from_ws(message);
                 if data.is_empty() {
-                    println!("Caught ws error exiting websocket");
+                    println!("reseting websocket");
                     return;
                 };
                 let input = rev_message_in(data);
