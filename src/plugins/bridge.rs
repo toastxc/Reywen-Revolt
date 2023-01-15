@@ -1,9 +1,13 @@
 // external
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 // internal
-use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::{fs_to_str}, rev_x::{rev_user, rev_convert_reply}, lreywen::crash_condition, oop::Reywen}};
-
-
+use crate::{
+    lib::{fs::fs_to_str, lreywen::crash_condition, oop::Reywen, rev_x::rev_convert_reply},
+    structs::{
+        auth::Auth,
+        message::{Masquerade, RMessage, RMessagePayload},
+    },
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BrConf {
@@ -12,38 +16,37 @@ pub struct BrConf {
     pub channel_2: String,
 }
 
-
 pub async fn br_main(auth: Auth, input_message: &RMessage) {
-
     // import config
-    let conf_str = fs_to_str("config/bridge.json")
-        .expect("failed to read config/message.json\n{e}");
+    let conf_str =
+        fs_to_str("config/bridge.json").expect("failed to read config/message.json\n{e}");
 
-    let conf: BrConf = serde_json::from_str(&conf_str)
-        .expect("Failed to deser message.json");
-
+    let conf: BrConf = serde_json::from_str(&conf_str).expect("Failed to deser message.json");
 
     // fail conditions
-    if !conf.enabled  {
-        return
+    if !conf.enabled {
+        return;
     };
-    
+
     crash_condition(input_message, None);
+
+    if auth.bot_id.is_empty() {
+        println!("WARN: bot ID is empty, this can lead to undefined behavior");
+    };
 
     // removing feedback loop
     if input_message.author == auth.bot_id && input_message.masquerade.is_some() {
-        return
+        return;
     };
 
     // channel switcher
     // i want a better solution but cant think of one
     let mut chan_rec = String::new();
     if input_message.channel == conf.channel_1 {
-       chan_rec = conf.channel_2;
-    }else if input_message.channel == conf.channel_2 {
+        chan_rec = conf.channel_2;
+    } else if input_message.channel == conf.channel_2 {
         chan_rec = conf.channel_1;
     };
-
 
     // made input mutable for the input channel to be changed
     let mut message = input_message.clone();
@@ -52,17 +55,15 @@ pub async fn br_main(auth: Auth, input_message: &RMessage) {
     // due to how weird this plugin is by nature, the client needs to be created later
     let client = Reywen::new(auth.clone(), &message);
 
-    let mut br_masq: Masquerade =  Masquerade::new();
+    let mut br_masq: Masquerade = Masquerade::new();
 
     //if user has no masquerade: pull from user info API
-    if input_message.masquerade.is_none()  {
-
+    if input_message.masquerade.is_none() {
         // moved to external function (its awful)
-        br_masq = masq_from_user(&input_message.author, &auth.token).await;
+        br_masq = masq_from_user(&input_message.author, client.clone()).await;
 
         // else - port over masquerade details from input message
-    }else {
-        
+    } else {
         let in_masq = message.masquerade.unwrap();
 
         // translates masq values if applicable
@@ -91,26 +92,23 @@ pub async fn br_main(auth: Auth, input_message: &RMessage) {
     client.send(payload).await;
 }
 
-
-async fn masq_from_user(author: &str, token: &str) -> Masquerade {
-
-    let user = rev_user(token, author).await;
+async fn masq_from_user(author: &str, client: Reywen) -> Masquerade {
+    let user = client.get_user(author).await;
 
     if user.is_some() {
         let user = user.unwrap();
 
         let avatar = match user.avatar {
             None => None,
-            Some(r) =>  Some(format!("https://autumn.revolt.chat/avatars/{}", r.id)),
+            Some(r) => Some(format!("https://autumn.revolt.chat/avatars/{}", r.id)),
         };
 
-        let mut masq = Masquerade::new()
-            .name(&user.username);
+        let mut masq = Masquerade::new().name(&user.username);
 
         if avatar.is_some() {
-            masq =  masq.avatar(&avatar.unwrap());
+            masq = masq.avatar(&avatar.unwrap());
         };
-        return masq
+        return masq;
     };
 
     Masquerade::new()
