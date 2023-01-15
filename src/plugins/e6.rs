@@ -1,13 +1,24 @@
 // external
-use urlencoding::encode;
 use reqwest::header::USER_AGENT;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use urlencoding::encode;
 
 // internal
-use crate::{lib::{fs::fs_to_str, lreywen::{crash_condition, convec, lte}, oop::Reywen}, structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade}}};
+use crate::{
+    lib::{
+        fs::fs_to_str,
+        lreywen::{convec, crash_condition, lte},
+        oop::Reywen,
+    },
+    structs::{
+        auth::Auth,
+        message::RMessage,
+    },
+};
 
-const DURL:  &str = "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
+const DURL: &str =
+    "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct E6Conf {
     pub enabled: bool,
@@ -16,9 +27,8 @@ pub struct E6Conf {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Poster {
-
     #[serde(skip_serializing_if = "Option::is_none", rename = "posts")]
-    post: Option<Vec<Post>>
+    post: Option<Vec<Post>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -75,8 +85,7 @@ pub struct Sample {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Alternates {
-}
+pub struct Alternates {}
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Score {
@@ -117,87 +126,75 @@ pub struct Relationships {
 }
 
 pub async fn e6_main(auth: Auth, input_message: &RMessage) {
-     
-     // import config
-     let conf: String = fs_to_str("config/e6.json")
-        .expect("failed to read config/e6.json\n{e}");
+    // import config
+    let conf: String = fs_to_str("config/e6.json").expect("failed to read config/e6.json\n{e}");
 
-     let e6: E6Conf = serde_json::from_str(&conf)
-            .expect("Failed to deser e6.json");
-     
+    let e6: E6Conf = serde_json::from_str(&conf).expect("Failed to deser e6.json");
 
-     let masq = Masquerade::new()
-        .name("E621")
-        .avatar("https://avatars.githubusercontent.com/u/105477506?s=200&v=4");
-
-
-     let payload = RMessagePayload::new()
-        .masquerade(masq);
-     
-    if crash_condition(input_message, Some("?e")) {return};
+    if crash_condition(input_message, Some("?e")) {
+        return;
+    };
 
     let convec = convec(input_message);
 
     let client = Reywen::new(auth.clone(), input_message);
 
     // determines if e6 is allive
-     if ping_test(&e6.url).await {
-         client.clone().send(payload.clone().content(&format!("**Could not reach {}", e6.url))).await;
-     };
-     
-     let var = match convec[1] as &str {
-         "search" => e6_search(&convec, &e6.url).await,
-         "help"   => String::from("**Hewo!**\n`?e search <>` to search"),
-         _ => return,
-     };
-     client.send(payload.content(&var)).await;
+    if ping_test(&e6.url).await {
+        client
+            .clone()
+            .sender(&format!("**Could not reach {}", e6.url))
+            .await;
+    };
 
+    let var = match convec[1] as &str {
+        "search" => e6_search(&convec, &e6.url).await,
+        "help" => String::from("**Hewo!**\n`?e search <>` to search"),
+        _ => return,
+    };
+    client.sender(&var).await;
 }
-
 
 async fn ping_test(url: &str) -> bool {
-    
     let client: std::result::Result<reqwest::Response, reqwest::Error> =
-        reqwest::Client::new() 
-        .get(url)
-        .send().await;
- 
+        reqwest::Client::new().get(url).send().await;
+
     if client.is_ok() {
-        return false
+        return false;
     };
     true
-
 }
 
-
-async fn e6_search(convec: &[&str],  url: &str) -> String {
-
-
-   // https://e926.net/posts?tags=fox&limit=1&page=2
+async fn e6_search(convec: &[&str], url: &str) -> String {
+    // https://e926.net/posts?tags=fox&limit=1&page=2
     // ?e search fox 2
 
     // query payload url - tags - page number
-    let query = &format!("{url}/posts.json?tags={}&limit=1&page={}", encode(convec[2]), numcheck(convec));
+    let query = &format!(
+        "{url}/posts.json?tags={}&limit=1&page={}",
+        encode(convec[2]),
+        numcheck(convec)
+    );
 
-   // http request
-    let http: std::result::Result<reqwest::Response, reqwest::Error> =
-        reqwest::Client::new() 
+    // http request
+    let http: std::result::Result<reqwest::Response, reqwest::Error> = reqwest::Client::new()
         .get(query)
         // user agent used with permission
         .header(USER_AGENT, "libsixgrid/1.1.1")
-        .send().await;
-        
-    if http.is_err() { return String::new() };
-      
+        .send()
+        .await;
+
+    if http.is_err() {
+        return String::new();
+    };
+
     let http_payload = http.unwrap().text().await.unwrap();
 
-    if http_payload.is_empty() {return String::new()};
+    if http_payload.is_empty() {
+        return String::new();
+    };
 
-    println!("\n\n\n\n{}\n\n\n", http_payload);
-            
-    let res: Poster = serde_json::from_str(&http_payload)
-        .expect("failed to interpret E6 data");
-
+    let res: Poster = serde_json::from_str(&http_payload).expect("failed to interpret E6 data");
 
     if res.post.is_none() {
         return String::from("**No Results!**");
@@ -206,23 +203,28 @@ async fn e6_search(convec: &[&str],  url: &str) -> String {
 
     let image: String = match &res[0].file.url {
         None => DURL.to_string(),
-        Some(a) => a.to_string()
+        Some(a) => a.to_string(),
     };
 
     format!("**UwU**\n{}", lte(&image))
 }
 
 fn numcheck(convec: &[&str]) -> String {
-
     if convec.len() < 4 {
-        return  1.to_string()
+        return 1.to_string();
     };
 
     let maybe_number = convec[3].parse::<usize>();
 
     match maybe_number {
         Err(_) => 1,
-        Ok(a) => if a >= 750 {1} else {a}
-    }.to_string()
-
+        Ok(a) => {
+            if a >= 750 {
+                1
+            } else {
+                a
+            }
+        }
+    }
+    .to_string()
 }
