@@ -3,7 +3,7 @@ name = "reywen"
 version = "0.1.0"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
-license = "GNU General Public License v3.0"
+license = "GPL-3.0-only"
 documentation = "https://github.com/toastxc/Reywen-Revolt/wiki"
 
 
