@@ -10,10 +10,7 @@ use crate::{
         oop::Reywen,
         rev_x::sudoer,
     },
-    structs::{
-        auth::Auth,
-        message::{Masquerade, RMessage, RMessagePayload},
-    },
+    structs::{auth::Auth, message::RMessage},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -36,12 +33,6 @@ pub async fn shell_main(auth: Auth, input_message: &RMessage) {
 
     let client = Reywen::new(auth.clone(), input_message);
 
-    let masq = Masquerade::new()
-        .name("Reyshell")
-        .avatar("https://toastxc.xyz/TXCS/reyshell.png");
-
-    let payload = RMessagePayload::new().masquerade(masq);
-
     if crash_condition(input_message, Some("?/")) {
         return;
     };
@@ -52,9 +43,7 @@ pub async fn shell_main(auth: Auth, input_message: &RMessage) {
         return;
     };
     if shell.whitelist_sudoers && !sudoer(&input_message.author, "SHELL", &auth.sudoers) {
-        client
-            .send(payload.content("**Only sudoers allowed**"))
-            .await;
+        client.sender("**Only sudoers allowed**").await;
         return;
     };
 
@@ -66,10 +55,10 @@ pub async fn shell_main(auth: Auth, input_message: &RMessage) {
         content_min1 += &format!("{} ", convec[x + 1])
     }
 
-    bash_exec(client, convec, payload).await;
+    bash_exec(client, convec).await;
 }
 
-pub async fn bash_exec(client: Reywen, convec: Vec<&str>, payload: RMessagePayload) {
+pub async fn bash_exec(client: Reywen, convec: Vec<&str>) {
     // shell
 
     let mut com = Command::new(convec[1]);
@@ -79,7 +68,7 @@ pub async fn bash_exec(client: Reywen, convec: Vec<&str>, payload: RMessagePaylo
     }
 
     if let Err(e) = com.output() {
-        client.send(payload.content(&e.to_string())).await;
+        client.sender(&e.to_string()).await;
         return;
     };
 
@@ -89,15 +78,13 @@ pub async fn bash_exec(client: Reywen, convec: Vec<&str>, payload: RMessagePaylo
     let out = String::from_utf8_lossy(&stdout) + String::from_utf8_lossy(&stderr);
 
     if out.chars().count() <= 1000 {
-        client
-            .send(payload.content(&format!("```text\n{out}")))
-            .await;
+        client.sender(&format!("```text\n{out}")).await;
     } else {
-        bash_big_msg(out.to_string(), client, payload).await;
+        bash_big_msg(out.to_string(), client).await;
     };
 }
 
-pub async fn bash_big_msg(out: String, client: Reywen, payload: RMessagePayload) {
+pub async fn bash_big_msg(out: String, client: Reywen) {
     let vec: Vec<char> = out.chars().collect();
 
     let (a, b, c) = convert(vec.len() as i32);
@@ -115,10 +102,7 @@ pub async fn bash_big_msg(out: String, client: Reywen, payload: RMessagePayload)
             iter += 1;
         }
 
-        client
-            .clone()
-            .send(payload.clone().content(&format!("```\\n\\n{current}")))
-            .await;
+        client.clone().sender(&format!("```\\n\\n{current}")).await;
 
         current = String::new();
     }
@@ -131,7 +115,7 @@ pub async fn bash_big_msg(out: String, client: Reywen, payload: RMessagePayload)
 
         current = format!("```\\n\\n{current}");
 
-        client.send(payload.content(&current)).await;
+        client.sender(&current).await;
     };
     println!();
 }
