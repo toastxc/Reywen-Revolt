@@ -2,11 +2,12 @@
 name = "reywen"
 version = "0.1.0"
 edition = "2021"
+description = "A fast and simple framework for creating bots for revolt.chat"
+license = "GNU General Public License v3.0"
+documentation = "https://github.com/toastxc/Reywen-Revolt/wiki"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
 
 # serilizing
 serde = { version = "1.0.152", features = ["derive"] }
@@ -19,7 +20,6 @@ tokio = { version = "1.24.1", features = ["full"] }
 tokio-net = "0.0.0"
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-channel = "0.3.25"
-
 
 # mongodb
 mongodb = {default-features = false, version = "2.3.1", features = ["tokio-runtime"]}
