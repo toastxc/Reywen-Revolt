@@ -1,141 +1,131 @@
+use crate::structs::{
+    message::{RChannelFetch, RMessage, RMessagePayload, RReplies},
+    user::RUserFetch,
+};
 use rand::Rng;
-use crate::structs::{message::{RMessage, RMessagePayload, RReplies, RChannelFetch}, user::RUserFetch};
-
-
 
 // given a user ID, checks if the user is a 'sudoer' or not
 pub fn sudoer(user: &str, comment: &str, sudoers: &[String]) -> bool {
-
     if sudoers.contains(&user.to_owned()) {
         println!("WARN: SUDOER ACTION FROM {user} in {comment}");
-        return true
+        return true;
     };
     false
 }
 
 // deserializes websocket messages
 pub fn rev_message_in(raw: String) -> Result<RMessage, serde_json::Error> {
-
-     serde_json::from_str(&raw)
+    serde_json::from_str(&raw)
 }
 
 // https://developers.revolt.chat/api/#tag/User-Information/operation/fetch_user_req
-pub async fn rev_user(token: &str, target: &str) -> Option<RUserFetch> {
-
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new()
-        .get(format!("https://api.revolt.chat/users/{target}"))
+pub async fn rev_user(domain: &str, user: &str, token: &str) -> Option<RUserFetch> {
+    let client: std::result::Result<reqwest::Response, reqwest::Error> = reqwest::Client::new()
+        .get(format!("https://{domain}/users/{user}"))
         .header("x-bot-token", token)
-        .send().await;
-
+        .send()
+        .await;
 
     if client.is_ok() {
-
         let client_res = client.unwrap().text().await.unwrap();
-        let json:RUserFetch = serde_json::from_str(&client_res).unwrap();
-        return Some(json)
-
+        let json: RUserFetch = serde_json::from_str(&client_res).unwrap();
+        return Some(json);
     };
 
-      http_err(client, "REV_USER_ERR");
+    http_err(client, "REV_USER_ERR");
 
-        None
+    None
 }
 
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_send_message_send
-pub async fn rev_send(token: &str, channel: &str, payload: RMessagePayload)  {
-
+pub async fn rev_send(domain: &str, channel: &str, token: &str, payload: RMessagePayload) {
     let mut random = rand::thread_rng();
     let idem: i64 = random.gen();
 
     let payload2 = serde_json::to_string(&payload).unwrap();
+    let url = format!("https://{domain}/channels/{channel}/messages");
 
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-        reqwest::Client::new()
-        .post(format!("https://api.revolt.chat/channels/{}/messages", channel))
+    let client: std::result::Result<reqwest::Response, reqwest::Error> = reqwest::Client::new()
+        .post(url)
         .header("x-bot-token", token)
         .header("Idempotency-Key", idem)
         .header("Content-Type", "application/json")
         .body(payload2)
-        .send().await;
+        .send()
+        .await;
 
     http_err(client, "REV_SEND");
 }
 
 // https://developers.revolt.chat/api/#tag/Server-Members/operation/member_remove_req
-pub async fn rev_kick(token: &str, user: &str, server: &str) {
-  //  https://api.revolt.chat/servers/{target}/members/{member}
-
-    let client: std::result::Result<reqwest::Response, reqwest::Error> =
-        reqwest::Client::new()
-        .delete(format!("https://api.revolt.chat/servers/{}/members/{}", server, user))
+pub async fn rev_kick(domain: &str, server: &str, member: &str, token: &str) {
+    let client: std::result::Result<reqwest::Response, reqwest::Error> = reqwest::Client::new()
+        .delete(format!(
+            "https://{domain}/servers/{}/members/{}",
+            server, member
+        ))
         .header("x-bot-token", token)
-        .send().await;
+        .send()
+        .await;
 
     http_err(client, "REV_KICK");
 }
 
-
 // for administrators
 // prints http based error codes to stdout with an optional message
 pub fn http_err(http: Result<reqwest::Response, reqwest::Error>, message: &str) {
-
     // reqwest error
     if http.is_err() {
         println!("{message}_REQWEST_ERROR:\n{}", http.err().unwrap());
 
     // http error
-    }else if !http.as_ref().unwrap().status().is_success() {
+    } else if !http.as_ref().unwrap().status().is_success() {
         println!("{message}_HTTP_ERROR: {}", http.unwrap().status());
     };
 }
 
 // https://developers.revolt.chat/api/#tag/Messaging/operation/message_delete_req
-pub async fn rev_del_2(token: &str, channel: &str, message: &str) {
-
-let client: std::result::Result<reqwest::Response, reqwest::Error> =
-    reqwest::Client::new()
-    .delete(format!("https://api.revolt.chat/channels/{}/messages/{}", channel, message))
-    .header("x-bot-token", token)
-    .send().await;
+pub async fn rev_del_2(domain: &str, channel: &str, message: &str, token: &str) {
+    let client: std::result::Result<reqwest::Response, reqwest::Error> = reqwest::Client::new()
+        .delete(format!(
+            "https://{domain}/channels/{}/messages/{}",
+            channel, message
+        ))
+        .header("x-bot-token", token)
+        .send()
+        .await;
 
     http_err(client, "REV_DEL");
 }
 
 // converts websocket replies to API compatible replies
 pub fn rev_convert_reply(input: Option<Vec<String>>) -> Option<Vec<RReplies>> {
-
     // return on none
     input.as_ref()?;
 
     let mut reply_vec: Vec<RReplies> = Vec::new();
 
     for x in input.unwrap().iter() {
-
-         let temp = RReplies {
-           id: x.to_owned(),
-           mention: false,
-         };
-         reply_vec.push(temp)
-    };
+        let temp = RReplies {
+            id: x.to_owned(),
+            mention: false,
+        };
+        reply_vec.push(temp)
+    }
     Some(reply_vec)
 }
 
-
-pub async fn rev_fetch_channel(channel: &str, token: &str) -> Option<RChannelFetch>  {
-    let client =
-    reqwest::Client::new()
-    .get(format!("https://api.revolt.chat/channels/{}", channel))
-    .header("x-bot-token", token)
-    .send().await;
-
+pub async fn rev_fetch_channel(domain: &str, channel: &str, token: &str) -> Option<RChannelFetch> {
+    let client = reqwest::Client::new()
+        .get(format!("https://{domain}/channels/{channel}"))
+        .header("x-bot-token", token)
+        .send()
+        .await;
 
     if client.is_ok() {
-
         let client_res = client.unwrap().text().await.unwrap();
         let json: RChannelFetch = serde_json::from_str(&client_res).unwrap();
-        return Some(json)
-
+        return Some(json);
     };
 
     http_err(client, "REV_CHANNEL_FETCH");
