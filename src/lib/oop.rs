@@ -1,32 +1,42 @@
-use crate::{structs::{auth::Auth, message::{RMessage, RMessagePayload, Masquerade, RReplies}}, lib::{rev_x::{rev_fetch_channel, rev_kick}, lreywen::send}};
-use super::{rev_x::{rev_send, rev_del_2}, lreywen::reply_from};
-
+use super::{
+    lreywen::reply_from,
+    rev_x::{rev_del_2, rev_send, rev_user},
+};
+use crate::{
+    lib::rev_x::{rev_fetch_channel, rev_kick},
+    structs::{
+        auth::Auth,
+        message::{Masquerade, RMessage, RMessagePayload, RReplies},
+        user::RUserFetch,
+    },
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct Reywen {
     auth: Auth,
     input_message: RMessage,
-
-
 }
 
 impl Reywen {
-
     #[allow(dead_code)]
     pub fn new(auth: Auth, input_message: &RMessage) -> Self {
         let input_message = input_message.to_owned();
 
-        Reywen
-        {
-            auth, input_message
+        Reywen {
+            auth,
+            input_message,
         }
     }
 
     #[allow(dead_code)]
     pub async fn send(self, payload: RMessagePayload) -> Self {
-
-
-        rev_send(&self.auth.token, &self.input_message.channel, payload).await;
+        rev_send(
+            &self.auth.domain,
+            &self.input_message.channel,
+            &self.auth.token,
+            payload,
+        )
+        .await;
         self
     }
     #[allow(dead_code)]
@@ -37,27 +47,60 @@ impl Reywen {
             replies: Some(vec![reply_from(&self.input_message)]),
             masquerade: None,
         };
-        rev_send(&self.auth.token, &self.input_message.channel, payload).await;
+        rev_send(
+            &self.auth.domain,
+            &self.input_message.channel,
+            &self.auth.token,
+            payload,
+        )
+        .await;
         self
     }
     #[allow(dead_code)]
     pub async fn delete_msg(self, message_id: &str) -> Self {
-        rev_del_2(&self.auth.token,&self.input_message.channel, message_id, ).await;
+        rev_del_2(
+            &self.auth.domain,
+            &self.input_message.channel,
+            message_id,
+            &self.auth.token,
+        )
+        .await;
         self
     }
 
     #[allow(dead_code)]
     pub async fn member_kick(self, user: &str) -> Self {
-
-        let server = rev_fetch_channel(&self.input_message.channel, &self.auth.token).await.unwrap().server;
-        let payload = format!("**Kicking {}**", user);
+        let server = rev_fetch_channel(
+            &self.auth.domain,
+            &self.input_message.channel,
+            &self.auth.token,
+        )
+        .await
+        .unwrap()
+        .server;
+        let content = format!("**Kicking {}**", user);
         let user = user.replace(['@', '<', '>'], "");
 
+        let payload = RMessagePayload::new()
+            .content(&content)
+            .reply_from(&self.input_message);
+
         tokio::join!(
-                rev_kick(&self.auth.token, &user, &server),
-                send(&self.auth.token, &self.input_message, &payload),
-                );
+            rev_kick(&self.auth.domain, &server, &user, &self.auth.token),
+            //send(&self.auth.token, &self.input_message, &payload),
+            rev_send(
+                &self.auth.domain,
+                &self.input_message.channel,
+                &self.auth.token,
+                payload
+            ),
+        );
         self
+    }
+    #[allow(dead_code)]
+    pub async fn get_user(self, user: &str) -> Option<RUserFetch> {
+        let user = rev_user(&self.auth.domain, user, &self.auth.token).await;
+        user
     }
 }
 
@@ -77,7 +120,6 @@ impl RMessagePayload {
     pub fn masquerade(mut self, masq: Masquerade) -> Self {
         self.masquerade = Some(masq);
         self
-
     }
 
     #[allow(dead_code)]
@@ -92,8 +134,6 @@ impl RMessagePayload {
         self
     }
 }
-
-
 
 impl Masquerade {
     #[allow(dead_code)]
