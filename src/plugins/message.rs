@@ -7,8 +7,12 @@ use crate::{
         fs::fs_to_str,
         lreywen::{convec, crash_condition},
         oop::Reywen,
+
     },
-    structs::{auth::Auth, message::RMessage},
+    structs::{
+        auth::Auth,
+        message::RMessage,
+    },
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -36,7 +40,7 @@ pub async fn message_main(auth: Auth, input_message: &RMessage) {
     let convec = convec(input_message);
 
     // created session based on credentials
-    let client = Reywen::new(auth, input_message);
+    let client = Reywen::new(auth.clone(), input_message);
 
     let mes = match convec[0] as &str {
         "?Mog" | "?mog" => ":01G7MT5B978E360NB6VWAS9SJ6:",
