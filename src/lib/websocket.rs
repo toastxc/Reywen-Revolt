@@ -6,6 +6,7 @@ use tokio_tungstenite::connect_async;
 pub struct RWebsocket {
     token: String,
     format: String,
+    #[serde(rename = "websocket_domain")]
     domain: String,
 }
 
