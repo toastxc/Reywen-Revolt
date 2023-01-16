@@ -12,6 +12,11 @@
             "type": "cargo",
             "cargoArgs": ["run"],
             "name": "run"
+        },
+        {
+            "type": "cargo",
+            "cargoArgs": ["doc", "--open"],
+            "name": "docs",
         }
 
     ]
