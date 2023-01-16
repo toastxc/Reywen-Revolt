@@ -1,5 +1,6 @@
 // an abstraction layer for RevX2 - functionality has been moved from here to oop
-use crate::structs::message::{RMessage, RReplies};
+
+use crate::quark::delta::message::{RMessage, RReplies};
 
 #[allow(dead_code)]
 pub fn reply_from(input: &RMessage) -> RReplies {

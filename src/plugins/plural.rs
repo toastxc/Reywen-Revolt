@@ -1,9 +1,23 @@
-// internal
-use crate::{structs::{message::{RMessage, Masquerade, RMessagePayload}, auth::Auth}, lib::{fs::fs_to_str, lreywen::{convec, crash_condition}, mongo::{RMongo, mongo_db}, oop::Reywen}};
-
 // external
-use serde::{Serialize, Deserialize};
 use mongodb::bson::doc;
+use serde::{Deserialize, Serialize};
+
+// internal
+use crate::{
+    delta::{
+        fs::fs_to_str,
+        lreywen::{convec, crash_condition},
+        mongo::mongo_db,
+        oop::Reywen,
+    },
+    quark::{
+        delta::{
+            auth::Auth,
+            message::{Masquerade, RMessage, RMessagePayload},
+        },
+        mongo::RMongo,
+    },
+};
 
 // config struct
 // this optional struct adds configurable paramaters that are hot changeable, config files are
@@ -17,32 +31,31 @@ struct Plural {
 
 // plugin main is responsible for getting details and activiating functions based on conditions
 pub async fn plural_main(auth: Auth, input_message: &RMessage) {
+    let conf = fs_to_str("config/plural.json").expect("failed to read config/plural.json\n{e}");
 
-    let conf = fs_to_str("config/plural.json")
-        .expect("failed to read config/plural.json\n{e}");
+    let plural: Plural = serde_json::from_str(&conf).expect("Failed to deser plural.json");
 
-    let plural: Plural = serde_json::from_str(&conf)
-        .expect("Failed to deser plural.json");
+    let mongo: RMongo = serde_json::from_str(&conf).expect("Failed to deser plural.json");
 
-    let mongo: RMongo = serde_json::from_str(&conf)
-        .expect("Failed to deser plural.json");
-
-
-    // if the config channel matches the channel of the message received AND 
+    // if the config channel matches the channel of the message received AND
     // if the plugin is enabled, send ID
     if !plural.enabled {
-        return
+        return;
     };
     if plural.channel_only && plural.channel != input_message.channel {
-        return
+        return;
     };
 
     let convec = convec(input_message);
 
-    if crash_condition(input_message, Some("?p")) { return};
+    if crash_condition(input_message, Some("?p")) {
+        return;
+    };
 
     // additional crash condition
-    if convec.len() < 3 {return};
+    if convec.len() < 3 {
+        return;
+    };
 
     let dbinfo = RMongo::new()
         .username(&mongo.username)
@@ -53,40 +66,40 @@ pub async fn plural_main(auth: Auth, input_message: &RMessage) {
 
     let client = Reywen::new(auth, input_message);
 
-
     match convec[1] as &str {
-       "search" => {
-           if pl_search(convec[2], db).await.is_none() {client.sender("**Profile could not be found!**").await;
-           }else { client.sender("**Profile found!**").await;};},
+        "search" => {
+            if pl_search(convec[2], db).await.is_none() {
+                client.sender("**Profile could not be found!**").await;
+            } else {
+                client.sender("**Profile found!**").await;
+            };
+        }
 
         "rm" => {
-           pl_remove(client.clone(), db, input_message).await;
-       },
+            pl_remove(client.clone(), db, input_message).await;
+        }
         "insert" => {
-           pl_insert(client.clone(), db, input_message).await;
-       },
+            pl_insert(client.clone(), db, input_message).await;
+        }
 
         "send" => {
-           pl_send(client.clone(), db, input_message).await;
-       },
+            pl_send(client.clone(), db, input_message).await;
+        }
         "query" => {
-           pl_query(input_message, db, client).await;
-       },
+            pl_query(input_message, db, client).await;
+        }
         _ => {}
     };
 }
 
-
 async fn pl_search(query: &str, db: mongodb::Database) -> Option<Masquerade> {
-
-    db
-    .collection::<Masquerade>("profiles")
-    .find_one(doc! { "name": query }, None).await.unwrap()
-
+    db.collection::<Masquerade>("profiles")
+        .find_one(doc! { "name": query }, None)
+        .await
+        .unwrap()
 }
 
 async fn pl_remove(client: Reywen, db: mongodb::Database, input_message: &RMessage) {
-
     let convec = convec(input_message);
 
     let collection = db.collection::<Masquerade>("profiles");
@@ -95,12 +108,14 @@ async fn pl_remove(client: Reywen, db: mongodb::Database, input_message: &RMessa
 
     if userquery.is_err() {
         client.sender("**Failed to connect to mongodb**").await;
-
-    }else if userquery.unwrap().is_none() {
+    } else if userquery.unwrap().is_none() {
         client.sender("**No results found!**").await;
-    }else {
-        let del_res = collection.delete_one(doc!{"name": convec[2]}, None ).await;
-        client.clone().sender("**Profile found, deleting...**").await;
+    } else {
+        let del_res = collection.delete_one(doc! {"name": convec[2]}, None).await;
+        client
+            .clone()
+            .sender("**Profile found, deleting...**")
+            .await;
 
         let str = match del_res {
             Ok(_) => String::from("**Successfully deleted**"),
@@ -111,16 +126,16 @@ async fn pl_remove(client: Reywen, db: mongodb::Database, input_message: &RMessa
 }
 
 async fn pl_send(client: Reywen, db: mongodb::Database, input_message: &RMessage) {
-
-
-        let convec: Vec<&str> = convec(input_message);
+    let convec: Vec<&str> = convec(input_message);
 
     // ?p send <>
     let profile = pl_search(convec[2], db).await;
 
     if profile.is_none() {
-        client.sender("**Invalid profile! (we couldn't find it pwp**").await;
-        return
+        client
+            .sender("**Invalid profile! (we couldn't find it pwp**")
+            .await;
+        return;
     };
     let profile = profile.unwrap();
 
@@ -130,7 +145,6 @@ async fn pl_send(client: Reywen, db: mongodb::Database, input_message: &RMessage
     message.remove(0);
     message.remove(0);
     let new_message: String = message.iter().map(|i| i.to_string() + " ").collect();
-
 
     let mut payload = RMessagePayload::new()
         .masquerade(profile)
@@ -142,21 +156,22 @@ async fn pl_send(client: Reywen, db: mongodb::Database, input_message: &RMessage
     };
 
     tokio::join!(
-            client.clone().send(payload),
-            client.delete_msg(&input_message._id),
+        client.clone().send(payload),
+        client.delete_msg(&input_message._id),
     );
 }
 
-async fn pl_insert(client: Reywen, db: mongodb::Database, input_message: &RMessage ) {
-
-
+async fn pl_insert(client: Reywen, db: mongodb::Database, input_message: &RMessage) {
     let collection = db.collection::<Masquerade>("profiles");
 
     let convec = convec(input_message);
 
     if pl_search(convec[2], db).await.is_some() {
-        client.clone().sender("**This profile already exists! try another name**").await;
-        return
+        client
+            .clone()
+            .sender("**This profile already exists! try another name**")
+            .await;
+        return;
     };
 
     // CLI schema out of order ?p insert FLoofy --colour red --avatar img.jpg
@@ -165,24 +180,25 @@ async fn pl_insert(client: Reywen, db: mongodb::Database, input_message: &RMessa
     let mut masq = Masquerade::new().name(convec[2]);
 
     // validity check and optional insertion
-    for x in 0..convec.len()  - 1{
+    for x in 0..convec.len() - 1 {
         // colour
         if convec[x] == "--colour" && convec[x + 1].chars().count() < 10 {
             masq = masq.colour(convec[x + 1]);
         };
         // avatar
-        if convec[x] == "--avatar" && convec[x +1].chars().count() < 100 {
+        if convec[x] == "--avatar" && convec[x + 1].chars().count() < 100 {
             masq = masq.avatar(convec[x + 1]);
         };
-    };
+    }
 
     let userquery = collection.insert_one(masq, None).await;
 
     if userquery.is_err() {
         client.sender("**Failed to connect**").await;
-
-    }else {
-        client.sender("**Valid profile! adding to collection**").await;
+    } else {
+        client
+            .sender("**Valid profile! adding to collection**")
+            .await;
     };
 }
 
@@ -192,9 +208,8 @@ async fn pl_query(input_message: &RMessage, db: mongodb::Database, client: Reywe
     let userquery = pl_search(convec[2], db).await;
 
     if userquery.is_none() {
-
         client.sender("**Could not find profile!**").await;
-        return
+        return;
     };
     let userquery = userquery.unwrap();
 

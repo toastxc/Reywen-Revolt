@@ -1,14 +1,7 @@
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
 use tokio_tungstenite::connect_async;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
-pub struct RWebsocket {
-    token: String,
-    format: String,
-    #[serde(rename = "websocket_domain")]
-    domain: String,
-}
+use crate::quark::bonfire::RWebsocket;
 
 impl RWebsocket {
     pub fn new(ws: RWebsocket) -> Self {

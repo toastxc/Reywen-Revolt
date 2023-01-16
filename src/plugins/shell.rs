@@ -2,16 +2,17 @@
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 
-// internal
 use crate::{
-    lib::{
+    delta::{
+        delta::sudoer,
         fs::fs_to_str,
         lreywen::{convec, crash_condition},
         oop::Reywen,
-        rev_x::sudoer,
     },
-    structs::{auth::Auth, message::RMessage},
+    quark::delta::{auth::Auth, message::RMessage},
 };
+
+// internal
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ShellConf {

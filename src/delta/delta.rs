@@ -1,8 +1,9 @@
-use crate::structs::{
+use rand::Rng;
+
+use crate::quark::delta::{
     message::{RChannelFetch, RMessage, RMessagePayload, RReplies},
     user::RUserFetch,
 };
-use rand::Rng;
 
 // given a user ID, checks if the user is a 'sudoer' or not
 pub fn sudoer(user: &str, comment: &str, sudoers: &[String]) -> bool {

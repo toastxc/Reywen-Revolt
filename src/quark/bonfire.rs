@@ -1,11 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
-pub struct Auth {
-
+pub struct RWebsocket {
     pub token: String,
-    pub bot_id: String,
-    pub sudoers: Vec<String>,
-    #[serde(rename = "api_domain")]
+    pub format: String,
+    #[serde(rename = "websocket_domain")]
     pub domain: String,
 }

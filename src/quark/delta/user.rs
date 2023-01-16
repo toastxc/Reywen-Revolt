@@ -54,7 +54,7 @@ pub struct Avatar {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message_id: Option<String>,
-    
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_id: Option<String>,
 
@@ -78,7 +78,6 @@ pub struct Bot {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Profile {
-
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

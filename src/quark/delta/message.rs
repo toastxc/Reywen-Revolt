@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct RMessage {
-    
+
     pub _id: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -52,7 +52,7 @@ pub struct RMessagePayload {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attachments: Option<Vec<String>>,
-      
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replies: Option<Vec<RReplies>>,
 

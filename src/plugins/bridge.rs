@@ -1,13 +1,14 @@
 // external
 use serde::{Deserialize, Serialize};
-// internal
+
 use crate::{
-    lib::{fs::fs_to_str, lreywen::crash_condition, oop::Reywen, rev_x::rev_convert_reply},
-    structs::{
+    delta::{delta::rev_convert_reply, fs::fs_to_str, lreywen::crash_condition, oop::Reywen},
+    quark::delta::{
         auth::Auth,
         message::{Masquerade, RMessage, RMessagePayload},
     },
 };
+// internal
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BrConf {

@@ -1,14 +1,15 @@
-use super::{
-    lreywen::reply_from,
-    rev_x::{rev_del_2, rev_send, rev_user},
-};
 use crate::{
-    lib::rev_x::{rev_fetch_channel, rev_kick},
-    structs::{
+    delta::delta::{rev_fetch_channel, rev_kick},
+    quark::delta::{
         auth::Auth,
         message::{Masquerade, RMessage, RMessagePayload, RReplies},
         user::RUserFetch,
     },
+};
+
+use super::{
+    delta::{rev_del_2, rev_send, rev_user},
+    lreywen::reply_from,
 };
 
 #[derive(Debug, Clone, Default)]

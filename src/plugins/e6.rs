@@ -4,18 +4,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use urlencoding::encode;
 
-// internal
 use crate::{
-    lib::{
+    delta::{
         fs::fs_to_str,
         lreywen::{convec, crash_condition, lte},
         oop::Reywen,
     },
-    structs::{
-        auth::Auth,
-        message::RMessage,
-    },
+    quark::delta::{auth::Auth, message::RMessage},
 };
+
+// internal
 
 const DURL: &str =
     "https://autumn.revolt.chat/attachments/6bfy1Es-xWa9U6VzEPSw7DnbQPGUDK7LWrk4yRWHpV";

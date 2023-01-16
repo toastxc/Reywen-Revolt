@@ -1,19 +1,10 @@
 // external
-use mongodb::{options::ClientOptions, bson::doc};
-use serde::{Deserialize, Serialize};
+use mongodb::{bson::doc, options::ClientOptions};
 
-#[derive(Debug, Default, Deserialize, Serialize)]
-pub struct RMongo {
-    pub username: String,
-    pub password: String,
-    pub ip: Option<String>,
-    pub port: Option<String>,
-    pub database: String
-}
+use crate::quark::mongo::RMongo;
 
 #[allow(dead_code)]
 pub async fn mongo_db(mut mongo: RMongo) -> mongodb::Database {
-
     if mongo.ip.is_none() {
         mongo.ip = Some(String::from("localhost"))
     };
@@ -21,8 +12,13 @@ pub async fn mongo_db(mut mongo: RMongo) -> mongodb::Database {
         mongo.port = Some(String::from("27017"))
     };
 
-    let options = format!("mongodb://{}:{}@{}:{}",
-                        mongo.username, mongo.password, mongo.ip.unwrap(), mongo.port.unwrap());
+    let options = format!(
+        "mongodb://{}:{}@{}:{}",
+        mongo.username,
+        mongo.password,
+        mongo.ip.unwrap(),
+        mongo.port.unwrap()
+    );
 
     let client = mongodb::Client::with_options(ClientOptions::parse(options).await.unwrap())
         .expect("could not connect to database");
@@ -60,13 +56,11 @@ impl RMongo {
         self.database = String::from(db);
         self
     }
-
 }
 
 // example usage of mongodb
 #[allow(dead_code)]
 async fn example_usage() {
-
     // define your credentials
     let dbinfo = RMongo::new()
         .username("github")
@@ -80,9 +74,4 @@ async fn example_usage() {
     let collection = db.collection::<String>("names");
 
     let _ = collection.find_one(doc!("name": "jeff"), None).await;
-
 }
-
-
-
-

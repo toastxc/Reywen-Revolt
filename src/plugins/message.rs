@@ -1,20 +1,16 @@
 // external
 use serde::{Deserialize, Serialize};
 
-// internal
 use crate::{
-    lib::{
+    delta::{
         fs::fs_to_str,
         lreywen::{convec, crash_condition},
         oop::Reywen,
-
     },
-    structs::{
-        auth::Auth,
-        message::RMessage,
-    },
+    quark::delta::{auth::Auth, message::RMessage},
 };
 
+// internal
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageConf {
     pub enabled: bool,

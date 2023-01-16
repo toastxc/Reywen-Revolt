@@ -1,40 +1,17 @@
-// plugins
-mod plugins {
-    pub mod bridge;
-    pub mod e6;
-    pub mod message;
-    pub mod plural;
-    pub mod shell;
-}
-use crate::plugins::{
-    bridge::br_main, e6::e6_main, message::message_main, plural::plural_main, shell::shell_main,
-};
-
-// libraries
-mod lib {
-    pub mod fs;
-    pub mod lreywen;
-    pub mod mongo;
-    pub mod oop;
-    pub mod rev_x;
-    pub mod websocket;
-}
-
-use crate::lib::{
-    fs::{conf_init, ws_init},
-    rev_x::rev_message_in,
-    websocket::{from_ws, RWebsocket},
-};
-
-// structs
-mod structs {
-    pub mod auth;
-    pub mod message;
-    pub mod user;
-}
-
 // external crates
+
 use futures_util::StreamExt;
+use reywen::{
+    bonfire::bonfire::from_ws,
+    delta::{
+        delta::rev_message_in,
+        fs::{conf_init, ws_init},
+    },
+    plugins::{
+        bridge::br_main, e6::e6_main, message::message_main, plural::plural_main, shell::shell_main,
+    },
+    quark::bonfire::RWebsocket,
+};
 
 #[tokio::main]
 async fn main() {
