@@ -14,8 +14,8 @@ use super::{
 
 #[derive(Debug, Clone, Default)]
 pub struct Reywen {
-    auth: Auth,
-    input_message: RMessage,
+    pub auth: Auth,
+    pub input_message: RMessage,
 }
 
 impl Reywen {
