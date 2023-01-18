@@ -4,7 +4,7 @@
 /// - quark - common methods and structures
 /// - bonfire - websocket
 
-/// # http methods for reywen!
+/// # http methods for reywen! as well as other useful features
 pub mod delta {
     pub mod delta;
     pub mod fs;
@@ -15,15 +15,6 @@ pub mod delta {
 /// # websocket features for reywen
 pub mod bonfire {
     pub mod bonfire;
-}
-/// # plugin
-/// premade examples of using the reywen framework
-pub mod plugins {
-    pub mod bridge;
-    pub mod e6;
-    pub mod message;
-    pub mod plural;
-    pub mod shell;
 }
 
 /// # structs

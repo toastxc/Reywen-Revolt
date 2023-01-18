@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
@@ -19,14 +19,13 @@ validator = { version = "0.16.0", features = ["derive"] }
 tokio = { version = "1.24.1", features = ["full"] }
 tokio-net = "0.0.0"
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
-futures-channel = "0.3.25"
+
 
 # mongodb
 mongodb = {default-features = false, version = "2.3.1", features = ["tokio-runtime"]}
-bson = "2.4.0"
+
 
 # https
-urlencoding = "2.1.2"
 rand = "0.8.5"
 reqwest = { version = "0.11", features = ["json", "native-tls"] }
 tokio-tungstenite = { version = "0.18.0", features = ["native-tls"] }
