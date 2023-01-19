@@ -17,7 +17,13 @@
             "type": "cargo",
             "cargoArgs": ["doc", "--open"],
             "name": "docs",
-        }
+        },
+        {
+            "type": "cargo",
+            "name": "clippy",
+            "cargoArgs": ["clippy"],
+        },
+
 
     ]
 }
