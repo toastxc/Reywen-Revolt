@@ -1,30 +1,30 @@
-/// # Reywen
-/// Reywen features are named are the backend component they connect to
-/// - delta - http API
-/// - quark - common methods and structures
-/// - bonfire - websocket
-
-/// # http methods for reywen! as well as other useful features
+/// # http methods
 pub mod delta {
+    /// http
     pub mod delta;
+    /// filesystem abstraction
     pub mod fs;
+    /// http abstraction
     pub mod lreywen;
+    /// abstractions for mongodb
     pub mod mongo;
+    /// builder patterns for http
     pub mod oop;
 }
-/// # websocket features for reywen
+/// # websocket
 pub mod bonfire {
     pub mod bonfire;
 }
-
-/// # structs
-/// common datastructures for reywen
+/// # common structures for reywen
 pub mod quark {
+    /// # structs for http
     pub mod delta {
         pub mod auth;
         pub mod message;
         pub mod user;
     }
+    /// structs for websocket
     pub mod bonfire;
+    /// structs for mongodb
     pub mod mongo;
 }
