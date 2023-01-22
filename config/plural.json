@@ -1,12 +1,6 @@
 {
 	"enabled": false,
-    
-    "channel_only": false,
-    "channel": "",
-    	
-    "username": "reywen",
-	"password": "PASSWORD",
-    "ip": "localhost",
-    "port": "27017",
-    "database": "test"
+	"channel_only": false,
+	"channel": "",
+	"collection": "profiles"
 }
