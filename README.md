@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/DeclanChidlow/Reywen-Revolt/blob/main/README_RESOURCES/ReywenLogo.svg" alt="Crab claw holding a spanner" width="30%" height="30%">
+  <img src="https://github.com/toastxc/Reywen-Revolt/blob/main/README_RESOURCES/ReywenLogo.svg" alt="Crab claw holding a spanner" width="30%" height="30%">
 
   Reywen - A Rust Bot and Framework for Revolt.chat
   
