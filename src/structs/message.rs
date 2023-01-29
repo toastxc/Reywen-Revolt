@@ -3,10 +3,6 @@ use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-pub fn if_false(t: &bool) -> bool {
-    !t
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Reply {
     /// Message Id
@@ -15,7 +11,16 @@ pub struct Reply {
     pub mention: bool,
 }
 
-#[derive(Validate, Serialize, Deserialize, Clone, Debug)]
+impl Reply {
+    pub fn new(id: &str) -> Self {
+        Reply {
+            id: String::from(id),
+            mention: false,
+        }
+    }
+}
+
+#[derive(Validate, Serialize, Deserialize, Clone, Debug, Default)]
 pub struct SendableEmbed {
     #[validate(length(min = 1, max = 128))]
     pub icon_url: Option<String>,
@@ -27,6 +32,16 @@ pub struct SendableEmbed {
     pub media: Option<String>,
     #[validate(length(min = 1, max = 128))]
     pub colour: Option<String>,
+}
+
+impl SendableEmbed {
+    pub fn new(url: &str, name: &str) -> Self {
+        SendableEmbed {
+            url: Some(String::from(url)),
+            title: Some(String::from(name)),
+            ..Default::default()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -56,7 +71,7 @@ pub enum SystemMessage {
     ChannelOwnershipChanged { from: String, to: String },
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Validate)]
+#[derive(Serialize, Deserialize, Debug, Clone, Validate, Default)]
 pub struct Masquerade {
     /// Replace the display name shown on this message
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -72,6 +87,24 @@ pub struct Masquerade {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[validate(length(min = 1, max = 128))]
     pub colour: Option<String>,
+}
+
+impl Masquerade {
+    pub fn new() -> Self {
+        Masquerade::default()
+    }
+    pub fn name(mut self, name: &str) -> Self {
+        self.name = Some(String::from(name));
+        self
+    }
+    pub fn avatar(mut self, avatar: &str) -> Self {
+        self.avatar = Some(String::from(avatar));
+        self
+    }
+    pub fn colour(mut self, colour: &str) -> Self {
+        self.colour = Some(String::from(colour));
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, OptionalStruct, Default)]
@@ -109,15 +142,6 @@ pub struct Message {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub masquerade: Option<Masquerade>,
 }
-impl Message {
-    pub fn new() -> Self {
-        Self::default()
-    }
-    pub fn content(mut self, content: &str) -> Self {
-        self.content = Some(String::from(content));
-        self
-    }
-}
 
 #[derive(Validate, Serialize, Deserialize, Default)]
 pub struct DataMessageSend {
@@ -141,6 +165,35 @@ impl DataMessageSend {
     }
     pub fn content(mut self, content: &str) -> Self {
         self.content = Some(String::from(content));
+        self
+    }
+
+    pub fn replies_add(mut self, replies: Vec<Reply>) -> Self {
+        self.replies = Some(replies);
+        self
+    }
+    pub fn reply_add(mut self, reply: Reply) -> Self {
+        match self.replies {
+            None => self.replies = Some(vec![reply]),
+            Some(ref mut a) => a.push(reply),
+        };
+        self
+    }
+
+    pub fn embed(mut self, embed: SendableEmbed) -> Self {
+        match self.embeds {
+            None => self.embeds = Some(vec![embed]),
+            Some(ref mut a) => a.push(embed),
+        };
+        self
+    }
+    pub fn embeds(mut self, embeds: Vec<SendableEmbed>) -> Self {
+        self.embeds = Some(embeds);
+        self
+    }
+
+    pub fn masquerade(mut self, masquerade: Masquerade) -> Self {
+        self.masquerade = Some(masquerade);
         self
     }
 }
