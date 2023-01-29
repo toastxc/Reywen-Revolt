@@ -40,12 +40,32 @@ pub struct SendableEmbed {
 }
 
 impl SendableEmbed {
-    pub fn new(url: &str, name: &str) -> Self {
-        SendableEmbed {
-            url: Some(String::from(url)),
-            title: Some(String::from(name)),
-            ..Default::default()
-        }
+    pub fn new() -> Self {
+        SendableEmbed::default()
+    }
+    pub fn icon_url(mut self, icon_url: &str) -> Self {
+        self.icon_url = Some(String::from(icon_url));
+        self
+    }
+    pub fn url(mut self, url: &str) -> Self {
+        self.icon_url = Some(String::from(url));
+        self
+    }
+    pub fn title(mut self, title: &str) -> Self {
+        self.icon_url = Some(String::from(title));
+        self
+    }
+    pub fn description(mut self, description: &str) -> Self {
+        self.icon_url = Some(String::from(description));
+        self
+    }
+    pub fn media(mut self, media: &str) -> Self {
+        self.icon_url = Some(String::from(media));
+        self
+    }
+    pub fn colour(mut self, colour: &str) -> Self {
+        self.icon_url = Some(String::from(colour));
+        self
     }
 }
 
