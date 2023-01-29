@@ -1,15 +1,14 @@
 [package]
 name = "reywen"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
-documentation = "https://github.com/toastxc/Reywen-Revolt/wiki"
-
+documentation = "https://docs.rs/reywen/latest/reywen/"
 
 [dependencies]
 
-# serilizing
+# serde
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
 optional_struct = "0.2.0"
@@ -17,18 +16,16 @@ validator = { version = "0.16.0", features = ["derive"] }
 
 # async
 tokio = { version = "1.24.1", features = ["full"] }
-tokio-net = "0.0.0"
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
-
-
-# mongodb
-mongodb = {default-features = false, version = "2.3.1", features = ["tokio-runtime"]}
-
 
 # https
 rand = "0.8.5"
 reqwest = { version = "0.11", features = ["json", "native-tls"] }
+iso8601-timestamp = "0.2.9"
+
+# websocket
 tokio-tungstenite = { version = "0.18.0", features = ["native-tls"] }
+
 
 
 [profile.release]
