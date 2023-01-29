@@ -12,6 +12,7 @@ mod methods {
 }
 /// Data structures (copied mainy from the Revolt backend) for API
 pub mod structs {
+    pub mod attachment;
     pub mod auth;
     pub mod channel;
     pub mod message;
