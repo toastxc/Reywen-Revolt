@@ -3,7 +3,7 @@ use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Reply {
     /// Message Id
     pub id: String,
@@ -12,11 +12,16 @@ pub struct Reply {
 }
 
 impl Reply {
-    pub fn new(id: &str) -> Self {
-        Reply {
-            id: String::from(id),
-            mention: false,
-        }
+    pub fn new() -> Self {
+        Reply::default()
+    }
+    pub fn id(mut self, id: &str) -> Self {
+        self.id = String::from(id);
+        self
+    }
+    pub fn mention(mut self, mention: bool) -> Self {
+        self.mention = mention;
+        self
     }
 }
 
