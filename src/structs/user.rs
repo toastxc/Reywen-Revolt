@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+use super::attachment::File;
+
 pub fn if_false(t: &bool) -> bool {
     !t
 }
@@ -105,6 +107,10 @@ pub struct User {
     pub id: String,
     /// Username
     pub username: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Avatar attachment
+    pub avatar: Option<File>,
 
     /// Relationships with other users
     #[serde(skip_serializing_if = "Option::is_none")]

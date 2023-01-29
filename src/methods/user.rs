@@ -83,3 +83,5 @@ pub async fn user_default_avatar(domain: &str, token: &str, user: &str) -> Optio
         Ok(a) => Some(a.text().await.unwrap()),
     }
 }
+
+
