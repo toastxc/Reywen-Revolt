@@ -18,8 +18,12 @@ pub struct Websocket {
 }
 
 impl Websocket {
-    pub fn new(ws: Websocket) -> Self {
-        ws
+    pub fn from_token(token: &str) -> Self {
+        Websocket {
+            token: String::from(token),
+            format: String::from("json"),
+            domain: String::from("ws.revolt.chat"),
+        }
     }
 
     pub async fn generate(self) -> impl Stream<Item = Result<Message, Error>> {
