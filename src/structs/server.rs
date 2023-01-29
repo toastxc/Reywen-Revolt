@@ -6,7 +6,7 @@ use validator::Validate;
 
 use super::attachment::File;
 
-pub fn if_false(t: &bool) -> bool {
+fn if_false(t: &bool) -> bool {
     !t
 }
 
@@ -27,6 +27,30 @@ pub struct Role {
     pub rank: i64,
 }
 
+impl Role {
+    pub fn new() -> Self {
+        Role::default()
+    }
+
+    pub fn name(mut self, name: &str) -> Self {
+        self.name = String::from(name);
+        self
+    }
+
+    pub fn colour(mut self, colour: &str) -> Self {
+        self.colour = Some(String::from(colour));
+        self
+    }
+    pub fn hoist(mut self, hoist: bool) -> Self {
+        self.hoist = hoist;
+        self
+    }
+    pub fn rank(mut self, rank: i64) -> Self {
+        self.rank = rank;
+        self
+    }
+}
+
 #[derive(Validate, Serialize, Deserialize, Debug, Clone)]
 pub struct Category {
     /// Unique ID for this category
@@ -37,6 +61,31 @@ pub struct Category {
     pub title: String,
     /// Channels in this category
     pub channels: Vec<String>,
+}
+
+impl Category {
+    pub fn id(mut self, id: &str) -> Self {
+        self.id = String::from(id);
+        self
+    }
+
+    pub fn title(mut self, title: &str) -> Self {
+        self.title = String::from(title);
+        self
+    }
+
+    pub fn channels(mut self, channels: Vec<String>) -> Self {
+        self.channels = channels;
+        self
+    }
+
+    pub fn channel_add(mut self, channel: &str) -> Self {
+        match self.channels.is_empty() {
+            true => self.channels = vec![String::from(channel)],
+            false => self.channels.push(String::from(channel)),
+        };
+        self
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -121,7 +170,6 @@ pub enum FieldsServer {
 pub enum FieldsRole {
     Colour,
 }
-
 
 // ########################## SERVER MEMBERS ##########################
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
