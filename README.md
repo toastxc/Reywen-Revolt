@@ -11,7 +11,7 @@
   [![Licence](https://img.shields.io/github/license/toastxc/Reywen-Revolt?style=flat-square&logoColor=white)](https://github.com/toastxc/Reywen-Revolt/blob/main/LICENCE)
 </h1>
 
-Reywen is a bot and a framework for building bots on the Revolt.chat platform, written in Rust. It provides simple abstraction libraries for easily implementing features, while allowing for more direct interaction with the Revolt APi and Websocket.
+Reywen is a library for building bots on the Revolt.chat platform, written in Rust. It provides simple abstraction libraries for easily implementing features, while allowing for more direct interaction with the Revolt APi and Websocket.
 
 ## Features
 - Easy to use and well-documented API
@@ -25,8 +25,7 @@ Reywen is a bot and a framework for building bots on the Revolt.chat platform, w
 ## Things I won't add
 - SQL support
 - Discord integration
-- Uploading images or other attachments
-
+- Uploading images
 
 ## Getting Started (for developers)
 
@@ -39,7 +38,7 @@ Once you have your bot set up, you can start implementing your bot's functionali
 
 ## Documentation
 Reywen functions, abstractions and features
-[can be found at the wiki](https://github.com/toastxc/Reywen-Revolt/wiki)
+[can be found at the wiki](https://docs.rs/reywen/latest/reywen/)
 
 ## Support
 For help or questions reguarding the usage or development of Reywen please create an issue on github, its the easiest and fastest way to improve issues
