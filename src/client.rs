@@ -160,6 +160,22 @@ impl Do {
         .await
     }
 
+    /// fetches a users profile picture link based - None for failure OR no avatar
+    pub async fn self_fetch_avatar(&self) -> Option<String> {
+        let user = crate::methods::user::user_fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.input_message.author,
+        )
+        .await;
+        if let Some(user) = user {
+            if let Some(avatar) = user.avatar {
+                return Some(format!("https://autumn.revolt.chat/avatars/{}", avatar.id));
+            };
+        };
+        None
+    }
+
     /// fetches server details - None for failure
     pub async fn fetch_server(&self, server: &str) -> Option<Server> {
         crate::methods::server::server_fetch(&self.auth.domain, server, &self.auth.token).await
