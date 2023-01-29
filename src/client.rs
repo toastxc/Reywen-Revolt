@@ -1,8 +1,10 @@
+use iso8601_timestamp::Timestamp;
+
 use crate::{
     methods::{message, user},
     structs::{
         auth::Auth,
-        message::{DataMessageSend, Message},
+        message::{DataMessageSend, Masquerade, Message, SendableEmbed, SystemMessage},
         server::Server,
         user::User,
     },
@@ -11,7 +13,8 @@ use crate::{
 /// DO is the builder pattern for safely and easily interacting with the Revolt API
 /// While the API can be directly used it is not recommended
 ///
-/// Both fields Auth and Message are private, but there are methods extracting these
+/// The fields auth and input_message are public but this is a temporary measure and will
+/// become depricated!!
 #[derive(Debug, Default, Clone)]
 pub struct Do {
     pub auth: Auth,
@@ -26,8 +29,49 @@ impl Do {
             input_message: input_message.to_owned(),
         }
     }
+    // ########################### INPUT_MESSAGE ###############################
 
-    /// returns text content for Message, if none return an empty string
+    /// returns ID for Message
+    pub fn id(&self) -> String {
+        self.input_message.id.clone()
+    }
+    /// bool for id()
+    pub fn id_is(&self, id: &str) -> bool {
+        if id == self.input_message.id.as_str() {
+            return true;
+        };
+        false
+    }
+
+    /// returns channel for Message
+    pub fn channel(&self) -> String {
+        self.input_message.channel.clone()
+    }
+    /// bool for channel()
+    pub fn channel_is(&self, id: &str) -> bool {
+        if id == self.input_message.channel.as_str() {
+            return true;
+        };
+        false
+    }
+    /// returns channel for Message
+    pub fn author(&self) -> String {
+        self.input_message.author.clone()
+    }
+    /// bool for channel()
+    pub fn author_is(&self, id: &str) -> bool {
+        if id == self.input_message.author.as_str() {
+            return true;
+        };
+        false
+    }
+
+    /// checks if bot is reading its own message
+    pub fn author_is_bot(&self) -> bool {
+        self.auth.bot_id == self.input_message.author
+    }
+
+    /// returns content for Message, if none return an empty string
     pub fn content(&self) -> String {
         self.input_message.content.clone().unwrap_or_default()
     }
@@ -39,16 +83,51 @@ impl Do {
         false
     }
 
+    /// returns SystemMessage
+    pub fn system_message(&self) -> Option<SystemMessage> {
+        self.input_message.system.clone()
+    }
+
+    /// returns if the message has been edited
+    pub fn edited(&self) -> Option<Timestamp> {
+        self.input_message.edited
+    }
+
+    /// returns if the message has been edited
+    pub fn mentions(&self) -> Option<Vec<String>> {
+        self.input_message.mentions.clone()
+    }
+
+    /// returns if the message has been edited
+    pub fn replies(&self) -> Option<Vec<String>> {
+        self.input_message.replies.clone()
+    }
+
+    /// returns if the message has been edited
+    pub fn embeds(&self) -> Option<Vec<SendableEmbed>> {
+        self.input_message.embeds.clone()
+    }
+
+    /// returns if the message has been edited
+    pub fn masquerade(&self) -> Option<Masquerade> {
+        self.input_message.masquerade.clone()
+    }
+
+    // ########################### AUTH ###############################
+
+    pub fn sudoers(&self) -> Vec<String> {
+        self.auth.sudoers.clone()
+    }
+    pub fn is_sudoer(&self, user: &str) -> bool {
+        self.auth.sudoers.contains(&String::from(user))
+    }
+
     /// vector of content
     pub fn convec(&self) -> Vec<String> {
         vecify(&self.input_message.content.clone().unwrap_or_default())
     }
 
-    /// returns the author for Message
-    pub fn author(&self) -> String {
-        self.input_message.author.clone()
-    }
-
+    // ########################### API - POST ###############################
     /// sends a message, all fields are ignored besides content for Message
     pub async fn sender(&self, message: &str) {
         message::message_send(
@@ -59,7 +138,6 @@ impl Do {
         )
         .await;
     }
-
     /// sends a message - requires the Message data structure
     pub async fn send(&self, message: DataMessageSend) {
         message::message_send(
@@ -71,6 +149,7 @@ impl Do {
         .await;
     }
 
+    // ########################### API - GET ###############################
     /// fetches User based on the input_message author - None for failure
     pub async fn self_fetch(&self) -> Option<User> {
         crate::methods::user::user_fetch(
@@ -80,6 +159,13 @@ impl Do {
         )
         .await
     }
+
+    /// fetches server details - None for failure
+    pub async fn fetch_server(&self, server: &str) -> Option<Server> {
+        crate::methods::server::server_fetch(&self.auth.domain, server, &self.auth.token).await
+    }
+
+    // ########################### API - PATCH ###############################
 
     /// edits user based on input_message author
     pub async fn edit_self(&self, edit: user::DataEditUser) {
@@ -91,14 +177,10 @@ impl Do {
         )
         .await
     }
-
-    /// fetches server details - None for failure
-    pub async fn fetch_server(&self, server: &str) -> Option<Server> {
-        crate::methods::server::server_fetch(&self.auth.domain, server, &self.auth.token).await
-    }
 }
+// ########################### OTHER ###############################
 
-/// simple abstracton for converting &str to Vec<String> (not Vec<&str>)
+/// simple fn for converting &str to Vec<String> (not Vec<&str>)
 fn vecify(input: &str) -> Vec<String> {
     let mut master: Vec<String> = Vec::new();
     for x in input.split(' ') {
