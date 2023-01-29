@@ -8,3 +8,13 @@ pub struct Auth {
     #[serde(rename = "api_domain")]
     pub domain: String,
 }
+
+impl Auth {
+    pub fn from_token(token: &str) -> Self {
+        Auth {
+            token: String::from(token),
+            domain: (String::from("api.revolt.chat")),
+            ..Default::default()
+        }
+    }
+}
