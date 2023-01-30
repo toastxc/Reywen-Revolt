@@ -193,11 +193,11 @@ impl DataMessageSend {
         self
     }
 
-    pub fn replies_add(mut self, replies: Vec<Reply>) -> Self {
+    pub fn replies(mut self, replies: Vec<Reply>) -> Self {
         self.replies = Some(replies);
         self
     }
-    pub fn reply_add(mut self, reply: Reply) -> Self {
+    pub fn reply(mut self, reply: Reply) -> Self {
         match self.replies {
             None => self.replies = Some(vec![reply]),
             Some(ref mut a) => a.push(reply),
