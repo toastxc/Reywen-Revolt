@@ -3,7 +3,7 @@ use validator::Validate;
 
 use super::attachment::File;
 
-pub fn if_false(t: &bool) -> bool {
+fn if_false(t: &bool) -> bool {
     !t
 }
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
