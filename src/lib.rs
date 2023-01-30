@@ -1,6 +1,20 @@
 /// # Handles HTTP errors and other methods
 ///
-/// # Default functionality will print the error, as well as the name of the function that errored
+/// ### Web
+///```
+///use reywen::debug::Web;
+///pub async fn http_example() {
+///    if let Err(e) = reqwest::Client::new()
+///        .get(format!("https://example.com"))
+///        .send()
+///        .await
+///    {
+///        Web::error(e, "example_function");
+///    };
+///}
+///```
+///The default functionality is to print the http error to stdout, this can be modified
+///More debug features will be added but for now it's just HTTP
 pub mod debug;
 
 /// # Methods are implementations of the Revolt API
