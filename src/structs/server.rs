@@ -79,7 +79,7 @@ impl Category {
         self
     }
 
-    pub fn channel_add(mut self, channel: &str) -> Self {
+    pub fn channel(mut self, channel: &str) -> Self {
         match self.channels.is_empty() {
             true => self.channels = vec![String::from(channel)],
             false => self.channels.push(String::from(channel)),
