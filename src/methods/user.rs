@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use validator::Validate;
 
 use crate::{
-    debug::Web,
+    client::Web,
     structs::user::{FieldsUser, User, UserStatus},
 };
 
@@ -37,7 +37,7 @@ pub struct DataEditUser {
     remove: Option<Vec<FieldsUser>>,
 }
 #[allow(dead_code)]
-pub async fn user_fetch(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn fetch(domain: &str, token: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}"))
         .header("x-bot-token", token)
@@ -56,7 +56,7 @@ pub async fn user_fetch(domain: &str, token: &str, user: &str) -> Option<User> {
 }
 
 #[allow(dead_code)]
-pub async fn user_edit(domain: &str, token: &str, user: &str, edit: DataEditUser) {
+pub async fn edit(domain: &str, token: &str, user: &str, edit: DataEditUser) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/users/{user}"))
         .header("x-bot-token", token)
@@ -68,20 +68,3 @@ pub async fn user_edit(domain: &str, token: &str, user: &str, edit: DataEditUser
         Web::error(e, "fetch_channel");
     }
 }
-#[allow(dead_code)]
-pub async fn user_default_avatar(domain: &str, token: &str, user: &str) -> Option<String> {
-    match reqwest::Client::new()
-        .get(format!("https://{domain}/users/{user}"))
-        .header("x-bot-token", token)
-        .send()
-        .await
-    {
-        Err(http_err) => {
-            Web::error(http_err, "fetch_channel");
-            None
-        }
-        Ok(a) => Some(a.text().await.unwrap()),
-    }
-}
-
-
