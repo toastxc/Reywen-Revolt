@@ -1,7 +1,7 @@
-use crate::{debug::Web, structs::channel::Channel};
+use crate::{structs::channel::Channel, client::Web};
 #[allow(dead_code)]
 
-pub async fn channel_fetch(domain: &str, channel: &str, token: &str) -> Option<Channel> {
+pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Channel> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/channels/{channel}"))
         .header("x-bot-token", token)
@@ -19,7 +19,7 @@ pub async fn channel_fetch(domain: &str, channel: &str, token: &str) -> Option<C
     }
 }
 #[allow(dead_code)]
-pub async fn channel_delete(domain: &str, channel: &str, token: &str) {
+pub async fn delete(domain: &str, channel: &str, token: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/channels/{channel}"))
         .header("x-bot-token", token)
@@ -30,7 +30,7 @@ pub async fn channel_delete(domain: &str, channel: &str, token: &str) {
     };
 }
 #[allow(dead_code)]
-pub async fn channel_edit(domain: &str, channel: &str, token: &str) {
+pub async fn edit(domain: &str, channel: &str, token: &str) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/channels/{channel}"))
         .header("x-bot-token", token)
