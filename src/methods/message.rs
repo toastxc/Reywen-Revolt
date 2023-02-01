@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-use crate::{debug::Web, structs::message::{Message, DataMessageSend}};
+use crate::{
+    client::Web,
+    structs::message::{DataMessageSend, Message},
+};
 
 #[derive(Serialize, Deserialize)]
 pub enum MessageSort {
@@ -52,7 +55,7 @@ pub struct DataEditMessage {
     content: Option<String>,
 }
 #[allow(dead_code)]
-pub async fn message_fetch(domain: &str, channel: &str, token: &str) -> Option<Vec<Message>> {
+pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Vec<Message>> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/channels/{channel}/messages"))
         .header("x-bot-token", token)
@@ -70,7 +73,7 @@ pub async fn message_fetch(domain: &str, channel: &str, token: &str) -> Option<V
     }
 }
 
-pub async fn message_send(domain: &str, channel: &str, message: DataMessageSend, token: &str) {
+pub async fn send(domain: &str, channel: &str, message: DataMessageSend, token: &str) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/channels/{channel}/messages"))
         .header("x-bot-token", token)
@@ -84,12 +87,7 @@ pub async fn message_send(domain: &str, channel: &str, message: DataMessageSend,
     };
 }
 #[allow(dead_code)]
-pub async fn message_search(
-    domain: &str,
-    channel: &str,
-    message: OptionsMessageSearch,
-    token: &str,
-) {
+pub async fn search(domain: &str, channel: &str, message: OptionsMessageSearch, token: &str) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/channels/{channel}/search"))
         .header("x-bot-token", token)
@@ -102,7 +100,7 @@ pub async fn message_search(
     };
 }
 #[allow(dead_code)]
-pub async fn message_delete(domain: &str, channel: &str, message: &str, token: &str) {
+pub async fn delete(domain: &str, channel: &str, message: &str, token: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/channels/{channel}/{message}"))
         .header("x-bot-token", token)
@@ -113,7 +111,7 @@ pub async fn message_delete(domain: &str, channel: &str, message: &str, token: &
     };
 }
 #[allow(dead_code)]
-pub async fn message_edit(
+pub async fn edit(
     domain: &str,
     channel: &str,
     message: &str,
