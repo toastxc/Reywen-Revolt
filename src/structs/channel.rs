@@ -1,9 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-pub fn if_false(t: &bool) -> bool {
+use super::attachment::File;
+
+fn if_false(t: &bool) -> bool {
     !t
 }
 
+/// Representation of a channel on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "channel_type")]
 pub enum Channel {
@@ -45,6 +48,39 @@ pub enum Channel {
         /// Array of user ids participating in channel
         recipients: Vec<String>,
 
+        /// Custom icon attachment
+        #[serde(skip_serializing_if = "Option::is_none")]
+        icon: Option<File>,
+        /// Id of the last message sent in this channel
+        #[serde(skip_serializing_if = "Option::is_none")]
+        last_message_id: Option<String>,
+
+        /// Permissions assigned to members of this group
+        /// (does not apply to the owner of the group)
+        #[serde(skip_serializing_if = "Option::is_none")]
+        permissions: Option<i64>,
+
+        /// Whether this group is marked as not safe for work
+        #[serde(skip_serializing_if = "if_false", default)]
+        nsfw: bool,
+    },
+    /// Text channel belonging to a server
+    TextChannel {
+        /// Unique Id
+        #[serde(rename = "_id")]
+        id: String,
+        /// Id of the server this channel belongs to
+        server: String,
+
+        /// Display name of the channel
+        name: String,
+        /// Channel description
+        #[serde(skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+
+        /// Custom icon attachment
+        #[serde(skip_serializing_if = "Option::is_none")]
+        icon: Option<File>,
         /// Id of the last message sent in this channel
         #[serde(skip_serializing_if = "Option::is_none")]
         last_message_id: Option<String>,
@@ -67,12 +103,15 @@ pub enum Channel {
         /// Channel description
         description: Option<String>,
         /// Custom icon attachment
+        #[serde(skip_serializing_if = "Option::is_none")]
+        icon: Option<File>,
 
         /// Whether this channel is marked as not safe for work
         #[serde(skip_serializing_if = "if_false", default)]
         nsfw: bool,
     },
 }
+
 /// Partial values of [Channel]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct PartialChannel {
@@ -98,4 +137,15 @@ pub enum FieldsChannel {
     Description,
     Icon,
     DefaultPermissions,
+}
+impl Channel {
+    pub fn server(self) -> (String, Option<String>) {
+        match self {
+            Channel::SavedMessages { id, .. } => (id, None),
+            Channel::DirectMessage { id, .. } => (id, None),
+            Channel::Group { id, .. } => (id, None),
+            Channel::TextChannel { id, server, .. } => (id, Some(server)),
+            Channel::VoiceChannel { id, server, .. } => (id, Some(server)),
+        }
+    }
 }
