@@ -1,25 +1,7 @@
-/// # Handles HTTP errors and other methods
-///
-/// ### Web
-///```
-///use reywen::debug::Web;
-///pub async fn http_example() {
-///    if let Err(e) = reqwest::Client::new()
-///        .get(format!("https://example.com"))
-///        .send()
-///        .await
-///    {
-///        Web::error(e, "example_function");
-///    };
-///}
-///```
-///The default functionality is to print the http error to stdout, this can be modified
-///More debug features will be added but for now it's just HTTP
-pub mod debug;
-
 /// # Methods are implementations of the Revolt API
 mod methods {
     pub mod channel;
+    pub mod member;
     pub mod message;
     pub mod server;
     pub mod user;
@@ -33,7 +15,6 @@ pub mod structs {
     pub mod server;
     pub mod user;
 }
-
 /// An easy builder pattern for interacting with API
 /// ## Defining Client
 /// input message is type `Message`, and is given by
@@ -50,20 +31,20 @@ pub mod structs {
 ///      let client = Do::new(&auth, &input_message);
 ///}
 ///```
-/// ## Message Client
+
+/// ## Input
 ///
-/// The input message can (and is intended to) be queried
-/// through client. There are multiple methods for returning
-/// both a `bool` and `String` for the types in `Message`
+/// The input message can be accessed with the method `input()`
+/// for most fields in `input()` there are a `bool` and `String` based method
 /// ```
 ///use reywen::client::Do;
 ///async fn message_process(client: Do) {
 /// // bool
-///if client.content_is("hello") {
+///if client.input().content_is("hello") {
 ///    println!("someone said hi!");
 ///}
 /// // str
-///else if client.content() == "world" {
+///else if client.input().content() == "world" {
 ///   println!("indeed")
 ///};
 ///
@@ -72,58 +53,73 @@ pub mod structs {
 /// //This is converted to `String` but will default to `String::new()` if there is no content
 /// //It is important to keep this in mind when handling messages
 ///
-/// //This schema is the same for *most* variables in User, however it is not feature complete as of `reywen.rs v0.1.5`
-///
-///let message_author = client.author();
+///let message_author = client.input().author();
 ///}
 ///```
-///
-/// As a temporary measure the fields of the Do struct are publically available
-/// But this **will be depricated in future**, keep this in mind
-///```
-/// //The main problem with this is that additional cloning and borrowing is required
-/// //Which is undesirable for those two are still not familiar with the borrow checker
-///use reywen::client::Do;
-///async fn replies_example(client: Do) {
-///let replies: Option<Vec<String>> = client.input_message.replies.clone();
-///}
-///```
-/// ## Polling with Client
-/// As previously mentioned, variables can be defined with client from the input_message
-/// Additionally, data can be defined through methods of Client which poll API
+
+/// ## Message
 ///```
 ///use reywen::client::Do;
-///async fn user_example(client: Do) {
-///let user = client.self_fetch().await.unwrap();
-/// println!("nice badge :o {:?}", user.badges);
-///}
-///```
-///
-///
-/// ## Sending to API
-/// Client has several methods for sending messages to API, the two mains ones are `send` and `sender`
-///```
 ///use reywen::structs::message::DataMessageSend;
-///use reywen::client::Do;
-///async fn send_example(client: Do) {
-/// //send requires a payload, which can be fully typed
-///let payload = DataMessageSend {
+///async fn message_example(client: Do) {
+///   let message = client.message();
+///
+///  // send message without Message structure
+///  message.sender("hello");
+///
+///  //'send' requires a payload, which can be fully typed
+///  let payload = DataMessageSend {
 ///     content: Some(String::from("hello")),
 ///     replies: None,
 ///     embeds: None,
 ///     masquerade: None,
-///};
-/// //or use default
-///let mut payload = DataMessageSend::default();
-///payload.content = Some(String::from("hello"));
-///client.send(payload).await;
-///
-/// // sender only requires content, but content is mandatory
-///client.sender("hello").await;
+///  };
+///  message.send(payload).await;
 ///}
 ///```
-///Send provides greater control over the APi while sender is much easier to use
-///In practise, sender will be used much more often.
+
+/// ## Member
+///```
+///use reywen::client::Do;
+///use reywen::structs::message::DataMessageSend;
+///async fn member_example(client: Do) {
+///  // for member to be accessed, a server needs to be specified
+///  let member = client.member("server_id").await.unwrap();
+///
+///
+///  member.ban("you", None).await;
+///
+///
+///  // for easier use, member can be generated automatically
+///  let server_id = client.server().from_channel().await.unwrap();
+///  let member = client.member(&server_id).await.unwrap();
+///  member.ban("you", None).await;
+///}
+///```
+
+/// ## Channel
+///```
+///use reywen::client::Do;
+///async fn channel_example(client: Do) {
+///  let channel = client.channel();
+///
+///  println!("{:?}", channel.fetch("CHANNEL_ID").await);
+///}
+///```
+
+/// ## Server
+///```
+///use reywen::client::Do;
+///async fn server_example(client: Do) {
+///  let server = client.server();
+///
+///  // derive server ID from input_message
+///  let server_id = server.from_channel().await.unwrap();
+///
+///  server.fetch(&server_id).await;
+///
+///}
+///```
 pub mod client;
 
 ///## Websocket Configuration
@@ -167,7 +163,7 @@ pub mod client;
 ///
 /// // restart websocekt - always
 /// loop {
-///   Websocket::new(websocket.clone())
+///   websocket.clone()
 ///         // generate establishes a connection based on credentials
 ///         // it also handles maintaining the websocket connnection
 ///         // there is no method to send messages to websocket
