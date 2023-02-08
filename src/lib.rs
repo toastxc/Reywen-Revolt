@@ -1,8 +1,10 @@
 /// # Methods are implementations of the Revolt API
 mod methods {
+    pub mod bots;
     pub mod channel;
     pub mod member;
     pub mod message;
+    pub mod relationships;
     pub mod server;
     pub mod user;
 }
@@ -10,6 +12,7 @@ mod methods {
 pub mod structs {
     pub mod attachment;
     pub mod auth;
+    pub mod bots;
     pub mod channel;
     pub mod message;
     pub mod server;
