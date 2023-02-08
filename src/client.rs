@@ -28,7 +28,7 @@ pub struct Do {
 }
 
 impl Do {
-    pub async fn new(auth: &Auth, input_message: &Message) -> Self {
+    pub fn new(auth: &Auth, input_message: &Message) -> Self {
         Do {
             auth: auth.to_owned(),
             input_message: input_message.to_owned(),
