@@ -161,15 +161,17 @@ pub struct DataEditBot {
     remove: Option<Vec<FieldsBot>>,
 }
 #[allow(dead_code)]
-pub async fn edit(domain: &str, token: &str, bot: &str) -> Option<Bot> {
+pub async fn edit(domain: &str, token: &str, bot: &str, data: DataEditBot) -> Option<Bot> {
     match reqwest::Client::new()
         .patch(format!("https://{domain}/bots/{bot}"))
         .header("x-bot-token", token)
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
     {
         Err(http_err) => {
-            Web::error(http_err, "create_bot");
+            Web::error(http_err, "edit_bot");
             None
         }
         Ok(a) => match serde_json::from_str::<Bot>(&a.text().await.unwrap()) {
