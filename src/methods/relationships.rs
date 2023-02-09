@@ -57,7 +57,7 @@ pub async fn deny_friend(domain: &str, token: &str, user: &str) -> Option<User> 
         .await
     {
         Err(http_err) => {
-            Web::error(http_err, "accept_friend");
+            Web::error(http_err, "deny_friend");
             None
         }
         Ok(a) => match serde_json::from_str::<User>(&a.text().await.unwrap()) {
@@ -68,7 +68,7 @@ pub async fn deny_friend(domain: &str, token: &str, user: &str) -> Option<User> 
 }
 
 #[allow(dead_code)]
-pub async fn block_user(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn block(domain: &str, token: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .put(format!("https://{domain}/users/{user}/block"))
         .header("x-bot-token", token)
@@ -87,7 +87,7 @@ pub async fn block_user(domain: &str, token: &str, user: &str) -> Option<User> {
 }
 
 #[allow(dead_code)]
-pub async fn unblock_user(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn unblock(domain: &str, token: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .delete(format!("https://{domain}/users/{user}/block"))
         .header("x-bot-token", token)
@@ -126,8 +126,7 @@ pub async fn friend_request(
     data: DataSendFriendRequest,
 ) -> Option<User> {
     match reqwest::Client::new()
-        .delete(format!("https://{domain}/users/friend"))
-        //https://api.revolt.chat/users/friend
+        .post(format!("https://{domain}/users/friend"))
         .header("x-bot-token", token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
@@ -135,7 +134,7 @@ pub async fn friend_request(
         .await
     {
         Err(http_err) => {
-            Web::error(http_err, "unblock_user");
+            Web::error(http_err, "friend_request");
             None
         }
         Ok(a) => match serde_json::from_str::<User>(&a.text().await.unwrap()) {
