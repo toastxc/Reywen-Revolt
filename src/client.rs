@@ -2,14 +2,20 @@ use iso8601_timestamp::Timestamp;
 
 use crate::{
     methods::{
+        bots::{
+            self, BotResponse, DataCreateBot, DataEditBot, InviteBotDestination, OwnedBotsResponse,
+            PublicBot,
+        },
         channel,
         member::{self, DataBanCreate, DataMemberEdit},
         message::{self, DataEditMessage, OptionsMessageSearch},
+        relationships::{self, DataSendFriendRequest, MutualResponse},
         server::{self, CreateServerResponse, DataCreateServer, DataEditServer},
         user::{self, DataEditUser},
     },
     structs::{
         auth::Auth,
+        bots::Bot,
         message::{DataMessageSend, Masquerade, Message, SendableEmbed, SystemMessage},
         server::Server,
         user::User,
@@ -32,6 +38,12 @@ impl Do {
         Do {
             auth: auth.to_owned(),
             input_message: input_message.to_owned(),
+        }
+    }
+
+    pub fn bot(&self) -> BotMethod {
+        BotMethod {
+            auth: self.auth.clone(),
         }
     }
 
@@ -81,6 +93,35 @@ impl Do {
         }
     }
 }
+
+pub struct BotMethod {
+    pub auth: Auth,
+}
+
+impl BotMethod {
+    pub async fn create(&self, data: DataCreateBot) -> Option<Bot> {
+        bots::create(&self.auth.domain, &self.auth.token, data).await
+    }
+    pub async fn fetch_public(&self, bot: &str) -> Option<PublicBot> {
+        bots::fetch_public(&self.auth.domain, &self.auth.token, bot).await
+    }
+    pub async fn invite(&self, bot: &str, data: InviteBotDestination) {
+        bots::invite(&self.auth.domain, &self.auth.token, bot, data).await
+    }
+    pub async fn fetch(&self, bot: &str) -> Option<BotResponse> {
+        bots::fetch(&self.auth.domain, &self.auth.token, bot).await
+    }
+    pub async fn delete(&self, bot: &str) {
+        bots::delete(&self.auth.domain, &self.auth.token, bot).await
+    }
+    pub async fn edit(&self, bot: &str, data: DataEditBot) -> Option<Bot> {
+        bots::edit(&self.auth.domain, &self.auth.token, bot, data).await
+    }
+    pub async fn owned(&self) -> Option<OwnedBotsResponse> {
+        bots::owned(&self.auth.domain, &self.auth.token).await
+    }
+}
+
 pub struct ChannelMethod {
     auth: Auth,
 }
@@ -199,6 +240,34 @@ impl MessageMethod {
         .await;
     }
 }
+
+pub struct RelationshipMethod {
+    auth: Auth,
+    user: String,
+}
+
+impl RelationshipMethod {
+    pub async fn fetch_mutual_servers_and_friends(&self) -> Option<MutualResponse> {
+        relationships::fetch_mutal_servers_and_friends(&self.auth.domain, &self.auth.token).await
+    }
+    pub async fn friend_accept(&self) -> Option<User> {
+        relationships::accept_friend(&self.auth.domain, &self.auth.token, &self.user).await
+    }
+    pub async fn friend_deny(&self) -> Option<User> {
+        relationships::deny_friend(&self.auth.domain, &self.auth.token, &self.user).await
+    }
+    pub async fn block(&self) -> Option<User> {
+        relationships::block(&self.auth.domain, &self.auth.token, &self.user).await
+    }
+    pub async fn unblock(&self) -> Option<User> {
+        relationships::unblock(&self.auth.domain, &self.auth.token, &self.user).await
+    }
+    pub async fn friend_request(&self, username: &str) -> Option<User> {
+        let user = DataSendFriendRequest::new(username);
+        relationships::friend_request(&self.auth.domain, &self.auth.token, user).await
+    }
+}
+
 pub struct ServerMethod {
     auth: Auth,
     input_message: Message,
