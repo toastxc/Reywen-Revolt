@@ -74,11 +74,36 @@ impl Do {
             user: String::from(user),
         }
     }
-    pub fn server(&self) -> ServerMethod {
+    pub fn server(&self, server_id: &str) -> ServerMethod {
         ServerMethod {
             auth: self.auth.clone(),
-            input_message: self.input_message.clone(),
+
+            server: String::from(server_id),
         }
+    }
+
+    pub async fn server_from_input(&self) -> Option<ServerMethod> {
+        let server = match channel::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.input_message.channel,
+        )
+        .await
+        {
+            Some(a) => a,
+            None => return None,
+        };
+
+        if let Some(a) = server.server().1 {
+            return Some(ServerMethod {
+                auth: self.auth.clone(),
+
+                server: a,
+            });
+        };
+
+        None
     }
     pub fn user(&self, user_id: &str) -> UserMethod {
         UserMethod {
@@ -394,56 +419,50 @@ impl RelationshipMethod {
 
 pub struct ServerMethod {
     auth: Auth,
-    input_message: Message,
+    pub server: String,
 }
 
 impl ServerMethod {
+    pub fn member(&self, member: &str) -> MemberMethod {
+        MemberMethod {
+            auth: self.auth.clone(),
+            server: self.server.clone(),
+            member: String::from(member),
+        }
+    }
+
     pub async fn create(&self, data: DataCreateServer) -> Option<CreateServerResponse> {
         server::create(&self.auth.domain, &self.auth.token, &self.auth.header, data).await
     }
-    pub async fn edit(&self, server_id: &str, data: DataEditServer) {
+    pub async fn edit(&self, data: DataEditServer) {
         server::edit(
             &self.auth.domain,
             &self.auth.token,
             &self.auth.header,
-            server_id,
+            &self.server,
             data,
         )
         .await
     }
 
-    pub async fn fetch(&self, server_id: &str) -> Option<Server> {
+    pub async fn fetch(&self) -> Option<Server> {
         crate::methods::server::fetch(
             &self.auth.domain,
             &self.auth.token,
             &self.auth.header,
-            server_id,
+            &self.server,
         )
         .await
     }
 
-    pub async fn leave(&self, server_id: &str) {
+    pub async fn leave(&self) {
         crate::methods::server::leave(
             &self.auth.domain,
             &self.auth.token,
             &self.auth.header,
-            server_id,
+            &self.server,
         )
         .await
-    }
-
-    pub async fn from_channel(&self) -> Option<String> {
-        match channel::fetch(
-            &self.auth.domain,
-            &self.auth.token,
-            &self.auth.header,
-            &self.input_message.channel,
-        )
-        .await
-        {
-            Some(a) => a.server().1,
-            None => None,
-        }
     }
 }
 
