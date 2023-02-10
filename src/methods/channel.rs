@@ -1,10 +1,10 @@
-use crate::{structs::channel::Channel, client::Web};
+use crate::{client::Web, structs::channel::Channel};
 #[allow(dead_code)]
 
-pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Channel> {
+pub async fn fetch(domain: &str, token: &str, header: &str, channel: &str) -> Option<Channel> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/channels/{channel}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -19,10 +19,10 @@ pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Channel> 
     }
 }
 #[allow(dead_code)]
-pub async fn delete(domain: &str, channel: &str, token: &str) {
+pub async fn delete(domain: &str, token: &str, header: &str, channel: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/channels/{channel}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -30,10 +30,10 @@ pub async fn delete(domain: &str, channel: &str, token: &str) {
     };
 }
 #[allow(dead_code)]
-pub async fn edit(domain: &str, channel: &str, token: &str) {
+pub async fn edit(domain: &str, token: &str, header: &str, channel: &str) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/channels/{channel}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
