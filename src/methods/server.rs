@@ -77,12 +77,13 @@ pub struct DataEditServer {
 #[allow(dead_code)]
 pub async fn create(
     domain: &str,
-    server: DataCreateServer,
     token: &str,
+    header: &str,
+    server: DataCreateServer,
 ) -> Option<CreateServerResponse> {
     match reqwest::Client::new()
         .post(format!("https://{domain}/servers/create"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&server).unwrap())
         .send()
@@ -99,10 +100,10 @@ pub async fn create(
     }
 }
 #[allow(dead_code)]
-pub async fn fetch(domain: &str, server: &str, token: &str) -> Option<Server> {
+pub async fn fetch(domain: &str, token: &str, header: &str, server: &str) -> Option<Server> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/servers/{server}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -117,10 +118,10 @@ pub async fn fetch(domain: &str, server: &str, token: &str) -> Option<Server> {
     }
 }
 #[allow(dead_code)]
-pub async fn leave(domain: &str, server: &str, token: &str) {
+pub async fn leave(domain: &str, token: &str, header: &str, server: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/server/{server}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -128,10 +129,16 @@ pub async fn leave(domain: &str, server: &str, token: &str) {
     };
 }
 #[allow(dead_code)]
-pub async fn edit(domain: &str, server: &str, token: &str, server_edit: DataEditServer) {
+pub async fn edit(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+    server_edit: DataEditServer,
+) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/server/{server}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&server_edit).unwrap())
         .send()
