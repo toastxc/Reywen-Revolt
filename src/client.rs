@@ -48,20 +48,18 @@ impl Do {
         }
     }
 
-    pub fn channel(&self) -> ChannelMethod {
+    pub fn channel(&self, channel: &str) -> ChannelMethod {
         ChannelMethod {
             auth: self.auth.clone(),
+            channel: String::from(channel),
         }
     }
-    pub async fn member(&self, server_id: &str) -> Option<MemberMethod> {
-        let remember = MemberMethod {
+    pub fn member(&self, server_id: &str, member: &str) -> MemberMethod {
+        MemberMethod {
             auth: self.auth.clone(),
             server: String::from(server_id),
-        };
-
-        server::fetch(&self.auth.domain, server_id, &self.auth.token)
-            .await
-            .map(|_| remember)
+            member: String::from(member),
+        }
     }
 
     pub fn message(&self) -> MessageMethod {
@@ -70,16 +68,23 @@ impl Do {
             input_message: self.input_message.clone(),
         }
     }
+    pub fn relationship(&self, user: &str) -> RelationshipMethod {
+        RelationshipMethod {
+            auth: self.auth.clone(),
+            user: String::from(user),
+        }
+    }
     pub fn server(&self) -> ServerMethod {
         ServerMethod {
             auth: self.auth.clone(),
             input_message: self.input_message.clone(),
         }
     }
-    pub fn user(&self) -> UserMethod {
+    pub fn user(&self, user_id: &str) -> UserMethod {
         UserMethod {
             auth: self.auth.clone(),
             input_message: self.input_message.clone(),
+            user: String::from(user_id),
         }
     }
 
@@ -102,81 +107,162 @@ pub struct BotMethod {
 
 impl BotMethod {
     pub async fn create(&self, data: DataCreateBot) -> Option<Bot> {
-        bots::create(&self.auth.domain, &self.auth.token, data).await
+        bots::create(&self.auth.domain, &self.auth.token, &self.auth.header, data).await
     }
     pub async fn fetch_public(&self) -> Option<PublicBot> {
-        bots::fetch_public(&self.auth.domain, &self.auth.token, &self.bot_id).await
+        bots::fetch_public(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.bot_id,
+        )
+        .await
     }
     pub async fn invite(&self, data: InviteBotDestination) {
-        bots::invite(&self.auth.domain, &self.auth.token, &self.bot_id, data).await
+        bots::invite(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.bot_id,
+            data,
+        )
+        .await
     }
     pub async fn fetch(&self) -> Option<BotResponse> {
-        bots::fetch(&self.auth.domain, &self.auth.token, &self.bot_id).await
+        bots::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.bot_id,
+        )
+        .await
     }
     pub async fn delete(&self) {
-        bots::delete(&self.auth.domain, &self.auth.token, &self.bot_id).await
+        bots::delete(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.bot_id,
+        )
+        .await
     }
     pub async fn edit(&self, data: DataEditBot) -> Option<Bot> {
-        bots::edit(&self.auth.domain, &self.auth.token, &self.bot_id, data).await
+        bots::edit(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.bot_id,
+            data,
+        )
+        .await
     }
     pub async fn owned(&self) -> Option<OwnedBotsResponse> {
-        bots::owned(&self.auth.domain, &self.auth.token).await
+        bots::owned(&self.auth.domain, &self.auth.token, &self.auth.header).await
     }
 }
 
 pub struct ChannelMethod {
     auth: Auth,
+    channel: String,
 }
 
 impl ChannelMethod {
-    pub async fn delete(&self, channel_id: &str) {
-        channel::delete(&self.auth.domain, channel_id, &self.auth.token).await
+    pub async fn delete(&self) {
+        channel::delete(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.channel,
+        )
+        .await
     }
-    pub async fn edit(&self, channel_id: &str) {
-        channel::edit(&self.auth.domain, channel_id, &self.auth.token).await
+    pub async fn edit(&self) {
+        channel::edit(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.channel,
+        )
+        .await
     }
-    pub async fn fetch(&self, channel_id: &str) -> Option<crate::structs::channel::Channel> {
-        channel::fetch(&self.auth.domain, channel_id, &self.auth.token).await
+    pub async fn fetch(&self) -> Option<crate::structs::channel::Channel> {
+        channel::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.channel,
+        )
+        .await
     }
 }
 
 pub struct MemberMethod {
     auth: Auth,
     server: String,
+    member: String,
 }
 
 impl MemberMethod {
-    pub async fn ban(&self, user_id: &str, reason: Option<&str>) {
+    pub async fn ban(&self, reason: Option<&str>) {
         member::ban(
             &self.auth.domain,
-            &self.server,
             &self.auth.token,
-            user_id,
+            &self.auth.header,
+            &self.server,
+            &self.member,
             DataBanCreate::new(reason),
         )
         .await
     }
-    pub async fn edit(&self, user_id: &str, edit: DataMemberEdit) {
+    pub async fn edit(&self, edit: DataMemberEdit) {
         member::edit(
             &self.auth.domain,
-            &self.server,
             &self.auth.token,
-            user_id,
+            &self.auth.header,
+            &self.server,
+            &self.member,
             edit,
         )
         .await
     }
-    pub async fn fetch(&self, user_id: &str) -> Option<crate::structs::server::Member> {
-        member::fetch(&self.auth.domain, &self.server, &self.auth.token, user_id).await
+    pub async fn fetch(&self) -> Option<crate::structs::server::Member> {
+        member::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.server,
+            &self.member,
+        )
+        .await
     }
     pub async fn fetches(&self) -> Option<Vec<crate::structs::server::Member>> {
-        member::fetches(&self.auth.domain, &self.server, &self.auth.token).await
+        member::fetches(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.server,
+        )
+        .await
     }
-    pub async fn kick(&self, member: &str) {
-        member::kick(&self.auth.domain, &self.server, &self.auth.token, member).await
+    pub async fn kick(&self) {
+        member::kick(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.server,
+            &self.member,
+        )
+        .await
     }
-    pub async fn unban(&self, member: &str) {
-        member::unban(&self.auth.domain, &self.server, &self.auth.token, member).await
+    pub async fn unban(&self) {
+        member::unban(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.server,
+            &self.member,
+        )
+        .await
     }
 }
 
@@ -189,18 +275,20 @@ impl MessageMethod {
     pub async fn delete(&self, message: &str) {
         message::delete(
             &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
             &self.input_message.channel,
             message,
-            &self.auth.token,
         )
         .await
     }
     pub async fn edit(&self, message: &str, changes: DataEditMessage) {
         message::edit(
             &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
             &self.input_message.channel,
             message,
-            &self.auth.token,
             changes,
         )
         .await;
@@ -208,26 +296,29 @@ impl MessageMethod {
     pub async fn fetch(&self) -> Option<Vec<Message>> {
         message::fetch(
             &self.auth.domain,
-            &self.input_message.channel,
             &self.auth.token,
+            &self.auth.header,
+            &self.input_message.channel,
         )
         .await
     }
     pub async fn search(&self, search: OptionsMessageSearch) {
         message::search(
             &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
             &self.input_message.channel,
             search,
-            &self.auth.token,
         )
         .await
     }
     pub async fn sender(&self, message: &str) {
         message::send(
             &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
             &self.input_message.channel,
             DataMessageSend::new().content(message),
-            &self.auth.token,
         )
         .await;
     }
@@ -235,9 +326,10 @@ impl MessageMethod {
     pub async fn send(&self, message: DataMessageSend) {
         message::send(
             &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
             &self.input_message.channel,
             message,
-            &self.auth.token,
         )
         .await;
     }
@@ -250,23 +342,53 @@ pub struct RelationshipMethod {
 
 impl RelationshipMethod {
     pub async fn fetch_mutual_servers_and_friends(&self) -> Option<MutualResponse> {
-        relationships::fetch_mutal_servers_and_friends(&self.auth.domain, &self.auth.token).await
+        relationships::fetch_mutal_servers_and_friends(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+        )
+        .await
     }
     pub async fn friend_accept(&self) -> Option<User> {
-        relationships::accept_friend(&self.auth.domain, &self.auth.token, &self.user).await
+        relationships::accept_friend(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+        )
+        .await
     }
     pub async fn friend_deny(&self) -> Option<User> {
-        relationships::deny_friend(&self.auth.domain, &self.auth.token, &self.user).await
+        relationships::deny_friend(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+        )
+        .await
     }
     pub async fn block(&self) -> Option<User> {
-        relationships::block(&self.auth.domain, &self.auth.token, &self.user).await
+        relationships::block(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+        )
+        .await
     }
     pub async fn unblock(&self) -> Option<User> {
-        relationships::unblock(&self.auth.domain, &self.auth.token, &self.user).await
+        relationships::unblock(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+        )
+        .await
     }
     pub async fn friend_request(&self, username: &str) -> Option<User> {
         let user = DataSendFriendRequest::new(username);
-        relationships::friend_request(&self.auth.domain, &self.auth.token, user).await
+        relationships::friend_request(&self.auth.domain, &self.auth.token, &self.auth.header, user)
+            .await
     }
 }
 
@@ -276,26 +398,46 @@ pub struct ServerMethod {
 }
 
 impl ServerMethod {
-    pub async fn create(&self, payload: DataCreateServer) -> Option<CreateServerResponse> {
-        server::create(&self.auth.domain, payload, &self.auth.token).await
+    pub async fn create(&self, data: DataCreateServer) -> Option<CreateServerResponse> {
+        server::create(&self.auth.domain, &self.auth.token, &self.auth.header, data).await
     }
-    pub async fn edit(&self, server_id: &str, payload: DataEditServer) {
-        server::edit(&self.auth.domain, server_id, &self.auth.token, payload).await
+    pub async fn edit(&self, server_id: &str, data: DataEditServer) {
+        server::edit(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            server_id,
+            data,
+        )
+        .await
     }
 
-    pub async fn fetch(&self, server: &str) -> Option<Server> {
-        crate::methods::server::fetch(&self.auth.domain, server, &self.auth.token).await
+    pub async fn fetch(&self, server_id: &str) -> Option<Server> {
+        crate::methods::server::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            server_id,
+        )
+        .await
     }
 
     pub async fn leave(&self, server_id: &str) {
-        crate::methods::server::leave(&self.auth.domain, server_id, &self.auth.token).await
+        crate::methods::server::leave(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            server_id,
+        )
+        .await
     }
 
     pub async fn from_channel(&self) -> Option<String> {
         match channel::fetch(
             &self.auth.domain,
-            &self.input_message.channel,
             &self.auth.token,
+            &self.auth.header,
+            &self.input_message.channel,
         )
         .await
         {
@@ -308,19 +450,34 @@ impl ServerMethod {
 pub struct UserMethod {
     auth: Auth,
     input_message: Message,
+    user: String,
 }
 
 impl UserMethod {
-    pub async fn edit(&self, user: &str, edit: DataEditUser) {
-        user::edit(&self.auth.domain, &self.auth.token, user, edit).await
+    pub async fn edit(&self, edit: DataEditUser) {
+        user::edit(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+            edit,
+        )
+        .await
     }
-    pub async fn fetch(&self, user: &str) -> Option<User> {
-        user::fetch(&self.auth.domain, &self.auth.token, user).await
+    pub async fn fetch(&self) -> Option<User> {
+        user::fetch(
+            &self.auth.domain,
+            &self.auth.token,
+            &self.auth.header,
+            &self.user,
+        )
+        .await
     }
     pub async fn fetch_self(&self) -> Option<User> {
         user::fetch(
             &self.auth.domain,
             &self.auth.token,
+            &self.auth.header,
             &self.input_message.author,
         )
         .await
