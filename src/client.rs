@@ -41,9 +41,10 @@ impl Do {
         }
     }
 
-    pub fn bot(&self) -> BotMethod {
+    pub fn bot(&self, bot_id: &str) -> BotMethod {
         BotMethod {
             auth: self.auth.clone(),
+            bot_id: String::from(bot_id),
         }
     }
 
@@ -95,27 +96,28 @@ impl Do {
 }
 
 pub struct BotMethod {
-    pub auth: Auth,
+    auth: Auth,
+    bot_id: String,
 }
 
 impl BotMethod {
     pub async fn create(&self, data: DataCreateBot) -> Option<Bot> {
         bots::create(&self.auth.domain, &self.auth.token, data).await
     }
-    pub async fn fetch_public(&self, bot: &str) -> Option<PublicBot> {
-        bots::fetch_public(&self.auth.domain, &self.auth.token, bot).await
+    pub async fn fetch_public(&self) -> Option<PublicBot> {
+        bots::fetch_public(&self.auth.domain, &self.auth.token, &self.bot_id).await
     }
-    pub async fn invite(&self, bot: &str, data: InviteBotDestination) {
-        bots::invite(&self.auth.domain, &self.auth.token, bot, data).await
+    pub async fn invite(&self, data: InviteBotDestination) {
+        bots::invite(&self.auth.domain, &self.auth.token, &self.bot_id, data).await
     }
-    pub async fn fetch(&self, bot: &str) -> Option<BotResponse> {
-        bots::fetch(&self.auth.domain, &self.auth.token, bot).await
+    pub async fn fetch(&self) -> Option<BotResponse> {
+        bots::fetch(&self.auth.domain, &self.auth.token, &self.bot_id).await
     }
-    pub async fn delete(&self, bot: &str) {
-        bots::delete(&self.auth.domain, &self.auth.token, bot).await
+    pub async fn delete(&self) {
+        bots::delete(&self.auth.domain, &self.auth.token, &self.bot_id).await
     }
-    pub async fn edit(&self, bot: &str, data: DataEditBot) -> Option<Bot> {
-        bots::edit(&self.auth.domain, &self.auth.token, bot, data).await
+    pub async fn edit(&self, data: DataEditBot) -> Option<Bot> {
+        bots::edit(&self.auth.domain, &self.auth.token, &self.bot_id, data).await
     }
     pub async fn owned(&self) -> Option<OwnedBotsResponse> {
         bots::owned(&self.auth.domain, &self.auth.token).await
