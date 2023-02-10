@@ -17,10 +17,10 @@ pub struct AllMemberResponse {
 }
 /// Polls server for members - None for failure
 #[allow(dead_code)]
-pub async fn fetches(domain: &str, server: &str, token: &str) -> Option<Vec<Member>> {
+pub async fn fetches(domain: &str, token: &str, header: &str, server: &str) -> Option<Vec<Member>> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/servers/{server}/members"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -36,12 +36,18 @@ pub async fn fetches(domain: &str, server: &str, token: &str) -> Option<Vec<Memb
 }
 /// Polls server for a member - None for failure
 #[allow(dead_code)]
-pub async fn fetch(domain: &str, server: &str, token: &str, member: &str) -> Option<Member> {
+pub async fn fetch(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+    member: &str,
+) -> Option<Member> {
     match reqwest::Client::new()
         .get(format!(
             "https://{domain}/servers/{server}/members/{member}"
         ))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -57,12 +63,12 @@ pub async fn fetch(domain: &str, server: &str, token: &str, member: &str) -> Opt
 }
 
 #[allow(dead_code)]
-pub async fn kick(domain: &str, server: &str, token: &str, member: &str) {
+pub async fn kick(domain: &str, token: &str, header: &str, server: &str, member: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!(
             "https://{domain}/server/{server}/members:/{member}"
         ))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -95,12 +101,19 @@ pub enum FieldsMember {
 }
 
 #[allow(dead_code)]
-pub async fn edit(domain: &str, server: &str, token: &str, member: &str, edit: DataMemberEdit) {
+pub async fn edit(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+    member: &str,
+    edit: DataMemberEdit,
+) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!(
             "https://{domain}/server/{server}/members:/{member}"
         ))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&edit).unwrap())
         .send()
@@ -125,10 +138,17 @@ impl DataBanCreate {
 }
 
 #[allow(dead_code)]
-pub async fn ban(domain: &str, server: &str, token: &str, member: &str, reason: DataBanCreate) {
+pub async fn ban(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+    member: &str,
+    reason: DataBanCreate,
+) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/server/{server}/bans:/{member}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&reason).unwrap())
         .send()
@@ -139,10 +159,10 @@ pub async fn ban(domain: &str, server: &str, token: &str, member: &str, reason: 
 }
 
 #[allow(dead_code)]
-pub async fn unban(domain: &str, server: &str, token: &str, member: &str) {
+pub async fn unban(domain: &str, token: &str, header: &str, server: &str, member: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/server/{server}/bans:/{member}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
