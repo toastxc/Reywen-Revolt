@@ -12,10 +12,14 @@ pub struct MutualResponse {
 }
 
 #[allow(dead_code)]
-pub async fn fetch_mutal_servers_and_friends(domain: &str, token: &str) -> Option<MutualResponse> {
+pub async fn fetch_mutal_servers_and_friends(
+    domain: &str,
+    token: &str,
+    header: &str,
+) -> Option<MutualResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/dm"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -31,10 +35,10 @@ pub async fn fetch_mutal_servers_and_friends(domain: &str, token: &str) -> Optio
 }
 
 #[allow(dead_code)]
-pub async fn accept_friend(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn accept_friend(domain: &str, token: &str, header: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .put(format!("https://{domain}/users/{user}/friend"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -49,10 +53,10 @@ pub async fn accept_friend(domain: &str, token: &str, user: &str) -> Option<User
     }
 }
 #[allow(dead_code)]
-pub async fn deny_friend(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn deny_friend(domain: &str, token: &str, header: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .delete(format!("https://{domain}/users/{user}/friend"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -68,10 +72,10 @@ pub async fn deny_friend(domain: &str, token: &str, user: &str) -> Option<User> 
 }
 
 #[allow(dead_code)]
-pub async fn block(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn block(domain: &str, token: &str, header: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .put(format!("https://{domain}/users/{user}/block"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -87,10 +91,10 @@ pub async fn block(domain: &str, token: &str, user: &str) -> Option<User> {
 }
 
 #[allow(dead_code)]
-pub async fn unblock(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn unblock(domain: &str, token: &str, header: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .delete(format!("https://{domain}/users/{user}/block"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -123,11 +127,12 @@ impl DataSendFriendRequest {
 pub async fn friend_request(
     domain: &str,
     token: &str,
+    header: &str,
     data: DataSendFriendRequest,
 ) -> Option<User> {
     match reqwest::Client::new()
         .post(format!("https://{domain}/users/friend"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
