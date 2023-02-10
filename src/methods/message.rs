@@ -55,10 +55,10 @@ pub struct DataEditMessage {
     content: Option<String>,
 }
 #[allow(dead_code)]
-pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Vec<Message>> {
+pub async fn fetch(domain: &str, token: &str, header: &str, channel: &str) -> Option<Vec<Message>> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/channels/{channel}/messages"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -73,10 +73,16 @@ pub async fn fetch(domain: &str, channel: &str, token: &str) -> Option<Vec<Messa
     }
 }
 
-pub async fn send(domain: &str, channel: &str, message: DataMessageSend, token: &str) {
+pub async fn send(
+    domain: &str,
+    token: &str,
+    header: &str,
+    channel: &str,
+    message: DataMessageSend,
+) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/channels/{channel}/messages"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Idempotency-Key", rand::random::<u64>())
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&message).unwrap())
@@ -87,10 +93,16 @@ pub async fn send(domain: &str, channel: &str, message: DataMessageSend, token: 
     };
 }
 #[allow(dead_code)]
-pub async fn search(domain: &str, channel: &str, message: OptionsMessageSearch, token: &str) {
+pub async fn search(
+    domain: &str,
+    token: &str,
+    header: &str,
+    channel: &str,
+    message: OptionsMessageSearch,
+) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/channels/{channel}/search"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&message).unwrap())
         .send()
@@ -100,10 +112,10 @@ pub async fn search(domain: &str, channel: &str, message: OptionsMessageSearch, 
     };
 }
 #[allow(dead_code)]
-pub async fn delete(domain: &str, channel: &str, message: &str, token: &str) {
+pub async fn delete(domain: &str, token: &str, header: &str, channel: &str, message: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/channels/{channel}/{message}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -113,14 +125,16 @@ pub async fn delete(domain: &str, channel: &str, message: &str, token: &str) {
 #[allow(dead_code)]
 pub async fn edit(
     domain: &str,
+    token: &str,
+    header: &str,
     channel: &str,
     message: &str,
-    token: &str,
+
     changes: DataEditMessage,
 ) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/channels/{channel}/{message}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&changes).unwrap())
         .send()
