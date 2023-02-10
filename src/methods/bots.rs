@@ -11,7 +11,7 @@ use crate::{
 };
 /// # Bot Details
 
-#[derive(Validate, Deserialize, Serialize)]
+#[derive(Validate, Deserialize, Serialize, Debug)]
 pub struct DataCreateBot {
     /// Bot username
     #[validate(length(min = 2, max = 32))]
@@ -22,7 +22,7 @@ pub struct DataCreateBot {
 pub async fn create(domain: &str, token: &str, data: DataCreateBot) -> Option<Bot> {
     match reqwest::Client::new()
         .post(format!("https://{domain}/bots/create"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -40,7 +40,7 @@ pub async fn create(domain: &str, token: &str, data: DataCreateBot) -> Option<Bo
 }
 
 /// # Public Bot
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PublicBot {
     /// Bot Id
     #[serde(rename = "_id")]
@@ -74,7 +74,7 @@ pub async fn fetch_public(domain: &str, token: &str, bot: &str) -> Option<Public
     }
 }
 /// # Invite Destination
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub enum InviteBotDestination {
     /// Invite to a server
     Server {
@@ -92,7 +92,7 @@ pub enum InviteBotDestination {
 pub async fn invite(domain: &str, token: &str, bot: &str, data: InviteBotDestination) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/bots/{bot}/invite"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -102,7 +102,7 @@ pub async fn invite(domain: &str, token: &str, bot: &str, data: InviteBotDestina
     }
 }
 /// # Bot Response
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct BotResponse {
     /// Bot object
     bot: Bot,
@@ -114,7 +114,7 @@ pub struct BotResponse {
 pub async fn fetch(domain: &str, token: &str, bot: &str) -> Option<BotResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/bots/{bot}"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .send()
         .await
     {
@@ -133,7 +133,7 @@ pub async fn fetch(domain: &str, token: &str, bot: &str) -> Option<BotResponse> 
 pub async fn delete(domain: &str, token: &str, bot: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/bots/{bot}"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .send()
         .await
     {
@@ -141,7 +141,7 @@ pub async fn delete(domain: &str, token: &str, bot: &str) {
     }
 }
 /// # Bot Details
-#[derive(Validate, Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug)]
 pub struct DataEditBot {
     /// Bot username
     #[validate(length(min = 2, max = 32))]
@@ -164,7 +164,7 @@ pub struct DataEditBot {
 pub async fn edit(domain: &str, token: &str, bot: &str, data: DataEditBot) -> Option<Bot> {
     match reqwest::Client::new()
         .patch(format!("https://{domain}/bots/{bot}"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -184,7 +184,7 @@ pub async fn edit(domain: &str, token: &str, bot: &str, data: DataEditBot) -> Op
 /// # Owned Bots Response
 ///
 /// Both lists are sorted by their IDs.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct OwnedBotsResponse {
     /// Bot objects
     bots: Vec<Bot>,
@@ -196,12 +196,12 @@ pub struct OwnedBotsResponse {
 pub async fn owned(domain: &str, token: &str) -> Option<OwnedBotsResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/bots/@me"))
-        .header("x-bot-token", token)
+        .header("x-session-token", token)
         .send()
         .await
     {
         Err(http_err) => {
-            Web::error(http_err, "create_bot");
+            Web::error(http_err, "owned_bot");
             None
         }
         Ok(a) => match serde_json::from_str::<OwnedBotsResponse>(&a.text().await.unwrap()) {
