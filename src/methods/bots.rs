@@ -19,10 +19,10 @@ pub struct DataCreateBot {
 }
 
 #[allow(dead_code)]
-pub async fn create(domain: &str, token: &str, data: DataCreateBot) -> Option<Bot> {
+pub async fn create(domain: &str, token: &str, header: &str, data: DataCreateBot) -> Option<Bot> {
     match reqwest::Client::new()
         .post(format!("https://{domain}/bots/create"))
-        .header("x-session-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -56,10 +56,10 @@ pub struct PublicBot {
 }
 
 #[allow(dead_code)]
-pub async fn fetch_public(domain: &str, token: &str, bot: &str) -> Option<PublicBot> {
+pub async fn fetch_public(domain: &str, token: &str, header: &str, bot: &str) -> Option<PublicBot> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/bots/{bot}/invite"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -89,10 +89,16 @@ pub enum InviteBotDestination {
 }
 
 #[allow(dead_code)]
-pub async fn invite(domain: &str, token: &str, bot: &str, data: InviteBotDestination) {
+pub async fn invite(
+    domain: &str,
+    token: &str,
+    header: &str,
+    bot: &str,
+    data: InviteBotDestination,
+) {
     if let Err(e) = reqwest::Client::new()
         .post(format!("https://{domain}/bots/{bot}/invite"))
-        .header("x-session-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -111,10 +117,10 @@ pub struct BotResponse {
 }
 
 #[allow(dead_code)]
-pub async fn fetch(domain: &str, token: &str, bot: &str) -> Option<BotResponse> {
+pub async fn fetch(domain: &str, token: &str, header: &str, bot: &str) -> Option<BotResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/bots/{bot}"))
-        .header("x-session-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -130,10 +136,10 @@ pub async fn fetch(domain: &str, token: &str, bot: &str) -> Option<BotResponse> 
 }
 
 #[allow(dead_code)]
-pub async fn delete(domain: &str, token: &str, bot: &str) {
+pub async fn delete(domain: &str, token: &str, header: &str, bot: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!("https://{domain}/bots/{bot}"))
-        .header("x-session-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -161,10 +167,16 @@ pub struct DataEditBot {
     remove: Option<Vec<FieldsBot>>,
 }
 #[allow(dead_code)]
-pub async fn edit(domain: &str, token: &str, bot: &str, data: DataEditBot) -> Option<Bot> {
+pub async fn edit(
+    domain: &str,
+    token: &str,
+    header: &str,
+    bot: &str,
+    data: DataEditBot,
+) -> Option<Bot> {
     match reqwest::Client::new()
         .patch(format!("https://{domain}/bots/{bot}"))
-        .header("x-session-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -193,10 +205,10 @@ pub struct OwnedBotsResponse {
 }
 
 #[allow(dead_code)]
-pub async fn owned(domain: &str, token: &str) -> Option<OwnedBotsResponse> {
+pub async fn owned(domain: &str, token: &str, header: &str) -> Option<OwnedBotsResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/bots/@me"))
-        .header("x-session-token", token)
+        .header(header, token)
         .send()
         .await
     {
