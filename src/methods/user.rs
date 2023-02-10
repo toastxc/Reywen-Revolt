@@ -40,10 +40,10 @@ pub struct DataEditUser {
     remove: Option<Vec<FieldsUser>>,
 }
 #[allow(dead_code)]
-pub async fn fetch_self(domain: &str, token: &str) -> Option<User> {
+pub async fn fetch_self(domain: &str, token: &str, header: &str) -> Option<User> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/@me"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -59,10 +59,10 @@ pub async fn fetch_self(domain: &str, token: &str) -> Option<User> {
 }
 
 #[allow(dead_code)]
-pub async fn fetch(domain: &str, token: &str, user: &str) -> Option<User> {
+pub async fn fetch(domain: &str, token: &str, header: &str, user: &str) -> Option<User> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -78,10 +78,10 @@ pub async fn fetch(domain: &str, token: &str, user: &str) -> Option<User> {
 }
 
 #[allow(dead_code)]
-pub async fn edit(domain: &str, token: &str, user: &str, edit: DataEditUser) {
+pub async fn edit(domain: &str, token: &str, header: &str, user: &str, edit: DataEditUser) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/users/{user}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&edit).unwrap())
         .send()
@@ -97,10 +97,15 @@ pub struct FlagResponse {
 }
 
 #[allow(dead_code)]
-pub async fn fetch_flags(domain: &str, token: &str, user: &str) -> Option<FlagResponse> {
+pub async fn fetch_flags(
+    domain: &str,
+    token: &str,
+    header: &str,
+    user: &str,
+) -> Option<FlagResponse> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}/flags"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -145,10 +150,16 @@ impl DataChangeUsername {
 }
 
 #[allow(dead_code)]
-pub async fn change_username(domain: &str, token: &str, user: &str, data: DataChangeUsername) {
+pub async fn change_username(
+    domain: &str,
+    token: &str,
+    header: &str,
+    user: &str,
+    data: DataChangeUsername,
+) {
     if let Err(e) = reqwest::Client::new()
         .patch(format!("https://{domain}/users/{user}"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -159,10 +170,16 @@ pub async fn change_username(domain: &str, token: &str, user: &str, data: DataCh
 }
 
 #[allow(dead_code)]
-pub async fn fetch_default_avatar(domain: &str, token: &str, user: &str, data: DataChangeUsername) {
+pub async fn fetch_default_avatar(
+    domain: &str,
+    token: &str,
+    header: &str,
+    user: &str,
+    data: DataChangeUsername,
+) {
     if let Err(e) = reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}/default_avatar"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&data).unwrap())
         .send()
@@ -173,10 +190,15 @@ pub async fn fetch_default_avatar(domain: &str, token: &str, user: &str, data: D
 }
 
 #[allow(dead_code)]
-pub async fn fetch_user_profile(domain: &str, token: &str, user: &str) -> Option<UserProfile> {
+pub async fn fetch_user_profile(
+    domain: &str,
+    token: &str,
+    header: &str,
+    user: &str,
+) -> Option<UserProfile> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}/default_avatar"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -192,10 +214,10 @@ pub async fn fetch_user_profile(domain: &str, token: &str, user: &str) -> Option
 }
 
 #[allow(dead_code)]
-pub async fn fetch_dm_channels(domain: &str, token: &str) -> Vec<Channel> {
+pub async fn fetch_dm_channels(domain: &str, token: &str, header: &str) -> Vec<Channel> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/dms"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
@@ -211,10 +233,10 @@ pub async fn fetch_dm_channels(domain: &str, token: &str) -> Vec<Channel> {
 }
 
 #[allow(dead_code)]
-pub async fn open_dm(domain: &str, token: &str, user: &str) -> Vec<Channel> {
+pub async fn open_dm(domain: &str, token: &str, header: &str, user: &str) -> Vec<Channel> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/users/{user}/dm"))
-        .header("x-bot-token", token)
+        .header(header, token)
         .send()
         .await
     {
