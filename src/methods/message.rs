@@ -88,10 +88,13 @@ pub async fn send(
         .body(serde_json::to_string(&message).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "message_send");
     };
 }
+
 #[allow(dead_code)]
 pub async fn search(
     domain: &str,
@@ -107,6 +110,8 @@ pub async fn search(
         .body(serde_json::to_string(&message).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "message_search");
     };
@@ -114,10 +119,14 @@ pub async fn search(
 #[allow(dead_code)]
 pub async fn delete(domain: &str, token: &str, header: &str, channel: &str, message: &str) {
     if let Err(e) = reqwest::Client::new()
-        .delete(format!("https://{domain}/channels/{channel}/{message}"))
+        .delete(format!(
+            "https://{domain}/channels/{channel}/messages/{message}"
+        ))
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "message_delete");
     };
@@ -139,6 +148,8 @@ pub async fn edit(
         .body(serde_json::to_string(&changes).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "message_delete");
     };
