@@ -1,4 +1,5 @@
 use iso8601_timestamp::Timestamp;
+use log::warn;
 
 use crate::{
     methods::{
@@ -48,10 +49,15 @@ impl Do {
         }
     }
 
-    pub fn channel(&self, channel: &str) -> ChannelMethod {
+    pub fn channel(&self, channel: Option<&str>) -> ChannelMethod {
+        let channel = match channel {
+            Some(a) => String::from(a),
+            None => self.input_message.channel.clone(),
+        };
+
         ChannelMethod {
             auth: self.auth.clone(),
-            channel: String::from(channel),
+            channel,
         }
     }
     pub fn member(&self, server_id: &str, member: &str) -> MemberMethod {
@@ -74,36 +80,27 @@ impl Do {
             user: String::from(user),
         }
     }
-    pub fn server(&self, server_id: &str) -> ServerMethod {
+    pub async fn server(&self, server_id: Option<&str>) -> ServerMethod {
+        let server = match server_id {
+            Some(a) => String::from(a),
+            None => channel::fetch(
+                &self.auth.domain,
+                &self.auth.token,
+                &self.auth.header,
+                &self.input_message.channel,
+            )
+            .await
+            .unwrap()
+            .server()
+            .1
+            .unwrap(),
+        };
+
         ServerMethod {
             auth: self.auth.clone(),
-
-            server: String::from(server_id),
+            server,
+            input_message: self.input_message.clone(),
         }
-    }
-
-    pub async fn server_from_input(&self) -> Option<ServerMethod> {
-        let server = match channel::fetch(
-            &self.auth.domain,
-            &self.auth.token,
-            &self.auth.header,
-            &self.input_message.channel,
-        )
-        .await
-        {
-            Some(a) => a,
-            None => return None,
-        };
-
-        if let Some(a) = server.server().1 {
-            return Some(ServerMethod {
-                auth: self.auth.clone(),
-
-                server: a,
-            });
-        };
-
-        None
     }
     pub fn user(&self, user_id: &str) -> UserMethod {
         UserMethod {
@@ -297,7 +294,12 @@ pub struct MessageMethod {
 }
 
 impl MessageMethod {
-    pub async fn delete(&self, message: &str) {
+    pub async fn delete(&self, message_id: Option<&str>) {
+        let message = match message_id {
+            Some(a) => a,
+            None => &self.input_message.id,
+        };
+
         message::delete(
             &self.auth.domain,
             &self.auth.token,
@@ -419,15 +421,21 @@ impl RelationshipMethod {
 
 pub struct ServerMethod {
     auth: Auth,
-    pub server: String,
+    server: String,
+    input_message: Message,
 }
 
 impl ServerMethod {
-    pub fn member(&self, member: &str) -> MemberMethod {
+    pub fn member(&self, member: Option<&str>) -> MemberMethod {
+        let member = match member {
+            Some(a) => String::from(a),
+            None => self.input_message.author.clone(),
+        };
+
         MemberMethod {
             auth: self.auth.clone(),
             server: self.server.clone(),
-            member: String::from(member),
+            member,
         }
     }
 
@@ -586,7 +594,20 @@ impl InputMessageMethod {
     }
     /// vector of content
     pub fn convec(&self) -> Vec<String> {
-        vecify(&self.input_message.content.clone().unwrap_or_default())
+        vecify(
+            &self
+                .input_message
+                .content
+                .clone()
+                .unwrap_or_default()
+                
+        )
+    }
+
+    /// if input message contains a string
+    pub fn contains(&self, content: &str) -> bool {
+        let str = vecify(content);
+        str.contains(&String::from(content))
     }
 }
 
@@ -609,13 +630,14 @@ fn vecify(input: &str) -> Vec<String> {
     for x in input.split(' ') {
         master.push(x.to_string())
     }
-
     master
 }
 
 pub struct Web {}
 impl Web {
     pub fn error(e: reqwest::Error, message: &str) {
-        println!("HTTP ERROR: {e}\n{message}")
+        let res = format!("{}\n{message}", e.status().unwrap_or_default());
+        println!("{res}");
+        warn!("{res}");
     }
 }
