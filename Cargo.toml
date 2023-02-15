@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
@@ -26,6 +26,7 @@ iso8601-timestamp = "0.2.10"
 
 # websocket
 tokio-tungstenite = { version = "0.18.0", features = ["native-tls"] }
+log = "0.4.17"
 
 
 [profile.release]
