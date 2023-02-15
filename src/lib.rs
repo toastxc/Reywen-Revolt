@@ -26,15 +26,19 @@ pub mod structs {
 ///
 /// Auth is type `Auth` and needs to be imported as a json
 /// or hardcoded in the binary
+///
+/// Additionally, Auth can be created from a token (you must declare if the token is for a bot or not)
 /// ```
 ///use reywen::client::Do;
 ///use reywen::structs::message::Message;
 ///use reywen::structs::auth::Auth;
 ///async fn client_example(auth: Auth, input_message: Message) {
+///
+///      let auth = Auth::from_token("", true);
 ///      let client = Do::new(&auth, &input_message);
+///
 ///}
 ///```
-
 /// ## Input
 ///
 /// The input message can be accessed with the method `input()`
@@ -61,65 +65,87 @@ pub mod structs {
 ///```
 
 /// ## Message
+/// ### Sending Messages
 ///```
 ///use reywen::client::Do;
 ///use reywen::structs::message::DataMessageSend;
 ///async fn message_example(client: Do) {
-///   let message = client.message();
+///  let message = client.message();
 ///
 ///  // send message without Message structure
-///  message.sender("hello");
+///  message.sender("hello").await;
 ///
 ///  //'send' requires a payload, which can be fully typed
-///  let payload = DataMessageSend {
-///     content: Some(String::from("hello")),
-///     replies: None,
-///     embeds: None,
-///     masquerade: None,
-///  };
+///
+///  let payload = DataMessageSend::new().content("hewo");
+///
 ///  message.send(payload).await;
 ///}
 ///```
-
+/// ### Deleting messages
+///
+///```
+///use reywen::client::Do;
+///use reywen::structs::message::DataMessageSend;
+///async fn message_example(client: Do) {
+///  let message = client.message();
+///
+///  // send message without Message structure
+///  message.sender("hello").await;
+///
+///  //'send' requires a payload, which can be fully typed
+///
+///  let payload = DataMessageSend::new().content("hewo");
+///
+///  message.send(payload).await;
+///}
+///```
 /// ## Member
+///
+/// The member can be specified, but it will default to that of input_message
+///
 ///```
 ///use reywen::client::Do;
 ///use reywen::structs::message::DataMessageSend;
 ///async fn member_example(client: Do) {
-///  // for member to be accessed, a server needs to be specified
-///  let member = client.member("server_id").await.unwrap();
 ///
+///   let server = client.server(None).await;
 ///
-///  member.ban("you", None).await;
+///   let member = server.member(None);
 ///
+///   member.kick().await;
 ///
-///  // for easier use, member can be generated automatically
-///  let server_id = client.server().from_channel().await.unwrap();
-///  let member = client.member(&server_id).await.unwrap();
-///  member.ban("you", None).await;
 ///}
 ///```
-
+///
 /// ## Channel
+/// the channel method will default to the same channel as input_message unless declared
+/// this example returns the channel details of the channel from input_message
+///
+/// Channel can be used to fetch, delete and edit the given channel
+/// note: Message is its own structure
 ///```
 ///use reywen::client::Do;
 ///async fn channel_example(client: Do) {
-///  let channel = client.channel();
 ///
-///  println!("{:?}", channel.fetch("CHANNEL_ID").await);
+///    let channel = client.channel(None);
+///
+///  println!("{:?}", channel.fetch().await);
 ///}
 ///```
-
+///
 /// ## Server
+/// Like Channnel, the Server method has an optional input field.
+/// ### warning: the option None has a chance of panicing if the message sent is not in a server
 ///```
 ///use reywen::client::Do;
 ///async fn server_example(client: Do) {
-///  let server = client.server();
 ///
-///  // derive server ID from input_message
-///  let server_id = server.from_channel().await.unwrap();
+///  // Will painic if not for a server
+///  let server = client.server(None).await;
 ///
-///  server.fetch(&server_id).await;
+
+///  server.leave().await;
 ///
 ///}
 ///```
