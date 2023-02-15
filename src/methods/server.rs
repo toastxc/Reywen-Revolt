@@ -88,6 +88,8 @@ pub async fn create(
         .body(serde_json::to_string(&server).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "server_create");
@@ -106,6 +108,8 @@ pub async fn fetch(domain: &str, token: &str, header: &str, server: &str) -> Opt
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "server_fetch");
@@ -124,6 +128,8 @@ pub async fn leave(domain: &str, token: &str, header: &str, server: &str) {
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "server_delete");
     };
@@ -143,6 +149,8 @@ pub async fn edit(
         .body(serde_json::to_string(&server_edit).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "sever_delete");
     };

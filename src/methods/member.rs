@@ -23,6 +23,8 @@ pub async fn fetches(domain: &str, token: &str, header: &str, server: &str) -> O
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "server_fetch_members");
@@ -50,6 +52,8 @@ pub async fn fetch(
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "server_fetch_member");
@@ -71,6 +75,8 @@ pub async fn kick(domain: &str, token: &str, header: &str, server: &str, member:
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "server_kick_member");
     };
@@ -118,6 +124,8 @@ pub async fn edit(
         .body(serde_json::to_string(&edit).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "server_edit_member");
     };
@@ -153,6 +161,8 @@ pub async fn ban(
         .body(serde_json::to_string(&reason).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "server_ban_member");
     };
@@ -165,6 +175,8 @@ pub async fn unban(domain: &str, token: &str, header: &str, server: &str, member
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "server_ban_member");
     };

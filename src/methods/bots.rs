@@ -27,6 +27,8 @@ pub async fn create(domain: &str, token: &str, header: &str, data: DataCreateBot
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "create_bot");
@@ -62,6 +64,8 @@ pub async fn fetch_public(domain: &str, token: &str, header: &str, bot: &str) ->
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "fetch_public_bot");
@@ -103,6 +107,8 @@ pub async fn invite(
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "invite_bot");
     }
@@ -123,6 +129,8 @@ pub async fn fetch(domain: &str, token: &str, header: &str, bot: &str) -> Option
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "fetch_public_bot");
@@ -142,6 +150,8 @@ pub async fn delete(domain: &str, token: &str, header: &str, bot: &str) {
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "delete_bot");
     }
@@ -181,6 +191,8 @@ pub async fn edit(
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "edit_bot");
@@ -211,6 +223,8 @@ pub async fn owned(domain: &str, token: &str, header: &str) -> Option<OwnedBotsR
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "owned_bot");

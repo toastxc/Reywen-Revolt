@@ -7,6 +7,8 @@ pub async fn fetch(domain: &str, token: &str, header: &str, channel: &str) -> Op
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "channel_fetch");
@@ -25,6 +27,8 @@ pub async fn delete(domain: &str, token: &str, header: &str, channel: &str) {
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "channel_delete");
     };
@@ -36,6 +40,8 @@ pub async fn edit(domain: &str, token: &str, header: &str, channel: &str) {
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "channel_delete");
     };

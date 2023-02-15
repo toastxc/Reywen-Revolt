@@ -22,6 +22,8 @@ pub async fn fetch_mutal_servers_and_friends(
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(e) => {
             Web::error(e, "mutal_server_and_users");
@@ -41,6 +43,8 @@ pub async fn accept_friend(domain: &str, token: &str, header: &str, user: &str) 
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "accept_friend");
@@ -59,6 +63,8 @@ pub async fn deny_friend(domain: &str, token: &str, header: &str, user: &str) ->
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "deny_friend");
@@ -78,6 +84,8 @@ pub async fn block(domain: &str, token: &str, header: &str, user: &str) -> Optio
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "block_user");
@@ -97,6 +105,8 @@ pub async fn unblock(domain: &str, token: &str, header: &str, user: &str) -> Opt
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "unblock_user");
@@ -137,6 +147,8 @@ pub async fn friend_request(
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "friend_request");

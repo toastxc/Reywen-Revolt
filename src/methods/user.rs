@@ -46,6 +46,8 @@ pub async fn fetch_self(domain: &str, token: &str, header: &str) -> Option<User>
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "user_fetch");
@@ -65,6 +67,8 @@ pub async fn fetch(domain: &str, token: &str, header: &str, user: &str) -> Optio
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "user_fetch");
@@ -86,6 +90,8 @@ pub async fn edit(domain: &str, token: &str, header: &str, user: &str, edit: Dat
         .body(serde_json::to_string(&edit).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "user_edit");
     }
@@ -108,6 +114,8 @@ pub async fn fetch_flags(
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(http_err) => {
             Web::error(http_err, "user_fetch");
@@ -164,6 +172,8 @@ pub async fn change_username(
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "change_username");
     }
@@ -184,6 +194,8 @@ pub async fn fetch_default_avatar(
         .body(serde_json::to_string(&data).unwrap())
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Web::error(e, "fetch_default_avatar");
     }
@@ -201,6 +213,8 @@ pub async fn fetch_user_profile(
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(e) => {
             Web::error(e, "server_create");
@@ -220,6 +234,8 @@ pub async fn fetch_dm_channels(domain: &str, token: &str, header: &str) -> Vec<C
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(e) => {
             Web::error(e, "fetch_dms");
@@ -239,6 +255,8 @@ pub async fn open_dm(domain: &str, token: &str, header: &str, user: &str) -> Vec
         .header(header, token)
         .send()
         .await
+        .unwrap()
+        .error_for_status()
     {
         Err(e) => {
             Web::error(e, "open_dm");
