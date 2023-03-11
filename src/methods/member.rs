@@ -17,7 +17,12 @@ pub struct AllMemberResponse {
 }
 /// Polls server for members - None for failure
 #[allow(dead_code)]
-pub async fn fetches(domain: &str, token: &str, header: &str, server: &str) -> Option<Vec<Member>> {
+pub async fn fetch_all(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+) -> Option<Vec<Member>> {
     match reqwest::Client::new()
         .get(format!("https://{domain}/servers/{server}/members"))
         .header(header, token)
@@ -70,7 +75,7 @@ pub async fn fetch(
 pub async fn kick(domain: &str, token: &str, header: &str, server: &str, member: &str) {
     if let Err(e) = reqwest::Client::new()
         .delete(format!(
-            "https://{domain}/server/{server}/members:/{member}"
+            "https://{domain}/servers/{server}/members/{member}"
         ))
         .header(header, token)
         .send()
@@ -116,9 +121,7 @@ pub async fn edit(
     edit: DataMemberEdit,
 ) {
     if let Err(e) = reqwest::Client::new()
-        .patch(format!(
-            "https://{domain}/server/{server}/members:/{member}"
-        ))
+        .patch(format!("https://{domain}/server/{server}/members/{member}"))
         .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&edit).unwrap())
@@ -155,7 +158,7 @@ pub async fn ban(
     reason: DataBanCreate,
 ) {
     if let Err(e) = reqwest::Client::new()
-        .patch(format!("https://{domain}/server/{server}/bans:/{member}"))
+        .put(format!("https://{domain}/servers/{server}/bans/{member}"))
         .header(header, token)
         .header("Content-Type", "application/json")
         .body(serde_json::to_string(&reason).unwrap())
@@ -171,13 +174,13 @@ pub async fn ban(
 #[allow(dead_code)]
 pub async fn unban(domain: &str, token: &str, header: &str, server: &str, member: &str) {
     if let Err(e) = reqwest::Client::new()
-        .delete(format!("https://{domain}/server/{server}/bans:/{member}"))
+        .delete(format!("https://{domain}/servers/{server}/bans/{member}"))
         .header(header, token)
         .send()
         .await
         .unwrap()
         .error_for_status()
     {
-        Web::error(e, "server_ban_member");
+        Web::error(e, "server_unban_member");
     };
 }
