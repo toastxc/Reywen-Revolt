@@ -60,10 +60,27 @@ impl Do {
             channel,
         }
     }
-    pub fn member(&self, server_id: &str, member: &str) -> MemberMethod {
+    pub async fn member(&self, server_id: Option<&str>, member: Option<&str>) -> MemberMethod {
+        let member = member.unwrap_or(&self.input_message.author);
+
+        let server = match server_id {
+            Some(a) => String::from(a),
+            None => channel::fetch(
+                &self.auth.domain,
+                &self.auth.token,
+                &self.auth.header,
+                &self.input_message.channel,
+            )
+            .await
+            .unwrap()
+            .server()
+            .1.unwrap()
+
+        };
+
         MemberMethod {
             auth: self.auth.clone(),
-            server: String::from(server_id),
+            server: String::from(server),
             member: String::from(member),
         }
     }
@@ -102,11 +119,13 @@ impl Do {
             input_message: self.input_message.clone(),
         }
     }
-    pub fn user(&self, user_id: &str) -> UserMethod {
+    pub fn user(&self, user_id: Option<&str>) -> UserMethod {
+        let user = user_id.unwrap_or(&self.input_message.author);
+
         UserMethod {
             auth: self.auth.clone(),
             input_message: self.input_message.clone(),
-            user: String::from(user_id),
+            user: String::from(user),
         }
     }
 
@@ -257,8 +276,8 @@ impl MemberMethod {
         )
         .await
     }
-    pub async fn fetches(&self) -> Option<Vec<crate::structs::server::Member>> {
-        member::fetches(
+    pub async fn fetch_all(&self) -> Option<Vec<crate::structs::server::Member>> {
+        member::fetch_all(
             &self.auth.domain,
             &self.auth.token,
             &self.auth.header,
@@ -594,14 +613,7 @@ impl InputMessageMethod {
     }
     /// vector of content
     pub fn convec(&self) -> Vec<String> {
-        vecify(
-            &self
-                .input_message
-                .content
-                .clone()
-                .unwrap_or_default()
-                
-        )
+        vecify(&self.input_message.content.clone().unwrap_or_default())
     }
 
     /// if input message contains a string
