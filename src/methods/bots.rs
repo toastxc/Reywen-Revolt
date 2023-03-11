@@ -18,6 +18,14 @@ pub struct DataCreateBot {
     name: String,
 }
 
+impl DataCreateBot {
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: String::from(name),
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub async fn create(domain: &str, token: &str, header: &str, data: DataCreateBot) -> Option<Bot> {
     match reqwest::Client::new()
