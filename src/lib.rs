@@ -1,5 +1,5 @@
 /// # Methods are implementations of the Revolt API
-mod methods {
+pub mod methods {
     pub mod bots;
     pub mod channel;
     pub mod member;
