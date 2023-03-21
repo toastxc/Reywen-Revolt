@@ -8,7 +8,7 @@ use crate::{
 };
 
 // ################################## SERVER MEMBERS ##################################
-#[derive(Serialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct AllMemberResponse {
     /// List of members
     members: Vec<Member>,
@@ -87,7 +87,7 @@ pub async fn kick(domain: &str, token: &str, header: &str, server: &str, member:
     };
 }
 /// # Member Data
-#[derive(Validate, Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataMemberEdit {
     /// Member nickname
     #[validate(length(min = 1, max = 32))]

@@ -6,7 +6,7 @@ use crate::{
     structs::message::{DataMessageSend, Message},
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub enum MessageSort {
     /// Sort by the most relevant messages
     Relevance,
@@ -21,7 +21,7 @@ impl Default for MessageSort {
     }
 }
 
-#[derive(Validate, Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct OptionsMessageSearch {
     /// Full-text search query
     ///
@@ -48,7 +48,7 @@ pub struct OptionsMessageSearch {
 }
 
 /// # Message Details
-#[derive(Validate, Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataEditMessage {
     /// New message content
     #[validate(length(min = 1, max = 2000))]

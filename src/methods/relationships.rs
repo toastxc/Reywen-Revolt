@@ -119,7 +119,7 @@ pub async fn unblock(domain: &str, token: &str, header: &str, user: &str) -> Opt
     }
 }
 /// # User Lookup Information
-#[derive(Serialize, Deserialize)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataSendFriendRequest {
     username: String,
 }

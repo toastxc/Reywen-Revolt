@@ -11,7 +11,7 @@ use crate::{
 };
 /// # Bot Details
 
-#[derive(Validate, Deserialize, Serialize, Debug)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataCreateBot {
     /// Bot username
     #[validate(length(min = 2, max = 32))]
@@ -86,7 +86,7 @@ pub async fn fetch_public(domain: &str, token: &str, header: &str, bot: &str) ->
     }
 }
 /// # Invite Destination
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub enum InviteBotDestination {
     /// Invite to a server
     Server {
@@ -165,7 +165,7 @@ pub async fn delete(domain: &str, token: &str, header: &str, bot: &str) {
     }
 }
 /// # Bot Details
-#[derive(Validate, Serialize, Deserialize, Debug)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataEditBot {
     /// Bot username
     #[validate(length(min = 2, max = 32))]
@@ -216,7 +216,7 @@ pub async fn edit(
 /// # Owned Bots Response
 ///
 /// Both lists are sorted by their IDs.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct OwnedBotsResponse {
     /// Bot objects
     bots: Vec<Bot>,
