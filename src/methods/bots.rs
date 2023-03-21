@@ -86,7 +86,7 @@ pub async fn fetch_public(domain: &str, token: &str, header: &str, bot: &str) ->
     }
 }
 /// # Invite Destination
-#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum InviteBotDestination {
     /// Invite to a server
     Server {

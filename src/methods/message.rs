@@ -6,7 +6,7 @@ use crate::{
     structs::message::{DataMessageSend, Message},
 };
 
-#[derive(Validate, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum MessageSort {
     /// Sort by the most relevant messages
     Relevance,

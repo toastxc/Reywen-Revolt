@@ -51,7 +51,7 @@ pub struct Bot {
 }
 
 /// Optional fields on bot object
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum FieldsBot {
     Token,
     InteractionsURL,

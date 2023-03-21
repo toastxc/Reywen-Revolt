@@ -91,16 +91,16 @@ pub async fn kick(domain: &str, token: &str, header: &str, server: &str, member:
 pub struct DataMemberEdit {
     /// Member nickname
     #[validate(length(min = 1, max = 32))]
-    nickname: Option<String>,
+    pub nickname: Option<String>,
     /// Attachment Id to set for avatar
-    avatar: Option<String>,
+    pub avatar: Option<String>,
     /// Array of role ids
-    roles: Option<Vec<String>>,
+    pub roles: Option<Vec<String>>,
     /// Timestamp this member is timed out until
-    timeout: Option<Timestamp>,
+    pub timeout: Option<Timestamp>,
     /// Fields to remove from channel object
     #[validate(length(min = 1))]
-    remove: Option<Vec<FieldsMember>>,
+    pub remove: Option<Vec<FieldsMember>>,
 }
 /// Optional fields on server member object
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
