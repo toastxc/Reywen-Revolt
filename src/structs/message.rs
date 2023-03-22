@@ -1,5 +1,4 @@
 use iso8601_timestamp::Timestamp;
-use optional_struct::OptionalStruct;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -132,8 +131,7 @@ impl Masquerade {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, OptionalStruct, Default)]
-#[optional_derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Message {
     /// Unique Id
     #[serde(rename = "_id")]
