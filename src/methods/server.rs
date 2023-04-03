@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -153,5 +155,81 @@ pub async fn edit(
         .error_for_status()
     {
         Web::error(e, "sever_delete");
+    };
+}
+/// # Channel Type
+#[derive(Serialize, Deserialize, Clone)]
+pub enum ChannelType {
+    /// Text Channel
+    Text,
+    /// Voice Channel
+    Voice,
+}
+
+impl Default for ChannelType {
+    fn default() -> Self {
+        ChannelType::Text
+    }
+}
+
+/// # Channel Data
+#[derive(Validate, Serialize, Deserialize, Default, Clone)]
+pub struct DataCreateChannel {
+    /// Channel type
+    #[serde(rename = "type", default = "ChannelType::default")]
+    pub channel_type: ChannelType,
+    /// Channel name
+    #[validate(length(min = 1, max = 32))]
+    pub name: String,
+    /// Channel description
+    #[validate(length(min = 0, max = 1024))]
+    pub description: Option<String>,
+    /// Whether this channel is age restricted
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nsfw: Option<bool>,
+}
+
+impl DataCreateChannel {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn channel_type(&mut self, channel_type: ChannelType) -> Self {
+        self.channel_type = channel_type;
+        self.deref().to_owned()
+    }
+    pub fn nsfw(&mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
+        self.deref().to_owned()
+    }
+    pub fn description(&mut self, description: &str) -> Self {
+        self.description = Some(String::from(description));
+        self.deref().to_owned()
+    }
+    pub fn name(&mut self, name: &str) -> Self {
+        self.name = String::from(name);
+        self.deref().to_owned()
+    }
+}
+
+#[allow(dead_code)]
+pub async fn create_channel(
+    domain: &str,
+    token: &str,
+    header: &str,
+    server: &str,
+    server_edit: DataCreateChannel,
+) {
+    if let Err(e) = reqwest::Client::new()
+        .post(format!("https://{domain}/server/{server}"))
+        .header(header, token)
+        .header("Content-Type", "application/json")
+        .body(serde_json::to_string(&server_edit).unwrap())
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+    {
+        Web::error(e, "channel_create");
     };
 }
