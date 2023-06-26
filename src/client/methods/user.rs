@@ -61,7 +61,7 @@ impl Client {
         result(
             self.http
                 .post(
-                    &format!("/users/friend"),
+                    "/users/friend",
                     Some(
                         &serde_json::to_string(&DataSendFriendRequest::set_username(username))
                             .unwrap(),

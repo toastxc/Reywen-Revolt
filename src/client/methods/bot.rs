@@ -14,7 +14,7 @@ impl Client {
         result(
             self.http
                 .post(
-                    &format!("/bots/create"),
+                    "/bots/create",
                     Some(&serde_json::to_string(&data).unwrap()),
                 )
                 .await,
@@ -40,7 +40,7 @@ impl Client {
         result(self.http.get(&format!("/bots/{bot_id}")).await).await
     }
     pub async fn bot_fetch_owned(&self) -> Result<OwnedBotsResponse, DeltaError> {
-        result(self.http.get(&format!("/bots/@me")).await).await
+        result(self.http.get("/bots/@me").await).await
     }
     pub async fn bot_fetch_public(&self, bot_id: &str) -> Result<PublicBot, DeltaError> {
         result(self.http.get(&format!("/bots/{bot_id}/invite")).await).await
