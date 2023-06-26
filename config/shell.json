@@ -1,8 +1,0 @@
-{
-	"enabled": false,
-	
-	"whitelist_sudoers": true,
-	
-	"channel_only": true,
-    "channel": "01GKWVWGHNBNCFPC9Q7CRDHBVZ"
-}
