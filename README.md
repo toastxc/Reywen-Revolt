@@ -16,3 +16,6 @@ Reywen is a library for building bots on the Revolt.chat platform, written in Ru
 
 ## Structure
 Reywen is centered around a single main structure `Client`, this contains the websocket library, authentication details and all http methods for the revolt.chat API
+
+## Reporting
+for issues or bugs todo with the Reywen bot (ReywenTXC) or related bots made by ToastXC go to https://github.com/toastxc/Reywen-TXC
