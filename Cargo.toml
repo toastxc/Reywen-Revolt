@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
@@ -10,7 +10,6 @@ documentation = "https://docs.rs/reywen/latest/reywen/"
 [dependencies]
 
 # revolt compat
-indexmap = "1.9.3"
 iso8601-timestamp = "0.2.10"
 validator = "0.16.0"
 num_enum = "0.6.0"
@@ -27,12 +26,9 @@ rand = "0.8.5"
 reywen_http = "0.1.9"
 tokio-tungstenite = { version = "0.19.0", features = ["native-tls"] }
 
-
 # async
 tokio = { version = "1.27.0", features = ["full"] }
 futures-util = "0.3.28"
-
-
 
 
 [profile.release]
