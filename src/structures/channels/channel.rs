@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::attachment::File;
+use crate::structures::media::attachment::File;
 
 fn if_false(t: &bool) -> bool {
     !t

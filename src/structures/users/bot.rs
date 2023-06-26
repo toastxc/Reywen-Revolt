@@ -1,19 +1,17 @@
+use reywen_http::utils::if_false;
 use serde::{Deserialize, Serialize};
 
-/// Utility function to check if a boolean value is false
-fn if_false(t: &bool) -> bool {
-    !t
+use crate::structures::media::attachment::File;
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct PublicBot {
+    #[serde(rename = "_id")]
+    pub id: String,
+    pub username: String,
+    pub avatar: Option<File>,
+    pub description: Option<String>,
 }
 
-/// Bot flag enum
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
-#[repr(i32)]
-pub enum BotFlags {
-    Verified = 1,
-    Official = 2,
-}
-
-/// Representation of a bot on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Bot {
     /// Bot Id
@@ -28,7 +26,6 @@ pub struct Bot {
     /// Whether the bot is public
     /// (may be invited by anyone)
     pub public: bool,
-
     /// Whether to enable analytics
     #[serde(skip_serializing_if = "if_false", default)]
     pub analytics: bool,

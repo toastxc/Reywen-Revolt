@@ -1,20 +1,20 @@
 use std::collections::HashMap;
 
-use iso8601_timestamp::Timestamp;
+use num_enum::TryFromPrimitive;
+use reywen_http::utils::if_false;
+//use num_enum::TryFromPrimitive;
 use serde::{Deserialize, Serialize};
-use validator::Validate;
 
-use super::attachment::File;
-
-fn if_false(t: &bool) -> bool {
-    !t
-}
+use crate::structures::media::attachment::File;
 
 /// Representation of a server role
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Role {
     /// Role name
     pub name: String,
+    /// Permissions available to this role
+    //pub permissions: OverrideField,
+    /// Colour used for this role
     ///
     /// This can be any valid CSS colour
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -27,67 +27,18 @@ pub struct Role {
     pub rank: i64,
 }
 
-impl Role {
-    pub fn new() -> Self {
-        Role::default()
-    }
-
-    pub fn name(mut self, name: &str) -> Self {
-        self.name = String::from(name);
-        self
-    }
-
-    pub fn colour(mut self, colour: &str) -> Self {
-        self.colour = Some(String::from(colour));
-        self
-    }
-    pub fn hoist(mut self, hoist: bool) -> Self {
-        self.hoist = hoist;
-        self
-    }
-    pub fn rank(mut self, rank: i64) -> Self {
-        self.rank = rank;
-        self
-    }
-}
-
-#[derive(Validate, Serialize, Deserialize, Debug, Clone)]
+/// Channel category
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Category {
     /// Unique ID for this category
-    #[validate(length(min = 1, max = 32))]
     pub id: String,
-    /// Title for this category
-    #[validate(length(min = 1, max = 32))]
+    /// Title for this
     pub title: String,
     /// Channels in this category
     pub channels: Vec<String>,
 }
 
-impl Category {
-    pub fn id(mut self, id: &str) -> Self {
-        self.id = String::from(id);
-        self
-    }
-
-    pub fn title(mut self, title: &str) -> Self {
-        self.title = String::from(title);
-        self
-    }
-
-    pub fn channels(mut self, channels: Vec<String>) -> Self {
-        self.channels = channels;
-        self
-    }
-
-    pub fn channel(mut self, channel: &str) -> Self {
-        match self.channels.is_empty() {
-            true => self.channels = vec![String::from(channel)],
-            false => self.channels.push(String::from(channel)),
-        };
-        self
-    }
-}
-
+/// System message channel assignments
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SystemMessageChannels {
     /// ID of channel to send user join messages in
@@ -103,14 +54,18 @@ pub struct SystemMessageChannels {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user_banned: Option<String>,
 }
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+
+/// Server flag enum
+#[derive(Debug, PartialEq, Eq, TryFromPrimitive, Copy, Clone)]
 #[repr(i32)]
 pub enum ServerFlags {
     Verified = 1,
     Official = 2,
 }
 
+/// Representation of a server on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
+
 pub struct Server {
     /// Unique Id
     #[serde(rename = "_id")]
@@ -143,7 +98,14 @@ pub struct Server {
     /// Default set of server and channel permissions
     pub default_permissions: i64,
 
-    /// Enum of server flags
+    /// Icon attachment
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub icon: Option<File>,
+    /// Banner attachment
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub banner: Option<File>,
+
+    /// Bitfield of server flags
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flags: Option<i32>,
 
@@ -158,7 +120,8 @@ pub struct Server {
     pub discoverable: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+/// Optional fields on server object
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum FieldsServer {
     Description,
     Categories,
@@ -166,39 +129,9 @@ pub enum FieldsServer {
     Icon,
     Banner,
 }
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+
+/// Optional fields on server object
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum FieldsRole {
     Colour,
-}
-
-// ########################## SERVER MEMBERS ##########################
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct MemberCompositeKey {
-    /// Server Id
-    pub server: String,
-    /// User Id
-    pub user: String,
-}
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Member {
-    /// Unique member id
-    #[serde(rename = "_id")]
-    pub id: MemberCompositeKey,
-
-    /// Time at which this user joined the server
-    pub joined_at: Timestamp,
-
-    /// Member's nickname
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub nickname: Option<String>,
-    /// Avatar attachment
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub avatar: Option<File>,
-
-    /// Member's roles
-    #[serde(skip_serializing_if = "Vec::is_empty", default)]
-    pub roles: Vec<String>,
-    /// Timestamp this member is timed out until
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub timeout: Option<Timestamp>,
 }

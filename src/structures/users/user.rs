@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use validator::Validate;
 
-use super::attachment::File;
+use crate::structures::media::attachment::File;
 
 fn if_false(t: &bool) -> bool {
     !t
@@ -38,10 +37,9 @@ pub enum Presence {
     Invisible,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Validate, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct UserStatus {
     /// Custom status text
-    #[validate(length(min = 1, max = 128))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
     /// Current presence option

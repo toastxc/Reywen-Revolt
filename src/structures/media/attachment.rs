@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
 
 /// Metadata associated with file
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(tag = "type")]
 pub enum Metadata {
     /// File is just a generic uncategorised file
+    #[default]
     File,
     /// File contains textual data and should be displayed as such
     Text,
@@ -14,12 +15,6 @@ pub enum Metadata {
     Video { width: isize, height: isize },
     /// File is audio
     Audio,
-}
-
-impl Default for Metadata {
-    fn default() -> Metadata {
-        Metadata::File
-    }
 }
 
 /// Representation of a File on Revolt
@@ -46,6 +41,14 @@ pub struct File {
     /// Whether this file was reported
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reported: Option<bool>,
+
+    // ! THE FOLLOWING SHOULD BE DEPRECATED
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub server_id: Option<String>,
 
     /// Id of the object this file is associated with
     #[serde(skip_serializing_if = "Option::is_none")]
