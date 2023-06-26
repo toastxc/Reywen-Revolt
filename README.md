@@ -13,5 +13,6 @@
 
 Reywen is a library for building bots on the Revolt.chat platform, written in Rust. It provides simple abstraction libraries for easily implementing features, while allowing for more direct interaction with the Revolt APi and Websocket.
 
-## Status
-I'm currently working on a complete rewrite (ReywenV3) of the API library, and possibly the whole framework. Currently it is private but it will be made public and merged here once complete. 
+
+## Structure
+Reywen is centered around a single main structure `Client`, this contains the websocket library, authentication details and all http methods for the revolt.chat API
