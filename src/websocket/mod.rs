@@ -1,8 +1,8 @@
 pub mod data;
 pub mod process;
 pub mod result;
-
 use serde::{Deserialize, Serialize};
+use tokio_tungstenite::tungstenite::Message;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
 pub struct Websocket {
@@ -19,5 +19,9 @@ impl Websocket {
             format: String::from("json"),
             domain: String::from("ws.revolt.chat"),
         }
+    }
+
+    pub async fn ws_send(input: &str) -> Message {
+        Message::from(input)
     }
 }

@@ -10,7 +10,7 @@ use crate::{
 };
 
 impl Client {
-    pub async fn user_edit(&self, user: &str, data: DataEditUser) -> Result<User, DeltaError> {
+    pub async fn user_edit(&self, user: &str, data: &DataEditUser) -> Result<User, DeltaError> {
         let data = serde_json::to_string(&data).unwrap();
 
         result(self.http.patch(&format!("users/{user}"), Some(&data)).await).await

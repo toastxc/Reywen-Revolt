@@ -47,6 +47,21 @@ pub struct UserStatus {
     pub presence: Option<Presence>,
 }
 
+impl UserStatus {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn set_text(&mut self, text: &str) -> Self {
+        self.text = Some(String::from(text));
+        self.to_owned()
+    }
+    pub fn set_presence(&mut self, presence: Presence) -> Self {
+        self.presence = Some(presence);
+        self.to_owned()
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct UserProfile {
     /// Text content on user's profile
