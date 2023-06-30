@@ -138,7 +138,4 @@ pub enum FieldsChannel {
     Icon,
     DefaultPermissions,
 }
-impl Channel {
-
-  
-}
+impl Channel {}

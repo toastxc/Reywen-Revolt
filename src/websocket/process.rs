@@ -71,5 +71,3 @@ type SinkSplit = SplitSink<
     WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
     tokio_tungstenite::tungstenite::Message,
 >;
-
-
