@@ -1,11 +1,11 @@
 use reywen_http::{driver::Delta, results::DeltaError};
 
-use crate::websocket::Websocket;
+use crate::websocket::WebSocket;
 
 #[derive(Debug, Clone, Default)]
 pub struct Client {
     pub http: Delta,
-    pub websocket: Websocket,
+    pub websocket: WebSocket,
     pub token: String,
 }
 
@@ -24,7 +24,7 @@ impl Client {
 
         Ok(Self {
             http,
-            websocket: Websocket::from_token(token),
+            websocket: WebSocket::from_token(token),
             token: String::from(token),
         })
     }

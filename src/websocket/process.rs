@@ -6,9 +6,9 @@ use futures_util::{
 };
 use tokio_tungstenite::{connect_async, WebSocketStream};
 
-use super::{data::WebSocketEvent, Websocket};
+use super::{data::WebSocketEvent, WebSocket};
 
-impl Websocket {
+impl WebSocket {
     pub async fn stream(input: Connection) -> Pin<Box<impl Stream<Item = WebSocketEvent>>> {
         Box::pin({
             (input).filter_map(|result| async {
@@ -34,7 +34,7 @@ impl Websocket {
     }
 
     pub async fn start(self) -> Pin<Box<impl Stream<Item = WebSocketEvent>>> {
-        Websocket::stream(self.generate().await).await
+        WebSocket::stream(self.generate().await).await
     }
 
     pub async fn new_stream(input: StreamSplit) -> Pin<Box<impl Stream<Item = WebSocketEvent>>> {
@@ -58,7 +58,7 @@ impl Websocket {
 
         let (write, read) = ws.split();
 
-        (write, Websocket::new_stream(read).await)
+        (write, WebSocket::new_stream(read).await)
     }
 }
 
@@ -66,7 +66,10 @@ type Connection = WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::
 
 type StreamSplit =
     SplitStream<WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>>;
+
 type SinkSplit = SplitSink<
     WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
     tokio_tungstenite::tungstenite::Message,
 >;
+
+

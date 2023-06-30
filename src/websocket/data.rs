@@ -17,7 +17,7 @@ use crate::structures::{
 #[serde(untagged)]
 pub enum Ping {
     Binary(Vec<u8>),
-    Number(usize),
+    Number(u128),
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -28,7 +28,7 @@ pub enum WebSocketEvent {
         error: String,
     },
     Pong {
-        data: u64,
+        data: usize,
     },
     Ready {
         users: Vec<User>,
@@ -272,4 +272,34 @@ pub struct MessageUpdateData {
 pub struct MessageAppendData {
     #[serde(default)]
     embeds: Option<Vec<Embed>>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(tag = "type")]
+pub enum WebSocketSend {
+    Authenticate { token: String },
+    BeginTyping { channel: String },
+    EndTyping { channel: String },
+    Ping { data: usize },
+}
+
+impl WebSocketSend {
+    pub fn authenticate(token: &str) -> Self {
+        WebSocketSend::Authenticate {
+            token: String::from(token),
+        }
+    }
+    pub fn typing(channel: &str, status: bool) -> Self {
+        match status {
+            true => Self::BeginTyping {
+                channel: String::from(channel),
+            },
+            false => Self::EndTyping {
+                channel: String::from(channel),
+            },
+        }
+    }
+    pub fn ping(data: usize) -> Self {
+        WebSocketSend::Ping { data }
+    }
 }

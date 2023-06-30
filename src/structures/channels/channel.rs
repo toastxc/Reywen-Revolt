@@ -139,13 +139,6 @@ pub enum FieldsChannel {
     DefaultPermissions,
 }
 impl Channel {
-    pub fn server(self) -> (String, Option<String>) {
-        match self {
-            Channel::SavedMessages { id, .. } => (id, None),
-            Channel::DirectMessage { id, .. } => (id, None),
-            Channel::Group { id, .. } => (id, None),
-            Channel::TextChannel { id, server, .. } => (id, Some(server)),
-            Channel::VoiceChannel { id, server, .. } => (id, Some(server)),
-        }
-    }
+
+  
 }

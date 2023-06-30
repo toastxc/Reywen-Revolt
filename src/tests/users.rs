@@ -9,7 +9,7 @@ mod tests {
     async fn test_user_edit() {
         let client = tester_user();
 
-        if let Err(error) = client.user_edit(&USER, DataEditUser::new()).await {
+        if let Err(error) = client.user_edit(&USER, &DataEditUser::new()).await {
             panic!("{:#?}", error);
         }
     }

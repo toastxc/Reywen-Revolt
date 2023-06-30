@@ -1,13 +1,21 @@
+use std::time::SystemTime;
+
 #[cfg(test)]
 mod tests {
-    use futures_util::StreamExt;
+    use futures_util::{SinkExt, StreamExt};
 
-    use crate::websocket::{data::WebSocketEvent, Websocket};
+    use crate::{
+        tests::websocket::time_helper,
+        websocket::{
+            data::{WebSocketEvent, WebSocketSend},
+            WebSocket,
+        },
+    };
 
     // test of reywenv3 websocket owo
     #[tokio::test]
     pub async fn ws_stream_test() {
-        let input = Websocket::from_token("");
+        let input = WebSocket::from_token("");
         // generate a websocket connection AND convert types
         let mut ws = input.to_owned().start().await;
 
@@ -20,4 +28,42 @@ mod tests {
             }
         }
     }
+
+    #[tokio::test]
+    pub async fn ws_full_test() {
+        let ws = WebSocket::from_token(
+            "kRy0tMo6Mkc2pPeiRKN3g-phqVnUqk88ME6XaAlztZsAZkTd3tVZBFKyq88ZLi6j",
+        )
+        .dual_connection()
+        .await;
+
+        let (mut write, mut read) = ws;
+
+        while let Some(item) = read.next().await {
+            // if the event is a message
+            match item {
+                WebSocketEvent::Message { message } => {
+                    if message.content_is("ping") {
+                        write
+                            .send(WebSocketSend::ping(time_helper()).into())
+                            .await
+                            .ok();
+                    };
+                }
+                WebSocketEvent::Pong { data } => {
+                    let ping = time_helper() - data;
+                    println!("{}", ping);
+                }
+
+                _ => {}
+            };
+        }
+    }
+}
+
+pub fn time_helper() -> usize {
+    SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as usize
 }
