@@ -25,7 +25,7 @@ impl Client {
         result(
             self.http
                 .post(
-                    &format!("/servers/create"),
+                    "/servers/create",
                     Some(&serde_json::to_string(&data).unwrap()),
                 )
                 .await,

@@ -13,10 +13,7 @@ impl Client {
     pub async fn bot_create(&self, data: &DataCreateBot) -> Result<Bot, DeltaError> {
         result(
             self.http
-                .post(
-                    "/bots/create",
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
+                .post("/bots/create", Some(&serde_json::to_string(&data).unwrap()))
                 .await,
         )
         .await
