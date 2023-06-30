@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
@@ -29,6 +29,7 @@ tokio-tungstenite = { version = "0.19.0", features = ["native-tls"] }
 # async
 tokio = { version = "1.27.0", features = ["full"] }
 futures-util = "0.3.28"
+
 
 
 [profile.release]
