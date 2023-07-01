@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
