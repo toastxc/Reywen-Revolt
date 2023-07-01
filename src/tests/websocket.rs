@@ -32,7 +32,7 @@ mod tests {
     #[tokio::test]
     pub async fn ws_full_test() {
         let ws = WebSocket::from_token(
-            "kRy0tMo6Mkc2pPeiRKN3g-phqVnUqk88ME6XaAlztZsAZkTd3tVZBFKyq88ZLi6j",
+            "",
         )
         .dual_connection()
         .await;
@@ -42,17 +42,16 @@ mod tests {
         while let Some(item) = read.next().await {
             // if the event is a message
             match item {
-                WebSocketEvent::Message { message } => {
-                    if message.content_is("ping") {
-                        write
-                            .send(WebSocketSend::ping(time_helper()).into())
-                            .await
-                            .ok();
-                    };
+                WebSocketEvent::Message { .. } => {
+                    write
+                        .send(WebSocketSend::ping(time_helper()).into())
+                        .await
+                        .ok();
                 }
                 WebSocketEvent::Pong { data } => {
                     let ping = time_helper() - data;
                     println!("{}", ping);
+                    return;
                 }
 
                 _ => {}

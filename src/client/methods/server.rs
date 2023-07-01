@@ -1,8 +1,9 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::{
         channels::{channel::Channel, channel_invite::Invite},
         media::attachment::File,
@@ -16,24 +17,22 @@ use crate::{
 
 impl Client {
     pub async fn server_ack(&self, server: &str) -> Result<(), DeltaError> {
-        result(self.http.put(&format!("/servers/{server}/ack"), None).await).await
+        self.http
+            .request(Method::PUT, &format!("/servers/{server}/ack"), None)
+            .await
     }
     pub async fn server_create(
         &self,
         data: &DataCreateServer,
     ) -> Result<CreateServerResponse, DeltaError> {
-        result(
-            self.http
-                .post(
-                    "/servers/create",
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::POST, "/servers/create", json!(data))
+            .await
     }
     pub async fn server_delete(&self, server: &str) -> Result<(), DeltaError> {
-        result(self.http.delete(&format!("/servers/{server}"), None).await).await
+        self.http
+            .request(Method::DELETE, &format!("/servers/{server}"), None)
+            .await
     }
 
     pub async fn server_edit(
@@ -41,65 +40,64 @@ impl Client {
         server: &str,
         data: &DataEditServer,
     ) -> Result<Server, DeltaError> {
-        result(
-            self.http
-                .patch(
-                    &format!("/servers/{server}"),
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::PATCH, &format!("/servers/{server}"), json!(data))
+            .await
     }
 
     pub async fn server_fetch(&self, server: &str) -> Result<Server, DeltaError> {
-        result(self.http.get(&format!("/servers/{server}")).await).await
+        self.http
+            .request(Method::GET, &format!("/servers/{server}"), None)
+            .await
     }
 
     pub async fn ban_create(
         &self,
         server: &str,
         user: &str,
-        reason: &DataBanReason,
+        reason: Option<&str>,
     ) -> Result<DataBan, DeltaError> {
-        let data = serde_json::to_string(&reason).unwrap();
-        result(
-            self.http
-                .put(&format!("/servers/{server}/bans/{user}"), Some(&data))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PUT,
+                &format!("/servers/{server}/bans/{user}"),
+                json!(Into::<DataBanReason>::into(reason)),
+            )
+            .await
     }
     pub async fn ban_list(&self, server: &str) -> Result<DataBanList, DeltaError> {
-        result(self.http.get(&format!("/servers/{server}/bans")).await).await
+        self.http
+            .request(Method::GET, &format!("/servers/{server}/bans"), None)
+            .await
     }
 
     pub async fn ban_remove(&self, server: &str, user: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/servers/{server}/bans/{user}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/servers/{server}/bans/{user}"),
+                None,
+            )
+            .await
     }
     pub async fn channel_create(
         &self,
         server: &str,
         data: &DataChannelCreate,
     ) -> Result<Channel, DeltaError> {
-        result(
-            self.http
-                .post(
-                    &format!("/servers/{server}/channels"),
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::POST,
+                &format!("/servers/{server}/channels"),
+                json!(data),
+            )
+            .await
     }
 
     pub async fn invites_fetch(&self, server: &str) -> Result<Vec<Invite>, DeltaError> {
-        result(self.http.get(&format!("/servers/{server}/invites")).await).await
+        self.http
+            .request(Method::GET, &format!("/servers/{server}/invites"), None)
+            .await
     }
 }
 
@@ -231,6 +229,14 @@ impl DataEditServer {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DataBanReason {
     pub reason: Option<String>,
+}
+
+impl From<Option<&str>> for DataBanReason {
+    fn from(value: Option<&str>) -> Self {
+        Self {
+            reason: value.map(|reason| reason.to_string()),
+        }
+    }
 }
 
 impl DataBanReason {

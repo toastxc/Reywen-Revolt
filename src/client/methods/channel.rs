@@ -1,8 +1,9 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::channels::{
         channel::{Channel, FieldsChannel},
         channel_invite::Invite,
@@ -11,37 +12,29 @@ use crate::{
 
 impl Client {
     pub async fn channel_delete(&self, channel: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/channels/{channel}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::DELETE, &format!("/channels/{channel}"), None)
+            .await
     }
     pub async fn channel_edit(
         &self,
         channel: &str,
-        edit_data: &DataEditChannel,
+        data: &DataEditChannel,
     ) -> Result<Channel, DeltaError> {
-        let data = serde_json::to_string(edit_data).unwrap();
-        result(
-            self.http
-                .patch(&format!("/channels/{channel}"), Some(&data))
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::PATCH, &format!("/channels/{channel}"), json!(data))
+            .await
     }
     pub async fn channel_fetch(&self, channel: &str) -> Result<Channel, DeltaError> {
-        result(self.http.get(&format!("/channels/{channel}")).await).await
+        self.http
+            .request(Method::GET, &format!("/channels/{channel}"), None)
+            .await
     }
 
     pub async fn channel_invite_create(&self, channel: &str) -> Result<Invite, DeltaError> {
-        result(
-            self.http
-                .post(&format!("/channels/{channel}/invites"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::POST, &format!("/channels/{channel}/invites"), None)
+            .await
     }
 }
 

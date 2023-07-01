@@ -4,7 +4,7 @@ mod tests {
         client::methods::{
             member::DataMemberEdit,
             permissions::{DataEditRole, DataRoleCreate},
-            server::{DataBanReason, DataChannelCreate, DataCreateServer, DataEditServer},
+            server::{DataChannelCreate, DataCreateServer, DataEditServer},
         },
         structures::permissions::{calculator::Permissions, definitions::Permission},
         tests::{tester_bot, tester_user, ROLE, SERVER, USER},
@@ -34,7 +34,10 @@ mod tests {
     async fn test_member_fetch() {
         let client = tester_bot();
 
-        if let Err(curl) = client.member_fetch(&SERVER, &USER).await {
+        if let Err(curl) = client
+            .member_fetch("01H321YNJZZMF1SYPEY4S9B0R0", "01FSRTTGJC1XJ6ZEQJMSX8Q96C")
+            .await
+        {
             panic!("{:#?}", curl);
         }
     }
@@ -52,8 +55,8 @@ mod tests {
         let client = tester_bot();
 
         // ban user
-        let banreason = DataBanReason::none();
-        if let Err(curl) = client.ban_create(&SERVER, &USER, &banreason).await {
+
+        if let Err(curl) = client.ban_create(&SERVER, &USER, None).await {
             panic!("ban user {:#?}", curl);
         }
 

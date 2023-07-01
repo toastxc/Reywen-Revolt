@@ -1,11 +1,9 @@
-use reywen_http::{
-    results::{result, DeltaError},
-    utils::struct_to_url,
-};
+use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::channels::message::{
         BulkMessageResponse2, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
     },
@@ -13,76 +11,74 @@ use crate::{
 
 impl Client {
     pub async fn message_ack(&self, channel: &str, message: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .put(&format!("/channels/{channel}/ack/{message}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PUT,
+                &format!("/channels/{channel}/ack/{message}"),
+                None,
+            )
+            .await
     }
 
     pub async fn message_bulk_delete(
         &self,
         channel: &str,
-        messages: &DataBulkDelete,
+        data: &DataBulkDelete,
     ) -> Result<(), DeltaError> {
-        let data = serde_json::to_string(messages).unwrap();
-        result(
-            self.http
-                .delete(&format!("/channels/{channel}/messages/bulk"), Some(&data))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/channels/{channel}/messages/bulk"),
+                json!(data),
+            )
+            .await
     }
     pub async fn message_reaction_remove_all(
         &self,
         channel: &str,
         message: &str,
     ) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(
-                    &format!("/channels/{channel}/messages/{message}/reactions"),
-                    None,
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/channels/{channel}/messages/{message}/reactions"),
+                None,
+            )
+            .await
     }
 
     pub async fn message_delete(&self, channel: &str, message: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/channels/{channel}/messages/{message}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/channels/{channel}/messages/{message}"),
+                None,
+            )
+            .await
     }
     pub async fn message_edit(
         &self,
         channel: &str,
         message: &str,
-        edit_data: &DataEditMessage,
+        data: &DataEditMessage,
     ) -> Result<Message, DeltaError> {
-        let data = serde_json::to_string(edit_data).unwrap();
-        result(
-            self.http
-                .patch(
-                    &format!("/channels/{channel}/messages/{message}"),
-                    Some(&data),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PATCH,
+                &format!("/channels/{channel}/messages/{message}"),
+                json!(data),
+            )
+            .await
     }
 
     pub async fn message_fetch(&self, channel: &str, message: &str) -> Result<Message, DeltaError> {
-        result(
-            self.http
-                .get(&format!("/channels/{channel}/messages/{message}"))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::GET,
+                &format!("/channels/{channel}/messages/{message}"),
+                None,
+            )
+            .await
     }
 
     pub async fn message_query(
@@ -90,15 +86,13 @@ impl Client {
         channel: &str,
         query: &DataQueryMessages,
     ) -> Result<BulkMessageResponse2, DeltaError> {
-        result(
-            self.http
-                .get(&format!(
-                    "/channels/{channel}/messages{}",
-                    struct_to_url(query)
-                ))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::GET,
+                &format!("/channels/{channel}/messages{}", struct_to_url(query)),
+                None,
+            )
+            .await
     }
     pub async fn message_reaction_add(
         &self,
@@ -106,42 +100,40 @@ impl Client {
         message: &str,
         emoji: &str,
     ) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .put(
-                    &format!("/channels/{channel}/messages/{message}/reactions/{emoji}"),
-                    None,
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PUT,
+                &format!("/channels/{channel}/messages/{message}/reactions/{emoji}"),
+                None,
+            )
+            .await
     }
     pub async fn message_search(
         &self,
         channel: &str,
-        search_options: &DataMessageSearch,
+        data: &DataMessageSearch,
     ) -> Result<BulkMessageResponse2, DeltaError> {
-        let data = serde_json::to_string(search_options).unwrap();
-        result(
-            self.http
-                .post(&format!("/channels/{channel}/search"), Some(&data))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::POST,
+                &format!("/channels/{channel}/search"),
+                json!(data),
+            )
+            .await
     }
 
     pub async fn message_send(
         &self,
         channel: &str,
-        message: &DataMessageSend,
+        data: &DataMessageSend,
     ) -> Result<Message, DeltaError> {
-        let data = serde_json::to_string(message).unwrap();
-        result(
-            self.http
-                .post(&format!("/channels/{channel}/messages"), Some(&data))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::POST,
+                &format!("/channels/{channel}/messages"),
+                json!(data),
+            )
+            .await
     }
     pub async fn message_reaction_remove(
         &self,
@@ -150,18 +142,16 @@ impl Client {
         emoji: &str,
         data: &DataUnreact,
     ) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(
-                    &format!(
-                        "/channels/{channel}/messages/{message}/reactions/{emoji}{}",
-                        struct_to_url(data)
-                    ),
-                    None,
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!(
+                    "/channels/{channel}/messages/{message}/reactions/{emoji}{}",
+                    struct_to_url(data)
+                ),
+                None,
+            )
+            .await
     }
 }
 
@@ -173,9 +163,7 @@ pub struct DataBulkDelete {
 
 impl DataBulkDelete {
     pub fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
+        Default::default()
     }
     pub fn add_message(&mut self, message: &str) -> Self {
         self.ids.push(String::from(message));
@@ -198,9 +186,7 @@ pub struct DataEditMessage {
 }
 impl DataEditMessage {
     pub fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
+        Default::default()
     }
 
     pub fn content(&mut self, content: &str) -> Self {
@@ -238,9 +224,7 @@ pub struct DataQueryMessages {
 
 impl DataQueryMessages {
     pub fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
+        Default::default()
     }
     pub fn set_limit(&mut self, limit: i64) -> Self {
         self.limit = Some(limit);
@@ -374,9 +358,7 @@ pub struct DataUnreact {
 
 impl DataUnreact {
     pub fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
+        Default::default()
     }
     pub fn set_user_id(&mut self, user_id: &str) -> Self {
         self.user_id = Some(String::from(user_id));

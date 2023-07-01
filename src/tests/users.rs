@@ -2,7 +2,7 @@
 mod tests {
     use crate::{
         client::methods::user::DataEditUser,
-        tests::{tester_user, USER},
+        tests::{tester_user, USER, USER_NOTSELF},
     };
 
     #[tokio::test]
@@ -25,7 +25,7 @@ mod tests {
     async fn test_fetch_mutual() {
         let client = tester_user();
 
-        if let Err(error) = client.fetch_mutual(&USER).await {
+        if let Err(error) = client.fetch_mutual(USER_NOTSELF).await {
             panic!("{:#?}", error);
         }
     }
