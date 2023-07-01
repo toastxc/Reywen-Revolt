@@ -1,8 +1,9 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::{
         channels::channel::Channel,
         users::user::{FieldsUser, User, UserProfile, UserStatus},
@@ -11,77 +12,82 @@ use crate::{
 
 impl Client {
     pub async fn user_edit(&self, user: &str, data: &DataEditUser) -> Result<User, DeltaError> {
-        let data = serde_json::to_string(&data).unwrap();
-
-        result(self.http.patch(&format!("users/{user}"), Some(&data)).await).await
+        self.http
+            .request(Method::PATCH, &format!("users/{user}"), json!(data))
+            .await
     }
     pub async fn user_fetch(&self, user: &str) -> Result<User, DeltaError> {
-        result(self.http.get(&format!("users/{user}")).await).await
+        self.http
+            .request(Method::GET, &format!("users/{user}"), None)
+            .await
     }
     pub async fn user_profile_fetch(&self, user: &str) -> Result<Vec<UserProfile>, DeltaError> {
-        result(self.http.get(&format!("/users/{user}/profile")).await).await
+        self.http
+            .request(Method::GET, &format!("users/{user}/profile"), None)
+            .await
     }
 
     pub async fn fetch_mutual(&self, user: &str) -> Result<MutualResponse, DeltaError> {
-        result(self.http.get(&format!("users/{user}/mutual")).await).await
+        self.http
+            .request(Method::GET, &format!("users/{user}/mutual"), None)
+            .await
     }
 
     pub async fn user_fetch_self(&self) -> Result<User, DeltaError> {
-        result(self.http.get("users/@me").await).await
+        self.http.request(Method::GET, "users/@me", None).await
     }
 
     pub async fn user_block_remove(&self, user: &str) -> Result<User, DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/users/{user}/block"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::DELETE, &format!("/users/{user}/block"), None)
+            .await
     }
 
     pub async fn dm_open(&self, user: &str) -> Result<Channel, DeltaError> {
-        result(self.http.get(&format!("users/{user}/dm")).await).await
+        self.http
+            .request(Method::GET, &format!("users/{user}/dm"), None)
+            .await
     }
 
     pub async fn dm_fetch_all(&self) -> Result<Vec<Channel>, DeltaError> {
-        result(self.http.get("users/friend").await).await
+        self.http.request(Method::GET, "users/dms", None).await
     }
-    pub async fn default_avatar_fetch(&self, user: &str) -> Result<String, DeltaError> {
-        result(self.http.get(&format!("users/{user}/default_avatar")).await).await
+    pub async fn default_avatar_fetch(&self, user: &str) -> Result<Vec<u8>, DeltaError> {
+        self.http
+            .request_raw(Method::GET, &format!("users/{user}/default_avatar"), None)
+            .await
     }
     pub async fn user_flags_fetch(&self, user: &str) -> Result<ResponseFlag, DeltaError> {
-        result(self.http.get(&format!("users/{user}")).await).await
+        self.http
+            .request(Method::GET, &format!("users/{user}/flags"), None)
+            .await
     }
 
     pub async fn user_block(&self, user: &str) -> Result<User, DeltaError> {
-        result(self.http.post(&format!("/users/{user}/block"), None).await).await
+        self.http
+            .request(Method::POST, &format!("users/{user}/block"), None)
+            .await
     }
 
     pub async fn friend_request_send(&self, username: &str) -> Result<User, DeltaError> {
-        result(
-            self.http
-                .post(
-                    "/users/friend",
-                    Some(
-                        &serde_json::to_string(&DataSendFriendRequest::set_username(username))
-                            .unwrap(),
-                    ),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::POST,
+                "/users/friend",
+                json!(DataSendFriendRequest::set_username(username)),
+            )
+            .await
     }
     pub async fn friend_request_accept(&self, user: &str) -> Result<User, DeltaError> {
-        result(self.http.put(&format!("/users/{user}/friend"), None).await).await
+        self.http
+            .request(Method::PUT, &format!("/users/{user}/friend"), None)
+            .await
     }
 
     pub async fn friend_request_reject(&self, user: &str) -> Result<User, DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/users/{user}/friend"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::DELETE, &format!("/users/{user}/friend"), None)
+            .await
     }
     pub async fn friend_remove(&self, user: &str) -> Result<User, DeltaError> {
         self.friend_request_reject(user).await

@@ -1,8 +1,9 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::{server::server_member::Member, users::user::User},
 };
 
@@ -13,34 +14,36 @@ impl Client {
         member: &str,
         data: &DataMemberEdit,
     ) -> Result<DataMemberEdit, DeltaError> {
-        result(
-            self.http
-                .patch(
-                    &format!("/servers/{server}/members/{member}"),
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PATCH,
+                &format!("/servers/{server}/members/{member}"),
+                json!(data),
+            )
+            .await
     }
     pub async fn member_fetch(&self, server: &str, member: &str) -> Result<Member, DeltaError> {
-        result(
-            self.http
-                .get(&format!("/servers/{server}/members/{member}"))
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::GET,
+                &format!("/servers/{server}/members/{member}"),
+                None,
+            )
+            .await
     }
     pub async fn member_fetch_all(&self, server: &str) -> Result<ResponseMemberAll, DeltaError> {
-        result(self.http.get(&format!("/servers/{server}/members")).await).await
+        self.http
+            .request(Method::GET, &format!("/servers/{server}/members"), None)
+            .await
     }
     pub async fn member_remove(&self, server: &str, member: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/servers/{server}/members/{member}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/servers/{server}/members/{member}"),
+                None,
+            )
+            .await
     }
 }
 

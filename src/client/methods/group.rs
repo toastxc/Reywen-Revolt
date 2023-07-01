@@ -1,43 +1,42 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::{channels::channel::Channel, users::user::User},
 };
 
 impl Client {
     pub async fn group_member_add(&self, group: &str, member: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .put(&format!("/channels/{group}/recipients/{member}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::PATCH,
+                &format!("/channels/{group}/recipients/{member}"),
+                None,
+            )
+            .await
     }
 
     pub async fn group_create(&self, data: &DataCreateGroup) -> Result<Channel, DeltaError> {
-        result(
-            self.http
-                .post(
-                    "channels/create",
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::POST, "channels/create", json!(data))
+            .await
     }
     pub async fn group_member_remove(&self, channel: &str, member: &str) -> Result<(), DeltaError> {
-        result(
-            self.http
-                .delete(&format!("/channels/{channel}/recipients/{member}"), None)
-                .await,
-        )
-        .await
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/channels/{channel}/recipients/{member}"),
+                None,
+            )
+            .await
     }
 
     pub async fn group_member_fetch_all(&self, channel: &str) -> Result<Vec<User>, DeltaError> {
-        result(self.http.get(&format!("/channels/{channel}/members")).await).await
+        self.http
+            .request(Method::GET, &format!("/channels/{channel}/members"), None)
+            .await
     }
 }
 

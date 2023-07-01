@@ -39,7 +39,7 @@ mod tests {
     async fn test_channel_fetch() {
         let client = tester_bot();
 
-        if let Err(error) = client.channel_fetch(&CHANNEL).await {
+        if let Err(error) = client.channel_fetch("01H321YNJZXSJFJ8TKHZ1P5SGX").await {
             panic!("{:#?}", error);
         }
     }
@@ -93,10 +93,10 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_member_fetch() {
+    async fn test_group_member_fetch() {
         let client = tester_user();
 
-        if let Err(error) = client.group_member_fetch_all(&CHANNEL).await {
+        if let Err(error) = client.group_member_fetch_all(&GROUP).await {
             panic!("{:#?}", error);
         }
     }
@@ -290,7 +290,7 @@ mod tests {
         println!("{:#?}", data);
 
         if let Err(error) = client
-            .channel_permissions_set_default("01GXDKYV0P4T6DHNNG7M15CQ5R", &data, false)
+            .channel_permissions_set_default("01GXDKYV0P4T6DHNNG7M15CQ5R", &data)
             .await
         {
             panic!("{:#?}", error);

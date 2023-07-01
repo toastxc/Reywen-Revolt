@@ -1,3 +1,4 @@
+use indexmap::{IndexMap, IndexSet};
 use iso8601_timestamp::Timestamp;
 use reywen_http::utils::if_false;
 use serde::{Deserialize, Serialize};
@@ -94,14 +95,21 @@ impl Masquerade {
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Interactions {
     /// Reactions which should always appear and be distinct
-    //#[serde(skip_serializing_if = "Option::is_none")]
-    //  pub reactions: Option<IndexSet<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reactions: Option<IndexSet<String>>,
     /// Whether reactions should be restricted to the given list
     ///
     /// Can only be set to true if reactions list is of at least length 1
     #[serde(skip_serializing_if = "if_false")]
     pub restrict_reactions: bool,
 }
+
+impl Interactions {
+    pub fn is_default(&self) -> bool {
+        self.reactions.is_none()
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Message {
     /// Unique Id
@@ -114,7 +122,6 @@ pub struct Message {
     pub channel: String,
     /// Id of the user that sent this message
     pub author: String,
-
     /// Message content
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
@@ -137,11 +144,11 @@ pub struct Message {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replies: Option<Vec<String>>,
     /// Hashmap of emoji IDs to array of user IDs
-    //  #[serde(skip_serializing_if = "IndexMap::is_empty", default)]
-    // pub reactions: IndexMap<String, IndexSet<String>>,
+    #[serde(skip_serializing_if = "IndexMap::is_empty", default)]
+    pub reactions: IndexMap<String, IndexSet<String>>,
     /// Information about how this message should be interacted with
-    // #[serde(skip_serializing_if = "Interactions::is_default", default)]
-    // pub interactions: Interactions,
+    #[serde(skip_serializing_if = "Interactions::is_default", default)]
+    pub interactions: Interactions,
     /// Name and / or avatar overrides for this message
     #[serde(skip_serializing_if = "Option::is_none")]
     pub masquerade: Option<Masquerade>,

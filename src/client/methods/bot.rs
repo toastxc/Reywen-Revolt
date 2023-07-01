@@ -1,8 +1,9 @@
-use reywen_http::results::{result, DeltaError};
+use reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::Client,
+    json,
     structures::users::{
         bot::{Bot, FieldsBot, PublicBot},
         user::User,
@@ -11,57 +12,57 @@ use crate::{
 
 impl Client {
     pub async fn bot_create(&self, data: &DataCreateBot) -> Result<Bot, DeltaError> {
-        result(
-            self.http
-                .post("/bots/create", Some(&serde_json::to_string(&data).unwrap()))
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::POST, "/bots/create", json!(data))
+            .await
     }
     pub async fn bot_delete(&self, bot_id: &str) -> Result<(), DeltaError> {
-        result(self.http.delete(&format!("/bots/{bot_id}"), None).await).await
+        self.http
+            .request(Method::DELETE, &format!("/bots/{bot_id}"), None)
+            .await
     }
 
     pub async fn bot_edit(&self, bot_id: &str, data: &DataEditBot) -> Result<Bot, DeltaError> {
-        result(
-            self.http
-                .patch(
-                    &format!("/bots/{bot_id}"),
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+        self.http
+            .request(Method::PATCH, &format!("/bots/{bot_id}"), json!(data))
+            .await
     }
     pub async fn bot_fetch(&self, bot_id: &str) -> Result<BotResponse, DeltaError> {
-        result(self.http.get(&format!("/bots/{bot_id}")).await).await
+        self.http
+            .request(Method::GET, &format!("/bots/{bot_id}"), None)
+            .await
     }
     pub async fn bot_fetch_owned(&self) -> Result<OwnedBotsResponse, DeltaError> {
-        result(self.http.get("/bots/@me").await).await
+        self.http.request(Method::GET, "/bots/@me", None).await
     }
     pub async fn bot_fetch_public(&self, bot_id: &str) -> Result<PublicBot, DeltaError> {
-        result(self.http.get(&format!("/bots/{bot_id}/invite")).await).await
+        self.http
+            .request(Method::GET, &format!("/bots/{bot_id}/invite"), None)
+            .await
     }
 
-    pub async fn bot_invite(&self, bot_id: &str, server_id: &str) -> Result<(), DeltaError> {
-        let data = DataBotInvite {
-            server: server_id.to_string(),
-        };
-        result(
-            self.http
-                .post(
-                    &format!("/bots/{bot_id}/invite"),
-                    Some(&serde_json::to_string(&data).unwrap()),
-                )
-                .await,
-        )
-        .await
+    pub async fn bot_invite(&self, bot_id: &str, server_or_group: &str) -> Result<(), DeltaError> {
+        self.http
+            .request(
+                Method::POST,
+                &format!("/bots/{bot_id}/invite"),
+                json!(DataBotInvite::from(server_or_group)),
+            )
+            .await
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataBotInvite {
     pub server: String,
+}
+
+impl From<&str> for DataBotInvite {
+    fn from(value: &str) -> Self {
+        DataBotInvite {
+            server: String::from(value),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

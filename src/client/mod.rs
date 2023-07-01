@@ -1,4 +1,4 @@
-use reywen_http::{driver::Delta, results::DeltaError};
+use reywen_http::{results::DeltaError, Delta};
 
 use crate::websocket::WebSocket;
 
