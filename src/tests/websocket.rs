@@ -1,15 +1,12 @@
-use std::time::SystemTime;
-
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use futures_util::{SinkExt, StreamExt};
 
-    use crate::{
-        tests::websocket::time_helper,
-        websocket::{
-            data::{WebSocketEvent, WebSocketSend},
-            WebSocket,
-        },
+    use crate::websocket::{
+        data::{WebSocketEvent, WebSocketSend},
+        WebSocket,
     };
 
     // test of reywenv3 websocket owo
@@ -23,7 +20,6 @@ mod tests {
         while let Some(item) = ws.next().await {
             // if the event is a message
             if let WebSocketEvent::Message { .. } = item {
-                println!("yipeee!");
                 return;
             }
         }
@@ -39,14 +35,9 @@ mod tests {
             // if the event is a message
             match item {
                 WebSocketEvent::Message { .. } => {
-                    write
-                        .send(WebSocketSend::ping(time_helper()).into())
-                        .await
-                        .ok();
+                    write.send(WebSocketSend::ping(0).into()).await.ok();
                 }
-                WebSocketEvent::Pong { data } => {
-                    let ping = time_helper() - data;
-                    println!("{}", ping);
+                WebSocketEvent::Pong { .. } => {
                     return;
                 }
 
@@ -54,11 +45,36 @@ mod tests {
             };
         }
     }
-}
 
-pub fn time_helper() -> usize {
-    SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as usize
+    #[tokio::test]
+    pub async fn ws_test_async() {
+        let ws = WebSocket::from_token(
+            "kRy0tMo6Mkc2pPeiRKN3g-phqVnUqk88ME6XaAlztZsAZkTd3tVZBFKyq88ZLi6j",
+        );
+
+        let (mut read, write) = ws.dual_async().await;
+
+        while let Some(item) = read.next().await {
+            let write = Arc::clone(&write);
+
+            // if the event is a message
+            tokio::spawn(async move {
+                match item {
+                    WebSocketEvent::Message { .. } => {
+                        write
+                            .lock()
+                            .await
+                            .send(WebSocketSend::ping(0).into())
+                            .await
+                            .unwrap();
+                    }
+                    WebSocketEvent::Pong { .. } => {
+                        return;
+                    }
+
+                    _ => {}
+                };
+            });
+        }
+    }
 }

@@ -1,9 +1,10 @@
-use std::pin::Pin;
+use std::{pin::Pin, sync::Arc};
 
 use futures_util::{
     stream::{SplitSink, SplitStream},
     Stream, StreamExt,
 };
+use tokio::sync::Mutex;
 use tokio_tungstenite::{connect_async, WebSocketStream};
 
 use super::{data::WebSocketEvent, WebSocket};
@@ -59,6 +60,21 @@ impl WebSocket {
         let (write, read) = ws.split();
 
         (write, WebSocket::new_stream(read).await)
+    }
+
+    /// This is the recommended connection client
+    /// 0: a modified SplitStream websocket connection with the WebSocketEvent data type
+    /// 1: a modified SplitSink within an Arc<Mutex>, this can locked and have messages sent on it async.
+    /// Arc allows for cloning* the type which is useful for multithreading
+    pub async fn dual_async(
+        &self,
+    ) -> (
+        Pin<Box<impl Stream<Item = WebSocketEvent>>>,
+        Arc<Mutex<SinkSplit>>,
+    ) {
+        let (write, read) = Self::dual_connection(self).await;
+
+        (read, Arc::new(Mutex::new(write)))
     }
 }
 
