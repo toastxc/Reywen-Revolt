@@ -164,7 +164,7 @@ mod tests {
         }
 
         let original_message_success = original_message.ok().unwrap();
-        let edit_message_data = DataEditMessage::new().content("edited content");
+        let edit_message_data = DataEditMessage::new().set_content("edited content");
         if let Err(error) = client
             .message_edit(
                 &CHANNEL,
@@ -261,15 +261,13 @@ mod tests {
 
     #[tokio::test]
     async fn test_permission_set() {
-        let client = tester_user();
-        let data = Permissions::default()
-            .add_allow(Permission::ViewChannel)
-            .add_allow(Permission::KickMembers);
+        let client = tester_bot();
+        let data = Permissions::default().add_allow(Permission::SendMessage);
 
         if let Err(error) = client
             .channel_permissions_set(
-                "01GKWVWGHNBNCFPC9Q7CRDHBVZ",
-                "01GXFR9FPEPFY188X5MKV2E8ZN",
+                "01H3226059WB9HTRBR3YZ9M6Q9",
+                "01H4T0RZ1YD2Q7G7ZTAAAXBKH7",
                 &data.export(),
             )
             .await

@@ -26,6 +26,7 @@ mod tests {
     }
 
     #[tokio::test]
+
     pub async fn ws_full_test() {
         let ws = WebSocket::from_token("").dual_connection().await;
 

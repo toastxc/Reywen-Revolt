@@ -1,6 +1,6 @@
 [package]
 name = "reywen"
-version = "0.1.16"
+version = "0.1.17"
 edition = "2021"
 description = "A fast and simple framework for creating bots for revolt.chat"
 license = "GPL-3.0-only"
@@ -10,14 +10,14 @@ documentation = "https://docs.rs/reywen/latest/reywen/"
 [dependencies]
 
 # revolt compat
-iso8601-timestamp = "0.2.11"
-validator = "0.16.1"
-num_enum = "0.6.1"
+iso8601-timestamp = "0.2.10"
+validator = "0.16.0"
+num_enum = "0.6.0"
 indexmap = { version = "2.0.0", features = ["serde"] }
 
 # serde
 serde = { version = "1.0.164", features = ["derive"] }
-serde_json = "1.0.99"
+serde_json = "1.0.94"
 
 # misc
 rand = "0.8.5"

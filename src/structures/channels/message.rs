@@ -108,6 +108,27 @@ impl Interactions {
     pub fn is_default(&self) -> bool {
         self.reactions.is_none()
     }
+    pub fn add_reaction(&mut self, reaction: &str) -> Self {
+        let mut origin = match self.reactions.clone() {
+            Some(original) => original,
+            None => IndexSet::new(),
+        };
+        origin.insert(String::from(reaction));
+        self.reactions = Some(origin);
+        self.to_owned()
+    }
+
+    pub fn set_reactions(&mut self, reactions: Vec<String>) -> Self {
+        let mut index = self.reactions.to_owned().unwrap_or_default();
+        reactions.into_iter().for_each(|item| {
+            index.insert(item);
+        });
+        self.reactions = Some(index);
+        self.to_owned()
+    }
+    pub fn new() -> Self {
+        Default::default()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

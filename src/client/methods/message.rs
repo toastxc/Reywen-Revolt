@@ -2,12 +2,14 @@ use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::Client,
-    json,
+    client::{methods::opt_vec_add, Client},
+    json, opt_str, ref_str,
     structures::channels::message::{
         BulkMessageResponse2, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
     },
 };
+
+use super::origin;
 
 impl Client {
     pub async fn message_ack(&self, channel: &str, message: &str) -> Result<(), DeltaError> {
@@ -169,10 +171,10 @@ impl DataBulkDelete {
         self.ids.push(String::from(message));
         self.to_owned()
     }
-    pub fn set_messages(&mut self, messages: Vec<&str>) -> Self {
-        for x in messages {
-            self.ids.push(String::from(x))
-        }
+    pub fn set_messages(&mut self, mut messages: Vec<&str>) -> Self {
+        messages
+            .iter_mut()
+            .for_each(|item| self.ids.push(item.to_string()));
         self.to_owned()
     }
 }
@@ -189,7 +191,7 @@ impl DataEditMessage {
         Default::default()
     }
 
-    pub fn content(&mut self, content: &str) -> Self {
+    pub fn set_content(&mut self, content: &str) -> Self {
         self.content = Some(String::from(content));
         self.to_owned()
     }
@@ -340,9 +342,75 @@ impl DataMessageSend {
         self.content = Some(String::from(content));
         self.to_owned()
     }
+    pub fn set_attachments(&mut self, attachments: Vec<String>) -> Self {
+        self.attachments = origin(&self.attachments, attachments);
+        self.to_owned()
+    }
+    pub fn add_attachment(&mut self, attachment: &str) -> Self {
+        self.attachments = opt_vec_add(&self.attachments, ref_str!(attachment));
+        self.to_owned()
+    }
+
+    pub fn set_replies(&mut self, replies: Vec<Reply>) -> Self {
+        self.replies = origin(&self.replies, replies);
+        self.to_owned()
+    }
+    pub fn add_reply(&mut self, reply: &Reply) -> Self {
+        self.replies = opt_vec_add(&self.replies, reply);
+        self.to_owned()
+    }
+    pub fn set_reply_str(&mut self, replies: Vec<String>) {
+        self.replies = Some(
+            replies
+                .into_iter()
+                .map(|id| Reply {
+                    id,
+                    ..Default::default()
+                })
+                .collect(),
+        )
+    }
+    pub fn add_reply_str(&mut self, reply: &str) -> Self {
+        self.add_reply(&Reply {
+            id: String::from(reply),
+            ..Default::default()
+        });
+        self.to_owned()
+    }
+
+    pub fn set_embeds(&mut self, embeds: Vec<SendableEmbed>) -> Self {
+        let embeds = origin(&self.embeds, embeds);
+        self.embeds = embeds;
+        self.to_owned()
+    }
+    pub fn add_embed(&mut self, embed: &SendableEmbed) -> Self {
+        self.embeds = opt_vec_add(&self.embeds, embed);
+        self.to_owned()
+    }
 
     pub fn set_masquerade(&mut self, masquerade: &Masquerade) -> Self {
-        self.masquerade = Some(masquerade.clone());
+        self.masquerade = Some(masquerade.to_owned());
+        self.to_owned()
+    }
+
+    pub fn set_interactions(&mut self, interactions: Interactions) -> Self {
+        self.interactions = Some(interactions);
+        self.to_owned()
+    }
+    pub fn add_reaction(&mut self, reaction: &str) -> Self {
+        self.set_interactions(
+            self.interactions
+                .as_ref()
+                .map_or(Interactions::new(), |origin| origin.to_owned())
+                .add_reaction(reaction),
+        )
+    }
+    pub fn set_reactions(&mut self, reactions: Vec<String>) -> Self {
+        let mut interactions = self.interactions.clone().unwrap_or_default();
+        reactions.into_iter().for_each(|item| {
+            interactions.add_reaction(&item);
+        });
+
         self.to_owned()
     }
 }
@@ -355,13 +423,12 @@ pub struct DataUnreact {
     /// Remove all reactions
     pub remove_all: Option<bool>,
 }
-
 impl DataUnreact {
     pub fn new() -> Self {
         Default::default()
     }
     pub fn set_user_id(&mut self, user_id: &str) -> Self {
-        self.user_id = Some(String::from(user_id));
+        self.user_id = opt_str!(user_id);
         self.to_owned()
     }
     pub fn set_remove_all(&mut self, remove_all: bool) -> Self {

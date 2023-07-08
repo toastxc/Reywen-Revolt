@@ -12,8 +12,6 @@ pub struct Permissions {
 }
 
 impl Permissions {
-    // converts from readable to bitwise
-
     pub fn add_allow(&mut self, permission: Permission) -> Self {
         self.allow.push(permission);
         self.clone()
@@ -28,31 +26,23 @@ impl Permissions {
         Default::default()
     }
 
+    pub fn convert(input: Vec<Permission>) -> u64 {
+        input
+            .into_iter()
+            .map(|item| item as u64)
+            .collect::<Vec<u64>>()
+            .into_iter()
+            .sum()
+    }
+
     pub fn export(&self) -> PermissionData {
-        // define channel
-        let mut channel = Override::new();
-
-        for x in self.allow.clone() {
-            channel.allow += x as u64;
-        }
-        for x in self.deny.clone() {
-            channel.deny += x as u64;
-        }
-
-        // define group
-
-        let mut group = 0;
-
-        for x in self.allow.clone() {
-            group += x as u64;
-        }
-
-        // deny is simply dropped from scope
+        let allow = Self::convert(self.allow.to_owned());
+        let deny = Self::convert(self.deny.to_owned());
 
         PermissionData {
-            value: Value { permissions: group },
+            value: Value { permissions: allow },
             field: Field {
-                permissions: channel,
+                permissions: Override { allow, deny },
             },
         }
     }

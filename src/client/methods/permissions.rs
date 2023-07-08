@@ -133,6 +133,15 @@ impl DataRoleCreate {
             ..Default::default()
         }
     }
+    pub fn set_name(&mut self, name: &str) -> Self {
+        self.name = String::from(name);
+        self.to_owned()
+    }
+
+    pub fn set_rank(&mut self, rank: u32) -> Self {
+        self.rank = Some(rank);
+        self.to_owned()
+    }
 }
 
 /// # New Role Response

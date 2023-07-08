@@ -15,6 +15,8 @@ use crate::{
     },
 };
 
+use super::opt_vec_add;
+
 impl Client {
     pub async fn server_ack(&self, server: &str) -> Result<(), DeltaError> {
         self.http
@@ -120,9 +122,24 @@ impl DataChannelCreate {
     pub fn new(name: &str) -> Self {
         Self {
             name: String::from(name),
-            r#type: Some(ChannelType::Text),
             ..Default::default()
         }
+    }
+    pub fn set_type(&mut self, r#type: ChannelType) -> Self {
+        self.r#type = Some(r#type);
+        self.to_owned()
+    }
+    pub fn set_name(&mut self, name: &str) -> Self {
+        self.name = String::from(name);
+        self.to_owned()
+    }
+    pub fn set_description(&mut self, description: &str) -> Self {
+        self.description = Some(String::from(description));
+        self.to_owned()
+    }
+    pub fn set_nsfw(&mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
+        self.to_owned()
     }
 }
 
@@ -174,6 +191,18 @@ impl DataCreateServer {
             ..Default::default()
         }
     }
+    pub fn set_name(&mut self, name: &str) -> Self {
+        self.name = String::from(name);
+        self.to_owned()
+    }
+    pub fn set_description(&mut self, description: &str) -> Self {
+        self.description = Some(String::from(description));
+        self.to_owned()
+    }
+    pub fn set_nsfw(&mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
+        self.to_owned()
+    }
 }
 
 /// # Create Server Response
@@ -186,7 +215,7 @@ pub struct CreateServerResponse {
 }
 
 /// # Server Data
-#[derive(Serialize, Deserialize, Debug, Default)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct DataEditServer {
     /// Server name
     pub name: Option<String>,
@@ -220,9 +249,31 @@ pub struct DataEditServer {
 
 impl DataEditServer {
     pub fn new() -> Self {
-        Self {
-            ..Default::default()
-        }
+        Default::default()
+    }
+
+    pub fn set_name(&mut self, name: &str) -> Self {
+        self.name = Some(String::from(name));
+        self.to_owned()
+    }
+    pub fn set_description(&mut self, description: &str) -> Self {
+        self.name = Some(String::from(description));
+        self.to_owned()
+    }
+    pub fn set_icon(&mut self, icon: &str) -> Self {
+        self.icon = Some(String::from(icon));
+        self.to_owned()
+    }
+    pub fn set_banner(&mut self, banner: &str) -> Self {
+        self.banner = Some(String::from(banner));
+        self.to_owned()
+    }
+    pub fn add_category(&mut self, category: Category) {
+        self.categories = opt_vec_add(&self.categories, &category)
+    }
+    pub fn set_categories(&mut self, categories: Vec<Category>) -> Self {
+        self.categories = Some(categories);
+        self.to_owned()
     }
 }
 
