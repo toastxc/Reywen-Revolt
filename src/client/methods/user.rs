@@ -5,8 +5,8 @@ use crate::{
     client::Client,
     json,
     structures::{
-        channels::channel::Channel,
-        users::user::{FieldsUser, User, UserProfile, UserStatus},
+        channels::Channel,
+        users::{FieldsUser, User, UserProfile, UserStatus},
     },
 };
 

@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::structures::{
     media::{attachment::File, embeds::Embed},
-    server::server_member::Member,
-    users::user::User,
+    server::member::Member,
+    users::User,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]

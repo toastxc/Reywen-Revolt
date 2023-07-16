@@ -1,9 +1,9 @@
 pub mod bots;
 pub mod channels;
 pub mod servers;
+pub mod session;
 pub mod users;
 pub mod websocket;
-
 use reywen_http::Delta;
 
 use crate::client::Client;

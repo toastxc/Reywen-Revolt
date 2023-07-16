@@ -5,13 +5,10 @@ use crate::{
     client::Client,
     json,
     structures::{
-        channels::{channel::Channel, channel_invite::Invite},
+        channels::{invite::Invite, Channel},
         media::attachment::File,
-        server::{
-            server::{Category, FieldsServer, Server, SystemMessageChannels},
-            server_ban::ServerBan,
-        },
-        users::user::User,
+        server::{ban::ServerBan, Category, FieldsServer, Server, SystemMessageChannels},
+        users::User,
     },
 };
 

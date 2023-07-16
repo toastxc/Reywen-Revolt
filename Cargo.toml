@@ -37,3 +37,15 @@ opt-level = 3
 debug = false
 debug-assertions = false
 lto = "thin"
+
+
+
+[dev-dependencies] # for examples
+tokio = { version = "1.29.1", features = ["net", "macros", "rt-multi-thread", "fs"] }
+mongodb = "2.3.1"
+bson = "2.5.0"
+urlencoding = "2.1.2"
+easymongo = "0.1.1" 
+toml = "0.7.5"
+reywen = { path = "." }
+reywen_http = "*"

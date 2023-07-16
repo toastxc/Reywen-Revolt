@@ -5,8 +5,8 @@ pub mod member;
 pub mod message;
 pub mod permissions;
 pub mod server;
+pub mod session;
 pub mod user;
-
 /// macro for creating jsons
 #[macro_export]
 macro_rules! json {

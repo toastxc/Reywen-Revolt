@@ -4,10 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::Client,
     json,
-    structures::channels::{
-        channel::{Channel, FieldsChannel},
-        channel_invite::Invite,
-    },
+    structures::channels::{invite::Invite, Channel, FieldsChannel},
 };
 
 impl Client {

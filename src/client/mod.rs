@@ -11,8 +11,16 @@ pub struct Client {
 
 impl Client {
     pub fn from_token(token: &str, is_bot: bool) -> Result<Self, DeltaError> {
+        Self::from_token_url(token, is_bot, None)
+    }
+
+    pub fn from_token_url(
+        token: &str,
+        is_bot: bool,
+        url: Option<&str>,
+    ) -> Result<Self, DeltaError> {
         let http = Delta::new()
-            .set_url("https://api.revolt.chat/")
+            .set_url(url.unwrap_or("https://api.revolt.chat"))
             .add_header(
                 match is_bot {
                     true => "x-bot-token",

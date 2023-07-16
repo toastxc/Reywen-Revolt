@@ -6,7 +6,7 @@ use crate::{
     json,
     structures::users::{
         bot::{Bot, FieldsBot, PublicBot},
-        user::User,
+        User,
     },
 };
 

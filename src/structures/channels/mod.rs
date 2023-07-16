@@ -1,11 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use crate::structures::media::attachment::File;
-
-fn if_false(t: &bool) -> bool {
-    !t
-}
-
+use reywen_http::utils::if_false;
+use serde::{Deserialize, Serialize};
 /// Representation of a channel on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "channel_type")]
@@ -138,4 +133,6 @@ pub enum FieldsChannel {
     Icon,
     DefaultPermissions,
 }
-impl Channel {}
+
+pub mod invite;
+pub mod message;

@@ -6,10 +6,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::structures::{
-    channels::{channel::Channel, message::Message},
+    channels::{message::Message, Channel},
     media::{attachment::File, embeds::Embed, emoji::Emoji},
-    server::server::{Category, Role, Server, SystemMessageChannels},
-    users::user::{User, UserStatus},
+    server::{Category, Role, Server, SystemMessageChannels},
+    users::{User, UserStatus},
 };
 
 /// Ping Packet

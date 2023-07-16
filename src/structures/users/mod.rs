@@ -175,3 +175,5 @@ pub enum UserHint {
     /// Only match users
     User,
 }
+
+pub mod bot;

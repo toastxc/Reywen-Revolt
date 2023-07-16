@@ -5,9 +5,9 @@ use crate::{
     client::Client,
     json,
     structures::{
-        channels::channel::Channel,
-        permissions::newcalc::PermissionData,
-        server::server::{FieldsRole, Role, Server},
+        channels::Channel,
+        permissions::definitions::PermissionData,
+        server::{FieldsRole, Role, Server},
     },
 };
 

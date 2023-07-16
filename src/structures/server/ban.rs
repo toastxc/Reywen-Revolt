@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::server_member::MemberCompositeKey;
+use super::member::MemberCompositeKey;
 
 /// Representation of a server ban on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

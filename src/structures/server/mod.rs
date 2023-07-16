@@ -135,3 +135,6 @@ pub enum FieldsServer {
 pub enum FieldsRole {
     Colour,
 }
+
+pub mod ban;
+pub mod member;
