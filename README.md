@@ -19,3 +19,14 @@ Reywen is centered around a single main structure `Client`, this contains the we
 
 ## Reporting
 for issues or bugs todo with the Reywen bot (ReywenTXC) or related bots made by ToastXC go to https://github.com/toastxc/Reywen-TXC
+
+
+
+## Development
+Developing with and for Reywen-Revolt requires the following dependancies
+```text
+openssl-devel
+gcc
+rust stable
+```
+**Support for NT based operating systems is unknown and untested**
