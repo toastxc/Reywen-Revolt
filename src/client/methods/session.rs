@@ -3,7 +3,8 @@ use crate::{
     json,
     structures::authentication::{
         login::{DataLogin, ResponseLogin},
-        session::{Session, SessionInfo},
+        mfa::MFAResponse,
+        session::SessionInfo,
     },
 };
 use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url, Delta};
@@ -13,20 +14,11 @@ impl Client {
     pub async fn session_login(
         data: &DataLogin,
         url: Option<&str>,
-    ) -> Result<ResponseLogin, AuthError> {
-        match Delta::new()
-            .set_url(url.unwrap_or("api.revolt.chat"))
-            .request::<ResponseLogin>(Method::POST, "auth/session/login", json!(data))
+    ) -> Result<ResponseLogin, DeltaError> {
+        Delta::new()
+            .set_url(url.unwrap_or("https://api.revolt.chat"))
+            .request::<ResponseLogin>(Method::POST, "/auth/session/login", json!(data))
             .await
-        {
-            Ok(response) => match response {
-                ResponseLogin::Success(_) => Ok(response),
-                ResponseLogin::MFA { .. } | ResponseLogin::Disabled { .. } => {
-                    Err(AuthError::Auth(response))
-                }
-            },
-            Err(reywen_error) => Err(AuthError::Http(reywen_error)),
-        }
     }
 
     pub async fn session_logout(&mut self) -> Result<Client, DeltaError> {
@@ -81,18 +73,25 @@ impl Client {
 }
 
 impl Client {
-    pub async fn from_login(data: &DataLogin) -> Result<Client, AuthError> {
-        Self::from_login_url(data, None).await
-    }
-
-    pub async fn from_login_url(data: &DataLogin, url: Option<&str>) -> Result<Client, AuthError> {
-        if let ResponseLogin::Success(Session { token, .. }) =
-            Self::session_login(data, url).await?
-        {
-            return Ok(Client::from_token(&token, false).unwrap());
-        };
-
-        unreachable!()
+    pub async fn session_login_smart(
+        email: &str,
+        password: &str,
+        mfa: Option<MFAResponse>,
+    ) -> Result<ResponseLogin, DeltaError> {
+        match Client::session_login(&DataLogin::non_mfa(email, password), None).await {
+            Ok(ResponseLogin::MFA { ticket, .. }) => {
+                Client::session_login(
+                    &DataLogin::MFA {
+                        mfa_ticket: ticket,
+                        mfa_response: mfa,
+                        friendly_name: None,
+                    },
+                    None,
+                )
+                .await
+            }
+            result => result,
+        }
     }
 }
 
@@ -104,10 +103,4 @@ pub struct DataEditSession {
 pub struct ResponseEditSession {
     _id: String,
     name: String,
-}
-
-#[derive(Debug)]
-pub enum AuthError {
-    Http(DeltaError),
-    Auth(ResponseLogin),
 }

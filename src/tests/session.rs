@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::client::Client;
-    use crate::structures::authentication::login::DataLogin;
+    use crate::structures::authentication::mfa::MFAResponse;
     use crate::tests::tester_user;
 
     #[tokio::test]
@@ -12,8 +12,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_session_login2() {
-        let data = DataLogin::non_mfa("email", "password").set_friendly_name("hewoo");
+        let data2 =
+            Client::session_login_smart("EMAIL", "PASSSWORD", Some(MFAResponse::totp("CODE")))
+                .await;
 
-        let _client = Client::from_login(&data).await.unwrap();
+        println!("DATA: {:#?}", data2)
     }
 }

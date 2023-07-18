@@ -12,3 +12,4 @@ Cargo.lock
 
 
 src/main.rs
+src/tests/bot-token.txt

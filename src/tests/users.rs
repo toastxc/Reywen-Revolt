@@ -2,7 +2,7 @@
 mod tests {
     use crate::{
         client::methods::user::DataEditUser,
-        tests::{tester_user, USER, USER_NOTSELF},
+        tests::{tester_bot, tester_user, USER, USER_NOTSELF},
     };
 
     #[tokio::test]
@@ -15,7 +15,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_user_fetch() {
-        let client = tester_user();
+        let client = tester_bot();
 
         if let Err(error) = client.user_fetch(&USER).await {
             panic!("{:#?}", error);
