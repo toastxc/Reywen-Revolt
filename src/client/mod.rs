@@ -2,7 +2,7 @@ use reywen_http::{results::DeltaError, Delta};
 
 use crate::websocket::WebSocket;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Client {
     pub http: Delta,
     pub websocket: WebSocket,
@@ -19,25 +19,37 @@ impl Client {
         is_bot: bool,
         url: Option<&str>,
     ) -> Result<Self, DeltaError> {
-        let http = Delta::new()
-            .set_url(url.unwrap_or("https://api.revolt.chat"))
-            .add_header(
-                match is_bot {
-                    true => "x-bot-token",
-                    false => "x-session-token",
-                },
-                token,
-            )?
-            .set_timeout(10);
+        let mut client = Self::default();
+        client.http.add_header(
+            if is_bot {
+                "x-bot-token"
+            } else {
+                "x-session-token"
+            },
+            token,
+        )?;
+        if let Some(custom_url) = url {
+            client.http.set_url(custom_url);
+        };
 
-        Ok(Self {
-            http,
-            websocket: WebSocket::from_token(token),
-            token: String::from(token),
-        })
+        Ok(client)
     }
     pub fn new() -> Self {
         Default::default()
+    }
+}
+
+impl Default for Client {
+    fn default() -> Self {
+        let http = Delta::new()
+            .set_url("https://api.revolt.chat")
+            .set_timeout(10);
+
+        Self {
+            http,
+            websocket: Default::default(),
+            token: String::from("INSERT_TOKEN"),
+        }
     }
 }
 

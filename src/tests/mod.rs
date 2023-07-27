@@ -4,7 +4,6 @@ pub mod servers;
 pub mod session;
 pub mod users;
 pub mod websocket;
-use reywen_http::Delta;
 
 use crate::client::Client;
 
@@ -29,27 +28,22 @@ fn bot_or(is_bot: bool) -> (String, String) {
     if is_bot {
         (
             String::from("x-bot-token"),
-            include_str!("bot-token.txt").to_string(),
+            include_str!("bot-token.txt")
+                .to_string()
+                .replace(' ', "")
+                .replace("\n", ""),
         )
     } else {
         (
             String::from("x-session-token"),
-            include_str!("self-token.txt").to_string(),
+            include_str!("self-token.txt")
+                .to_string()
+                .replace(' ', "")
+                .replace("\n", ""),
         )
     }
 }
 
 pub fn test_client(is_bot: bool) -> Client {
-    let auth = bot_or(is_bot);
-    println!("{:#?}", auth);
-    let mut client = Client::new();
-    let http = Delta::new()
-        .set_url("https://api.revolt.chat/")
-        .add_header(&auth.0, &auth.1)
-        .unwrap()
-        .set_timeout(10);
-
-    client.http = http;
-
-    client
+    Client::from_token(&bot_or(is_bot).1, is_bot).unwrap()
 }

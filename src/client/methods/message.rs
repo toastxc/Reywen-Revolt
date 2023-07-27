@@ -91,7 +91,7 @@ impl Client {
         self.http
             .request(
                 Method::GET,
-                &format!("/channels/{channel}/messages{}", struct_to_url(query)),
+                &format!("/channels/{channel}/messages{}", struct_to_url(query, true)),
                 None,
             )
             .await
@@ -149,7 +149,7 @@ impl Client {
                 Method::DELETE,
                 &format!(
                     "/channels/{channel}/messages/{message}/reactions/{emoji}{}",
-                    struct_to_url(data)
+                    struct_to_url(data, true)
                 ),
                 None,
             )

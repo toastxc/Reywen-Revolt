@@ -12,10 +12,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_session_login2() {
-        let data2 =
-            Client::session_login_smart("EMAIL", "PASSSWORD", Some(MFAResponse::totp("CODE")))
-                .await;
+        let a = Client::session_login_smart("", "", Some(MFAResponse::totp("")))
+            .await
+            .unwrap();
+        panic!("{:#?}", a);
+    }
 
-        println!("DATA: {:#?}", data2)
+    #[tokio::test]
+    async fn test_session_delete() {
+        tester_user().session_delete("").await.unwrap();
     }
 }

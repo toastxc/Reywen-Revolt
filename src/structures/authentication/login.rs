@@ -8,7 +8,6 @@ use super::{
 /// # Login Data
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-
 pub enum DataLogin {
     Email {
         /// Email

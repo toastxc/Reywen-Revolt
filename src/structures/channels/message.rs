@@ -229,9 +229,14 @@ pub enum MessageTimePeriod {
         sort: Option<MessageSort>,
     },
 }
+
+/// # Bulk Message Response
+///
+/// Response used when multiple messages are fetched
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum BulkMessageResponse {
-    Messages(
+#[serde(untagged)]
+pub enum BulkMessageResponse2 {
+    JustMessages(
         /// List of messages
         Vec<Message>,
     ),
@@ -246,18 +251,6 @@ pub enum BulkMessageResponse {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct BulkMessageResponse2 {
-    /// List of messages
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub messages: Option<Vec<Message>>,
-    /// List of users
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub users: Option<Vec<User>>,
-    /// List of members
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub members: Option<Vec<Member>>,
-}
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppendMessage {
     /// Additional embeds to include in this message

@@ -4,9 +4,13 @@ mod tests {
 
     use futures_util::{SinkExt, StreamExt};
 
-    use crate::websocket::{
-        data::{WebSocketEvent, WebSocketSend},
-        WebSocket,
+    use crate::{
+        client::Client,
+        structures::authentication::{login::ResponseLogin, mfa::MFAResponse, session::Session},
+        websocket::{
+            data::{WebSocketEvent, WebSocketSend},
+            WebSocket,
+        },
     };
 
     // test of reywenv3 websocket owo
@@ -26,7 +30,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     pub async fn ws_full_test() {
         let ws = WebSocket::from_token("").dual_connection().await;
 
@@ -49,9 +52,7 @@ mod tests {
 
     #[tokio::test]
     pub async fn ws_test_async() {
-        let ws = WebSocket::from_token(
-            "kRy0tMo6Mkc2pPeiRKN3g-phqVnUqk88ME6XaAlztZsAZkTd3tVZBFKyq88ZLi6j",
-        );
+        let ws = WebSocket::from_token("");
 
         let (mut read, write) = ws.dual_async().await;
 
@@ -76,6 +77,32 @@ mod tests {
                     _ => {}
                 };
             });
+        }
+    }
+
+    #[tokio::test]
+    pub async fn test_authenticate() {
+        let (mut read, write) = WebSocket::default().dual_async().await;
+
+        if let Ok(ResponseLogin::Success(Session { token, .. })) =
+            Client::session_login_smart("EMAIL", "PASSWORD", Some(MFAResponse::totp("CODE"))).await
+        {
+            let _client = Client::from_token(&token, false).unwrap();
+            write
+                .lock()
+                .await
+                .send(WebSocketSend::Authenticate { token }.into())
+                .await
+                .unwrap();
+        }
+
+        while let Some(item) = read.next().await {
+            match item {
+                WebSocketEvent::Authenticated => {
+                    println!("SUCCESS")
+                }
+                _ => {}
+            }
         }
     }
 }

@@ -39,6 +39,8 @@ mod tests {
     async fn test_channel_fetch() {
         let client = tester_bot();
 
+        println!("{:#?}", client.http.headers);
+
         if let Err(error) = client.channel_fetch("01H321YNJZXSJFJ8TKHZ1P5SGX").await {
             panic!("{:#?}", error);
         }

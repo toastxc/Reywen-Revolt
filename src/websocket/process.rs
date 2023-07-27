@@ -4,10 +4,11 @@ use futures_util::{
     stream::{SplitSink, SplitStream},
     Stream, StreamExt,
 };
+use reywen_http::utils::struct_to_url;
 use tokio::sync::Mutex;
 use tokio_tungstenite::{connect_async, WebSocketStream};
 
-use super::{data::WebSocketEvent, WebSocket};
+use super::{data::WebSocketEvent, PartialWSConf, WebSocket};
 
 impl WebSocket {
     pub async fn stream(input: Connection) -> Pin<Box<impl Stream<Item = WebSocketEvent>>> {
@@ -24,10 +25,11 @@ impl WebSocket {
         })
     }
 
-    pub async fn generate(self) -> Connection {
+    pub async fn generate(&self) -> Connection {
         let url = format!(
-            "wss://{}/?version=1format={}&token={}",
-            self.domain, self.format, self.token
+            "wss://{}/{}",
+            self.domain.clone().unwrap(),
+            struct_to_url(Into::<PartialWSConf>::into(self.to_owned()), false)
         );
 
         let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");

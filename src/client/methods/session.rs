@@ -39,7 +39,7 @@ impl Client {
         self.http
             .request(
                 Method::DELETE,
-                &format!("/auth/session/all{}", struct_to_url(revoke_self)),
+                &format!("/auth/session/all{}", struct_to_url(revoke_self, true)),
                 None,
             )
             .await
@@ -76,21 +76,24 @@ impl Client {
     pub async fn session_login_smart(
         email: &str,
         password: &str,
-        mfa: Option<MFAResponse>,
+        mfa_response: Option<MFAResponse>,
     ) -> Result<ResponseLogin, DeltaError> {
         match Client::session_login(&DataLogin::non_mfa(email, password), None).await {
-            Ok(ResponseLogin::MFA { ticket, .. }) => {
+            Ok(ResponseLogin::MFA {
+                ticket: mfa_ticket, ..
+            }) => {
                 Client::session_login(
-                    &DataLogin::MFA {
-                        mfa_ticket: ticket,
-                        mfa_response: mfa,
+                    &(DataLogin::MFA {
+                        mfa_ticket,
+                        mfa_response,
                         friendly_name: None,
-                    },
+                    }),
                     None,
                 )
                 .await
             }
-            result => result,
+
+            error => error,
         }
     }
 }

@@ -1,7 +1,10 @@
 use futures_util::{SinkExt, StreamExt};
 use reywen::{
     client::{methods::user::DataEditUser, Client},
-    structures::{authentication::login::DataLogin, users::UserStatus},
+    structures::{
+        authentication::{login::ResponseLogin, mfa::MFAResponse, session::Session},
+        users::UserStatus,
+    },
     websocket::data::{WebSocketEvent, WebSocketSend},
 };
 use serde::{Deserialize, Serialize};
@@ -12,26 +15,45 @@ pub struct DataSendAuth {
     email: String,
     password: String,
     token: Option<String>,
+    mfa_totp: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
     // import auth from file
-    let auth = serde_json::from_str::<DataSendAuth>(include_str!("config/vlod_auth.json"))
+    println!("import conf file");
+    let mut auth = serde_json::from_str::<DataSendAuth>(include_str!("config/vlod_auth.json"))
         .expect("Invalid JSON for Auth config");
 
     // if there is no token, create one and sign in - otherwise use existing token
-    let client = match auth.token {
-        Some(token) => Client::from_token(&token, false).unwrap(),
-        None => { Client::from_login(&DataLogin::non_mfa(&auth.email, &auth.password)) }
-            .await
-            .unwrap(),
-    };
+    if auth.token.is_none() {
+        println!("no token found! generating...");
+        if let ResponseLogin::Success(Session { token, .. }) = Client::session_login_smart(
+            &auth.email,
+            &auth.password,
+            Some(MFAResponse::totp(&auth.clone().mfa_totp.unwrap())),
+        )
+        .await
+        .unwrap()
+        {
+            auth.token = Some(token);
+            std::fs::write(
+                "examples/config/vlod_auth.json",
+                serde_json::to_string_pretty(&auth).unwrap(),
+            )
+            .unwrap();
+            println!("done generating, restart");
+        }
+        return;
+    }
+
+    println!("making client");
+    let client = Client::from_token(&auth.token.unwrap(), false).unwrap();
 
     // for every websocket event
     loop {
         let (mut read, write) = client.websocket.dual_async().await;
-
+        println!("connected to websocket");
         while let Some(input) = read.next().await {
             let write = Arc::clone(&write);
             let client = client.clone();
