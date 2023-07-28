@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use reywen_http::{results::DeltaError, Delta};
 
 use crate::websocket::WebSocket;
