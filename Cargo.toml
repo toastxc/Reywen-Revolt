@@ -45,4 +45,4 @@ tokio = { version = "1.29.1", features = ["net", "macros", "rt-multi-thread", "f
 urlencoding = "2.1.2"
 toml = "0.7.5"
 reywen = { path = "." }
-reywen_http = "*"
+reywen_http = { version = "0.1.13", features = ["serde"] }
