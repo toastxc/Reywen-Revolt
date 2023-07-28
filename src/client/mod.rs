@@ -6,7 +6,7 @@ use crate::websocket::WebSocket;
 pub struct Client {
     pub http: Delta,
     pub websocket: WebSocket,
-    pub token: String,
+    pub token: Option<String>,
 }
 
 impl Client {
@@ -19,7 +19,11 @@ impl Client {
         is_bot: bool,
         url: Option<&str>,
     ) -> Result<Self, DeltaError> {
+        // derinvg defaults for types
         let mut client = Self::default();
+        client.websocket.token = Some(String::from(token));
+        client.token = Some(String::from(token));
+
         client.http.add_header(
             if is_bot {
                 "x-bot-token"
@@ -38,7 +42,6 @@ impl Client {
         Default::default()
     }
 }
-
 impl Default for Client {
     fn default() -> Self {
         let http = Delta::new()
@@ -47,10 +50,9 @@ impl Default for Client {
 
         Self {
             http,
-            websocket: Default::default(),
-            token: String::from("INSERT_TOKEN"),
+            websocket: WebSocket::default(),
+            token: None,
         }
     }
 }
-
 pub mod methods;

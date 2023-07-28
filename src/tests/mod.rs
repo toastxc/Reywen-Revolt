@@ -28,18 +28,12 @@ fn bot_or(is_bot: bool) -> (String, String) {
     if is_bot {
         (
             String::from("x-bot-token"),
-            include_str!("bot-token.txt")
-                .to_string()
-                .replace(' ', "")
-                .replace("\n", ""),
+            include_str!("bot-token.txt").replace([' ', '\n'], ""),
         )
     } else {
         (
             String::from("x-session-token"),
-            include_str!("self-token.txt")
-                .to_string()
-                .replace(' ', "")
-                .replace("\n", ""),
+            include_str!("self-token.txt").replace([' ', '\n'], ""),
         )
     }
 }
