@@ -12,7 +12,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_session_login2() {
-        let a = Client::session_login_smart("", "", Some(MFAResponse::totp("")))
+        let a = Client::session_login_smart("", "", Some(MFAResponse::totp("")), None)
             .await
             .unwrap();
         panic!("{:#?}", a);

@@ -85,7 +85,8 @@ mod tests {
         let (mut read, write) = WebSocket::default().dual_async().await;
 
         if let Ok(ResponseLogin::Success(Session { token, .. })) =
-            Client::session_login_smart("EMAIL", "PASSWORD", Some(MFAResponse::totp("CODE"))).await
+            Client::session_login_smart("EMAIL", "PASSWORD", Some(MFAResponse::totp("CODE")), None)
+                .await
         {
             let _client = Client::from_token(&token, false).unwrap();
             write

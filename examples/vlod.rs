@@ -32,6 +32,7 @@ async fn main() {
             &auth.email,
             &auth.password,
             Some(MFAResponse::totp(&auth.clone().mfa_totp.unwrap())),
+            Some("vlod"),
         )
         .await
         .unwrap()
