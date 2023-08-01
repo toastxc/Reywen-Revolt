@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::{
     client::Client,
     json,
@@ -77,23 +79,22 @@ impl Client {
         email: &str,
         password: &str,
         mfa_response: Option<MFAResponse>,
+        friendly_name: Option<&str>,
     ) -> Result<ResponseLogin, DeltaError> {
-        match Client::session_login(&DataLogin::non_mfa(email, password), None).await {
-            Ok(ResponseLogin::MFA {
-                ticket: mfa_ticket, ..
-            }) => {
-                Client::session_login(
-                    &(DataLogin::MFA {
-                        mfa_ticket,
-                        mfa_response,
-                        friendly_name: None,
-                    }),
-                    None,
-                )
-                .await
-            }
+        let original =
+            Client::session_login(&DataLogin::email(email, password, friendly_name), None).await;
 
-            error => error,
+        if let Ok(ResponseLogin::MFA {
+            ticket: mfa_ticket, ..
+        }) = original
+        {
+            Client::session_login(
+                &DataLogin::mfa(mfa_ticket, mfa_response, friendly_name),
+                None,
+            )
+            .await
+        } else {
+            original
         }
     }
 }

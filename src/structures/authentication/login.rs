@@ -32,18 +32,22 @@ pub enum DataLogin {
 }
 
 impl DataLogin {
-    pub fn mfa(mfa_ticket: &str) -> Self {
+    pub fn mfa(
+        mfa_ticket: String,
+        mfa_response: Option<MFAResponse>,
+        friendly_name: Option<&str>,
+    ) -> Self {
         Self::MFA {
-            mfa_ticket: String::from(mfa_ticket),
-            mfa_response: None,
-            friendly_name: None,
+            mfa_ticket,
+            mfa_response,
+            friendly_name: friendly_name.map(|a| a.to_string()),
         }
     }
-    pub fn non_mfa(email: &str, password: &str) -> Self {
+    pub fn email(email: &str, password: &str, friendly_name: Option<&str>) -> Self {
         Self::Email {
             email: String::from(email),
             password: String::from(password),
-            friendly_name: None,
+            friendly_name: friendly_name.map(|a| a.to_string()),
         }
     }
     pub fn set_friendly_name(&mut self, name: &str) -> Self {
