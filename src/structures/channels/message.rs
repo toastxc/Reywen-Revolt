@@ -235,7 +235,7 @@ pub enum MessageTimePeriod {
 /// Response used when multiple messages are fetched
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum BulkMessageResponse2 {
+pub enum BulkMessageResponse {
     JustMessages(
         /// List of messages
         Vec<Message>,

@@ -5,7 +5,7 @@ use crate::{
     client::{methods::opt_vec_add, Client},
     json, opt_str, ref_str,
     structures::channels::message::{
-        BulkMessageResponse2, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
+        BulkMessageResponse, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
     },
 };
 
@@ -87,7 +87,7 @@ impl Client {
         &self,
         channel: &str,
         query: &DataQueryMessages,
-    ) -> Result<BulkMessageResponse2, DeltaError> {
+    ) -> Result<BulkMessageResponse, DeltaError> {
         self.http
             .request(
                 Method::GET,
@@ -114,7 +114,7 @@ impl Client {
         &self,
         channel: &str,
         data: &DataMessageSearch,
-    ) -> Result<BulkMessageResponse2, DeltaError> {
+    ) -> Result<BulkMessageResponse, DeltaError> {
         self.http
             .request(
                 Method::POST,
