@@ -20,7 +20,7 @@ impl Client {
 
     pub async fn group_create(&self, data: &DataCreateGroup) -> Result<Channel, DeltaError> {
         self.http
-            .request(Method::POST, "channels/create", json!(data))
+            .request(Method::POST, "/channels/create", json!(data))
             .await
     }
     pub async fn group_member_remove(&self, channel: &str, member: &str) -> Result<(), DeltaError> {

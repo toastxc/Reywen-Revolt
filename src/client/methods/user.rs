@@ -13,28 +13,28 @@ use crate::{
 impl Client {
     pub async fn user_edit(&self, user: &str, data: &DataEditUser) -> Result<User, DeltaError> {
         self.http
-            .request(Method::PATCH, &format!("users/{user}"), json!(data))
+            .request(Method::PATCH, &format!("/users/{user}"), json!(data))
             .await
     }
     pub async fn user_fetch(&self, user: &str) -> Result<User, DeltaError> {
         self.http
-            .request(Method::GET, &format!("users/{user}"), None)
+            .request(Method::GET, &format!("/users/{user}"), None)
             .await
     }
     pub async fn user_profile_fetch(&self, user: &str) -> Result<Vec<UserProfile>, DeltaError> {
         self.http
-            .request(Method::GET, &format!("users/{user}/profile"), None)
+            .request(Method::GET, &format!("/users/{user}/profile"), None)
             .await
     }
 
     pub async fn fetch_mutual(&self, user: &str) -> Result<MutualResponse, DeltaError> {
         self.http
-            .request(Method::GET, &format!("users/{user}/mutual"), None)
+            .request(Method::GET, &format!("/users/{user}/mutual"), None)
             .await
     }
 
     pub async fn user_fetch_self(&self) -> Result<User, DeltaError> {
-        self.http.request(Method::GET, "users/@me", None).await
+        self.http.request(Method::GET, "/users/@me", None).await
     }
 
     pub async fn user_block_remove(&self, user: &str) -> Result<User, DeltaError> {
@@ -45,27 +45,27 @@ impl Client {
 
     pub async fn dm_open(&self, user: &str) -> Result<Channel, DeltaError> {
         self.http
-            .request(Method::GET, &format!("users/{user}/dm"), None)
+            .request(Method::GET, &format!("/users/{user}/dm"), None)
             .await
     }
 
     pub async fn dm_fetch_all(&self) -> Result<Vec<Channel>, DeltaError> {
-        self.http.request(Method::GET, "users/dms", None).await
+        self.http.request(Method::GET, "/users/dms", None).await
     }
     pub async fn default_avatar_fetch(&self, user: &str) -> Result<Vec<u8>, DeltaError> {
         self.http
-            .request_raw(Method::GET, &format!("users/{user}/default_avatar"), None)
+            .request_raw(Method::GET, &format!("/users/{user}/default_avatar"), None)
             .await
     }
     pub async fn user_flags_fetch(&self, user: &str) -> Result<ResponseFlag, DeltaError> {
         self.http
-            .request(Method::GET, &format!("users/{user}/flags"), None)
+            .request(Method::GET, &format!("/users/{user}/flags"), None)
             .await
     }
 
     pub async fn user_block(&self, user: &str) -> Result<User, DeltaError> {
         self.http
-            .request(Method::POST, &format!("users/{user}/block"), None)
+            .request(Method::POST, &format!("/users/{user}/block"), None)
             .await
     }
 
