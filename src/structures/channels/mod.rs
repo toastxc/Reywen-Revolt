@@ -107,6 +107,18 @@ pub enum Channel {
     },
 }
 
+impl Channel {
+    pub fn id(&self) -> String {
+        match self {
+            Channel::DirectMessage { id, .. }
+            | Channel::Group { id, .. }
+            | Channel::SavedMessages { id, .. }
+            | Channel::TextChannel { id, .. }
+            | Channel::VoiceChannel { id, .. } => id.clone(),
+        }
+    }
+}
+
 /// Partial values of [Channel]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct PartialChannel {
