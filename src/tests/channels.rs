@@ -196,13 +196,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_message_query() {
+    async fn test_message_fetch_all() {
         let client = tester_user();
 
-        let data = DataQueryMessages::new()
-            .set_limit(24)
-            .set_include_users(true);
-        if let Err(error) = client.message_query(&CHANNEL, &data).await {
+        if let Err(error) = client
+            .message_query(CHANNEL, &DataQueryMessages::new())
+            .await
+        {
             panic!("{:#?}", error);
         }
     }

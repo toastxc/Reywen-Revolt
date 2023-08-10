@@ -93,6 +93,23 @@ pub struct Override {
     pub deny: u64,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone, Copy, Default)]
+pub struct OverrideField {
+    /// Allow bit flags
+    pub allow: i64,
+    /// Disallow bit flags
+    pub deny: i64,
+}
+
+impl From<OverrideField> for Override {
+    fn from(value: OverrideField) -> Self {
+        Self {
+            allow: value.allow as u64,
+            deny: value.deny as u64,
+        }
+    }
+}
+
 impl Override {
     pub fn new() -> Self {
         Default::default()
