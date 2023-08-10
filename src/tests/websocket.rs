@@ -70,9 +70,7 @@ mod tests {
                             .await
                             .unwrap();
                     }
-                    WebSocketEvent::Pong { .. } => {
-                        return;
-                    }
+                    WebSocketEvent::Pong { .. } => {panic!("test completed")}
 
                     _ => {}
                 };
@@ -98,11 +96,8 @@ mod tests {
         }
 
         while let Some(item) = read.next().await {
-            match item {
-                WebSocketEvent::Authenticated => {
-                    println!("SUCCESS")
-                }
-                _ => {}
+            if let WebSocketEvent::Authenticated = item {
+                println!("SUCCESS")
             }
         }
     }

@@ -51,7 +51,7 @@ mod tests {
     async fn test_bot_fetch() {
         let client = test_client(false);
 
-        if let Err(error) = client.bot_fetch(&BOT).await {
+        if let Err(error) = client.bot_fetch(BOT).await {
             panic!("{:#?}", error);
         };
     }
@@ -69,7 +69,7 @@ mod tests {
     async fn test_bot_fetch_public() {
         let client = test_client(false);
 
-        if let Err(error) = client.bot_fetch_public(&BOT).await {
+        if let Err(error) = client.bot_fetch_public(BOT).await {
             panic!("{:#?}", error);
         };
     }
@@ -78,7 +78,7 @@ mod tests {
     async fn test_bot_invite() {
         let client = test_client(false);
 
-        if let Err(error) = client.bot_invite(&BOT, &SERVER).await {
+        if let Err(error) = client.bot_invite(BOT, SERVER).await {
             panic!("{:#?}", error);
         };
     }
