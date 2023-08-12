@@ -148,7 +148,7 @@ mod tests {
 
         let data = DataEditRole::new();
 
-        if let Err(error) = client.roles_edit(SERVER,ROLE, &data).await {
+        if let Err(error) = client.roles_edit(SERVER, ROLE, &data).await {
             panic!("{:#?}", error);
         }
     }

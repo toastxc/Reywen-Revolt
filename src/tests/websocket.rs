@@ -70,7 +70,9 @@ mod tests {
                             .await
                             .unwrap();
                     }
-                    WebSocketEvent::Pong { .. } => {panic!("test completed")}
+                    WebSocketEvent::Pong { .. } => {
+                        panic!("test completed")
+                    }
 
                     _ => {}
                 };
