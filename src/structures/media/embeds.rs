@@ -1,8 +1,7 @@
+use super::attachment::File;
 use serde::{Deserialize, Serialize};
 
-use super::attachment::File;
-
-/// Image positioning and size
+// Image positioning and size
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ImageSize {
     /// Show large preview at the bottom of the embed
@@ -58,6 +57,7 @@ pub enum BandcampType {
 
 /// Information about special remote content
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
 pub enum Special {
     /// No remote content
     None,
@@ -121,7 +121,7 @@ pub struct Metadata {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub video: Option<Video>,
 
-    //#[serde(skip_serializing_if = "Option::is_none")]
+    // #[serde(skip_serializing_if = "Option::is_none")]
     // opengraph_type: Option<String>,
     /// Site name
     #[serde(skip_serializing_if = "Option::is_none")]
