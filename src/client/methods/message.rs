@@ -1,6 +1,4 @@
-use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-
+use super::origin;
 use crate::{
     client::{methods::opt_vec_add, Client},
     json, opt_str, ref_str,
@@ -8,8 +6,8 @@ use crate::{
         BulkMessageResponse, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
     },
 };
-
-use super::origin;
+use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
+use serde::{Deserialize, Serialize};
 
 impl Client {
     pub async fn message_ack(&self, channel: &str, message: &str) -> Result<(), DeltaError> {
@@ -87,15 +85,7 @@ impl Client {
         &self,
         channel: &str,
         query: &DataQueryMessages,
-    ) -> Result<Vec<Message>, DeltaError> {
-        self.message_query_core(channel, query).await
-    }
-
-    pub async fn message_query_core<T: DeserializeOwned>(
-        &self,
-        channel: &str,
-        query: &DataQueryMessages,
-    ) -> Result<T, DeltaError> {
+    ) -> Result<BulkMessageResponse, DeltaError> {
         self.http
             .request(
                 Method::GET,
@@ -229,6 +219,7 @@ pub struct DataQueryMessages {
     /// It also fetches the message ID specified.
     /// length min: 26, max: 26
     pub nearby: Option<String>,
+    pub include_users: Option<bool>,
 }
 
 impl DataQueryMessages {
@@ -255,6 +246,10 @@ impl DataQueryMessages {
     }
     pub fn set_nearby(&mut self, nearby: &str) -> Self {
         self.nearby = Some(String::from(nearby));
+        self.to_owned()
+    }
+    pub fn set_include_users(&mut self, inclue_users: bool) -> Self {
+        self.include_users = Some(inclue_users);
         self.to_owned()
     }
 }
