@@ -28,6 +28,7 @@ pub struct SendableEmbed {
 }
 /// Representation of a system event message
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
 pub enum SystemMessage {
     #[serde(rename = "text")]
     Text { content: String },
