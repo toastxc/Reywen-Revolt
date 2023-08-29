@@ -65,7 +65,7 @@ impl Client {
 
     pub async fn user_block(&self, user: &str) -> Result<User, DeltaError> {
         self.http
-            .request(Method::POST, &format!("/users/{user}/block"), None)
+            .request(Method::PUT, &format!("/users/{user}/block"), None)
             .await
     }
 

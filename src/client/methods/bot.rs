@@ -41,28 +41,33 @@ impl Client {
             .await
     }
 
-    pub async fn bot_invite(&self, bot_id: &str, server_or_group: &str) -> Result<(), DeltaError> {
+    pub async fn bot_invite(
+        &self,
+        bot_id: &str,
+        server_or_group: &str,
+        is_server: bool,
+    ) -> Result<(), DeltaError> {
+        let data = if is_server {
+            DataBotInvite::Server {
+                server: server_or_group.to_string(),
+            }
+        } else {
+            DataBotInvite::Group {
+                group: server_or_group.to_string(),
+            }
+        };
+
         self.http
-            .request(
-                Method::POST,
-                &format!("/bots/{bot_id}/invite"),
-                json!(DataBotInvite::from(server_or_group)),
-            )
+            .request(Method::POST, &format!("/bots/{bot_id}/invite"), json!(data))
             .await
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct DataBotInvite {
-    pub server: String,
-}
-
-impl From<&str> for DataBotInvite {
-    fn from(value: &str) -> Self {
-        DataBotInvite {
-            server: String::from(value),
-        }
-    }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub enum DataBotInvite {
+    Server { server: String },
+    Group { group: String },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
