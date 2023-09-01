@@ -67,6 +67,10 @@ pub struct UserProfile {
     /// Text content on user's profile
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
+
+    /// Banner on user's profile
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background: Option<File>,
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -120,6 +124,12 @@ pub struct User {
     pub id: String,
     /// Username
     pub username: String,
+    /// User discriminator (#1234)
+    pub discriminator: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    /// User's display name
+    pub display_name: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Avatar attachment

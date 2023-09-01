@@ -78,7 +78,7 @@ mod tests {
     async fn test_bot_invite() {
         let client = test_client(false);
 
-        if let Err(error) = client.bot_invite(BOT, SERVER).await {
+        if let Err(error) = client.bot_invite(BOT, SERVER, true).await {
             panic!("{:#?}", error);
         };
     }
