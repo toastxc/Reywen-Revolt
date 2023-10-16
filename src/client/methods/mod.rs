@@ -1,3 +1,4 @@
+pub mod autumn;
 pub mod bot;
 pub mod channel;
 pub mod group;

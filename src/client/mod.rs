@@ -1,14 +1,13 @@
-use std::fmt::Debug;
-
-use reywen_http::{results::DeltaError, Delta};
-
 use crate::websocket::WebSocket;
+use reywen_http::{results::DeltaError, Delta};
+use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct Client {
     pub http: Delta,
     pub websocket: WebSocket,
     pub token: Option<String>,
+    pub autumn_uri: String,
 }
 
 impl Client {
@@ -46,14 +45,14 @@ impl Client {
 }
 impl Default for Client {
     fn default() -> Self {
-        let http = Delta::new()
-            .set_url("https://api.revolt.chat")
-            .set_timeout(10);
-
         Self {
-            http,
+            http: Delta::new()
+                .set_url("https://api.revolt.chat")
+                .set_timeout(10),
+
             websocket: WebSocket::default(),
             token: None,
+            autumn_uri: String::from("https://autumn.revolt.chat"),
         }
     }
 }
