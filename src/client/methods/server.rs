@@ -79,6 +79,17 @@ impl Client {
             )
             .await
     }
+
+    pub async fn member_kick(&self, server: &str, user: &str) -> Result<(), DeltaError> {
+        self.http
+            .request(
+                Method::DELETE,
+                &format!("/servers/{server}/members/{user}"),
+                None,
+            )
+            .await
+    }
+
     pub async fn channel_create(
         &self,
         server: &str,
