@@ -44,6 +44,6 @@ lto = "thin"
 [dev-dependencies] # for examples
 tokio = { version = "1.29.1", features = ["net", "macros", "rt-multi-thread", "fs"] }
 urlencoding = "2.1.2"
-toml = "0.7.5"
+toml = "0.8.2"
 reywen = { path = "." }
 reywen_http = { version = "0.1.13", features = ["serde"] }
