@@ -64,7 +64,7 @@ mod tests {
                 match item {
                     WebSocketEvent::Message { .. } => {
                         write
-                            .lock()
+                            .write()
                             .await
                             .send(WebSocketSend::ping(0).into())
                             .await
@@ -90,7 +90,7 @@ mod tests {
         {
             let _client = Client::from_token(&token, false).unwrap();
             write
-                .lock()
+                .write()
                 .await
                 .send(WebSocketSend::Authenticate { token }.into())
                 .await

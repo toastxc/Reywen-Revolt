@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use crate::reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url, Delta};
 use crate::{
     client::Client,
     json,
@@ -9,7 +10,6 @@ use crate::{
         session::SessionInfo,
     },
 };
-use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url, Delta};
 use serde::{Deserialize, Serialize};
 
 impl Client {
@@ -27,7 +27,8 @@ impl Client {
         self.http
             .request::<()>(Method::GET, "/auth/session/logout", None)
             .await?;
-        self.http.headers.remove("x-session-token");
+        //self.http.headers.remove("x-session-token");
+        self.http.header_delete("x-session-token");
         Ok(self.to_owned())
     }
 
@@ -41,7 +42,7 @@ impl Client {
         self.http
             .request(
                 Method::DELETE,
-                &format!("/auth/session/all{}", struct_to_url(revoke_self, true)),
+                &format!("/auth/session/all{}", struct_to_url(revoke_self)),
                 None,
             )
             .await

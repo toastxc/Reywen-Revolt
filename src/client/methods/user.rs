@@ -1,4 +1,4 @@
-use reywen_http::{driver::Method, results::DeltaError};
+use crate::reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -50,9 +50,18 @@ impl Client {
     }
 
     pub async fn dm_fetch_all(&self) -> Result<Vec<Channel>, DeltaError> {
+        println!("prerun");
+        let data: Vec<u8> = self
+            .http
+            .request_raw(Method::GET, "/users/dms", None)
+            .await?;
+        let data_str = String::from_utf8(data).unwrap();
+        println!("dm_fetch_all data: {:?}", data_str);
         self.http.request(Method::GET, "/users/dms", None).await
     }
     pub async fn default_avatar_fetch(&self, user: &str) -> Result<Vec<u8>, DeltaError> {
+        println!("DEFAULT_AVATAR {}", self.http.url);
+
         self.http
             .request_raw(Method::GET, &format!("/users/{user}/default_avatar"), None)
             .await

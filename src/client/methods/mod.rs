@@ -11,7 +11,12 @@ pub mod user;
 #[macro_export]
 macro_rules! json {
     ($data:expr) => {
-        Some(&serde_json::to_string(&$data).unwrap_or_default())
+        Some(
+            serde_json::to_string(&$data)
+                .unwrap_or_default()
+                .as_bytes()
+                .to_owned(),
+        )
     };
 }
 

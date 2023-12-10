@@ -1,4 +1,4 @@
-use reywen_http::utils::if_false;
+use crate::reywen_http::utils::if_false;
 use serde::{Deserialize, Serialize};
 
 /// Information about what owns this emoji

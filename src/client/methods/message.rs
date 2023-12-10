@@ -1,4 +1,5 @@
 use super::origin;
+use crate::reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
 use crate::{
     client::{methods::opt_vec_add, Client},
     json, opt_str, ref_str,
@@ -6,7 +7,6 @@ use crate::{
         BulkMessageResponse, Interactions, Masquerade, Message, MessageSort, Reply, SendableEmbed,
     },
 };
-use reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url};
 use serde::{Deserialize, Serialize};
 
 impl Client {
@@ -89,7 +89,7 @@ impl Client {
         self.http
             .request(
                 Method::GET,
-                &format!("/channels/{channel}/messages{}", struct_to_url(query, true)),
+                &format!("/channels/{channel}/messages{}", struct_to_url(query)),
                 None,
             )
             .await
@@ -148,7 +148,7 @@ impl Client {
                 Method::DELETE,
                 &format!(
                     "/channels/{channel}/messages/{message}/reactions/{emoji}{}",
-                    struct_to_url(data, true)
+                    struct_to_url(data)
                 ),
                 None,
             )

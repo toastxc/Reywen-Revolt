@@ -16,20 +16,26 @@ num_enum = "0.7.0"
 indexmap = { version = "2.0.0", features = ["serde"] }
 
 # serde
-serde = { version = "1.0.164", features = ["derive"] }
-serde_json = "1.0.94"
+serde = { version = "1.0.164", features = ["derive"]}
+serde_json = { version = "1.0.94"}
 
 # misc
 rand = "0.8.5"
 
 # async
-tokio = { version = "1.29.1", features = ["net", "macros"] }
+tokio = { version = "1.29.1", features = ["net", "macros", "sync"] }
 futures-util = "0.3.28"
 
 # http
 tokio-tungstenite = { version = "0.20.0", features = ["native-tls"] }
-reywen_http = { version = "0.1.13", features = ["serde"] }
+reywen_http = { version = "0.1.18", features = ["serde"]}
 
+
+
+[features]
+# engine option | mandatory
+standard = ["reywen_http/hyper_engine"]
+wasm = ["reywen_http/reqwasm_engine"]
 
 
 
@@ -46,4 +52,4 @@ tokio = { version = "1.29.1", features = ["net", "macros", "rt-multi-thread", "f
 urlencoding = "2.1.2"
 toml = "0.8.2"
 reywen = { path = "." }
-reywen_http = { version = "0.1.13", features = ["serde"] }
+#reywen_http = { version = "0.1.13", features = ["serde"] }

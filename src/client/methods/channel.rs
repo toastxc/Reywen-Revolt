@@ -1,4 +1,4 @@
-use reywen_http::{driver::Method, results::DeltaError};
+use crate::reywen_http::{driver::Method, results::DeltaError};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -23,6 +23,7 @@ impl Client {
             .await
     }
     pub async fn channel_fetch(&self, channel: &str) -> Result<Channel, DeltaError> {
+        println!("URI {}{}", self.http.url, format!("/channels/{channel}"));
         self.http
             .request(Method::GET, &format!("/channels/{channel}"), None)
             .await

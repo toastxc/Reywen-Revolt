@@ -1,11 +1,11 @@
-use std::{pin::Pin, sync::Arc};
-
 use futures_util::{
     stream::{SplitSink, SplitStream},
     Stream, StreamExt,
 };
-use reywen_http::utils::struct_to_url;
-use tokio::sync::Mutex;
+
+use std::{pin::Pin, sync::Arc};
+use crate::reywen_http::utils::struct_to_url;
+use tokio::sync::RwLock;
 use tokio_tungstenite::{connect_async, WebSocketStream};
 
 use super::{data::WebSocketEvent, PartialWSConf, WebSocket};
@@ -29,7 +29,7 @@ impl WebSocket {
         let url = format!(
             "wss://{}/{}",
             self.domain.clone().unwrap(),
-            struct_to_url(Into::<PartialWSConf>::into(self.to_owned()), false)
+            struct_to_url(Into::<PartialWSConf>::into(self.to_owned()))
         );
 
         let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
@@ -66,17 +66,17 @@ impl WebSocket {
 
     /// This is the recommended connection client
     /// 0: a modified SplitStream websocket connection with the WebSocketEvent data type
-    /// 1: a modified SplitSink within an Arc<Mutex>, this can locked and have messages sent on it async.
+    /// 1: a modified SplitSink within an Arc<Rwlock>, this can locked and have messages sent on it async.
     /// Arc allows for cloning* the type which is useful for multithreading
     pub async fn dual_async(
         &self,
     ) -> (
         Pin<Box<impl Stream<Item = WebSocketEvent>>>,
-        Arc<Mutex<SinkSplit>>,
+        Arc<RwLock<SinkSplit>>,
     ) {
         let (write, read) = Self::dual_connection(self).await;
 
-        (read, Arc::new(Mutex::new(write)))
+        (read, Arc::new(RwLock::new(write)))
     }
 }
 

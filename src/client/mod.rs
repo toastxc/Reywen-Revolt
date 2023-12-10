@@ -1,8 +1,6 @@
-use std::fmt::Debug;
-
-use reywen_http::{results::DeltaError, Delta};
-
+use crate::reywen_http::{results::DeltaError, Delta};
 use crate::websocket::WebSocket;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -15,7 +13,6 @@ impl Client {
     pub fn from_token(token: &str, is_bot: bool) -> Result<Self, DeltaError> {
         Self::from_token_url(token, is_bot, None)
     }
-
     pub fn from_token_url(
         token: &str,
         is_bot: bool,
@@ -46,9 +43,7 @@ impl Client {
 }
 impl Default for Client {
     fn default() -> Self {
-        let http = Delta::new()
-            .set_url("https://api.revolt.chat")
-            .set_timeout(10);
+        let http = Delta::new().set_url("https://api.revolt.chat");
 
         Self {
             http,
