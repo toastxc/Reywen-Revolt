@@ -1,6 +1,12 @@
 use crate::reywen_http::utils::if_false;
 use crate::structures::media::attachment::File;
 use serde::{Deserialize, Serialize};
+use crate::impl_to_vec;
+
+pub mod invite;
+pub mod message;
+pub mod group;
+
 /// Representation of a channel on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "channel_type")]
@@ -146,5 +152,70 @@ pub enum FieldsChannel {
     DefaultPermissions,
 }
 
-pub mod invite;
-pub mod message;
+
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DataEditChannel {
+    /// Channel name
+    /// length min: 1, max: 32
+    pub name: Option<String>,
+    /// Channel description
+    /// length min: 0, max: 1024
+    pub description: Option<String>,
+    /// Group owner
+    pub owner: Option<String>,
+    /// Icon
+    ///
+    /// Provide an Autumn attachment Id.
+    /// length min: 1, max: 128
+    pub icon: Option<String>,
+    /// Whether this channel is age-restricted
+    pub nsfw: Option<bool>,
+    /// Whether this channel is archived
+    pub archived: Option<bool>,
+    /// length min: 1
+    pub remove: Option<Vec<FieldsChannel>>,
+}
+impl_to_vec!(DataEditChannel);
+
+impl DataEditChannel {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn set_name(&mut self, name: impl Into<String>) -> Self {
+        self.name = Some(name.into());
+        self.to_owned()
+    }
+    pub fn set_description(&mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self.to_owned()
+    }
+    pub fn set_owner(&mut self, owner: impl Into<String>) -> Self {
+        self.owner = Some(owner.into());
+        self.to_owned()
+    }
+    pub fn set_icon(&mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self.to_owned()
+    }
+    pub fn set_nsfw(&mut self, nsfw: bool) -> Self {
+        self.nsfw = Some(nsfw);
+        self.to_owned()
+    }
+    pub fn set_archived(&mut self, archived: bool) -> Self {
+        self.archived = Some(archived);
+        self.to_owned()
+    }
+
+    pub fn add_remove(&mut self, channel: FieldsChannel) -> Self {
+        match self.remove.clone() {
+            Some(mut channel_vec) => {
+                channel_vec.push(channel);
+                self.remove = Some(channel_vec);
+            }
+            None => self.remove = Some(vec![channel]),
+        }
+        self.to_owned()
+    }
+}

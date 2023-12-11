@@ -1,7 +1,9 @@
-use crate::reywen_http::{results::DeltaError, Delta};
-use crate::websocket::WebSocket;
+use crate::{
+    reywen_http::{results::DeltaError, Delta},
+    websocket::WebSocket,
+};
 use std::fmt::Debug;
-
+pub mod methods;
 #[derive(Debug, Clone)]
 pub struct Client {
     pub http: Delta,
@@ -10,15 +12,11 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn from_token(token: &str, is_bot: bool) -> Result<Self, DeltaError> {
+    pub fn from_token(token: &str, is_bot: bool) -> Result<Self> {
         Self::from_token_url(token, is_bot, None)
     }
-    pub fn from_token_url(
-        token: &str,
-        is_bot: bool,
-        url: Option<&str>,
-    ) -> Result<Self, DeltaError> {
-        // derinvg defaults for types
+    pub fn from_token_url(token: &str, is_bot: bool, url: Option<&str>) -> Result<Self> {
+        // deriving defaults for types
         let mut client = Self::default();
         client.websocket.token = Some(String::from(token));
         client.token = Some(String::from(token));
@@ -52,4 +50,6 @@ impl Default for Client {
         }
     }
 }
-pub mod methods;
+
+
+pub type Result<T> = core::result::Result<T, DeltaError>;

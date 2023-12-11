@@ -1,7 +1,9 @@
+use crate::impl_to_vec;
 use crate::reywen_http::utils::if_false;
 use indexmap::{IndexMap, IndexSet};
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
+use crate::client::methods::{opt_vec_add, origin};
 
 use crate::structures::{
     media::{attachment::File, embeds::Embed},
@@ -211,6 +213,7 @@ pub enum MessageSort {
     /// Sort by the oldest messages first
     Oldest,
 }
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum MessageTimePeriod {
     Relative {
@@ -251,10 +254,292 @@ pub enum BulkMessageResponse {
         members: Option<Vec<Member>>,
     },
 }
-
+impl_to_vec!(BulkMessageResponse);
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppendMessage {
     /// Additional embeds to include in this message
     #[serde(skip_serializing_if = "Option::is_none")]
     pub embeds: Option<Vec<Embed>>,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DataBulkDelete {
+    /// Message IDs
+    pub ids: Vec<String>,
+}
+impl_to_vec!(DataBulkDelete);
+
+impl DataBulkDelete {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn add_message(&mut self, message: impl Into<String>) -> Self {
+        self.ids.push(message.into());
+        self.to_owned()
+    }
+    pub fn set_messages(&mut self, messages: impl Into<Vec<String>>) -> Self {
+        messages
+            .into()
+            .iter_mut()
+            .for_each(|item| self.ids.push(item.to_string()));
+        self.to_owned()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DataEditMessage {
+    /// New message content (length min: 1, length max: 2000)
+    pub content: Option<String>,
+    /// Embeds to include in the message (length min: 0, length max: 10)
+    pub embeds: Option<Vec<SendableEmbed>>,
+}
+impl_to_vec!(DataEditMessage);
+impl DataEditMessage {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn set_content(&mut self, content: impl Into<String> + std::fmt::Display) -> Self {
+        self.content = Some(content.into());
+        self.to_owned()
+    }
+}
+
+/// # Query Parameters
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct DataQueryMessages {
+    /// Maximum number of messages to fetch
+    ///
+    /// For fetching nearby messages, this is \`(limit + 1)\`.
+    /// min: 1, max 100
+    pub limit: Option<i64>,
+    /// Message id before which messages should be fetched
+    /// length min: 26, max: 26
+    pub before: Option<String>,
+    /// Message id after which messages should be fetched
+    /// length min: 26, max: 26
+    pub after: Option<String>,
+    /// Message sort direction
+    pub sort: Option<MessageSort>,
+    /// Message id to search around
+    ///
+    /// Specifying 'nearby' ignores 'before', 'after' and 'sort'.
+    /// It will also take half of limit rounded as the limits to each side.
+    /// It also fetches the message ID specified.
+    /// length min: 26, max: 26
+    pub nearby: Option<String>,
+    pub include_users: Option<bool>,
+}
+
+impl DataQueryMessages {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn set_limit(&mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self.clone()
+    }
+
+    pub fn set_before(&mut self, before: impl Into<String>) -> Self {
+        self.before = Some(before.into());
+        self.clone()
+    }
+    pub fn set_after(&mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self.clone()
+    }
+
+    pub fn set_sort(&mut self, sort: impl Into<MessageSort>) -> Self {
+        self.sort = Some(sort.into());
+        self.clone()
+    }
+    pub fn set_nearby(&mut self, nearby: impl Into<String>) -> Self {
+        self.nearby = Some(nearby.into());
+        self.clone()
+    }
+    pub fn set_include_users(&mut self, inclue_users: bool) -> Self {
+        self.include_users = Some(inclue_users);
+        self.clone()
+    }
+}
+
+/// # Search Parameters
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DataMessageSearch {
+    /// Full-text search query
+    ///
+    /// See [MongoDB documentation](https://docs.mongodb.com/manual/text-search/#-text-operator) for more information.
+    /// length min: 1, max: 64
+    pub query: String,
+
+    /// Maximum number of messages to fetch
+    /// length min: 1, max: 100
+    pub limit: Option<i64>,
+    /// Message id before which messages should be fetched
+    /// length min: 26, max: 26
+    pub before: Option<String>,
+    /// Message id after which messages should be fetched
+    /// length min: 26, max: 26
+    pub after: Option<String>,
+    /// Message sort direction
+    ///
+    /// By default, it will be sorted by latest.
+    pub sort: MessageSort,
+    /// Whether to include user (and member, if server channel) objects
+    pub include_users: Option<bool>,
+}
+impl_to_vec!(DataMessageSearch);
+impl DataMessageSearch {
+    pub fn new(query: impl Into<String>) -> Self {
+        Self {
+            query: query.into(),
+            ..Default::default()
+        }
+    }
+    pub fn set_limit(&mut self, limit: i64) -> Self {
+        self.limit = Some(limit);
+        self.clone()
+    }
+    pub fn set_before(&mut self, before: impl Into<String>) -> Self {
+        self.before = Some(before.into());
+        self.to_owned()
+    }
+    pub fn set_after(&mut self, after: impl Into<String>) -> Self {
+        self.after = Some(after.into());
+        self.clone()
+    }
+    pub fn set_sort(&mut self, sort: impl Into<MessageSort>) -> Self {
+        self.sort = sort.into();
+        self.to_owned()
+    }
+    pub fn set_include_users(&mut self, include_users: bool) -> Self {
+        self.include_users = Some(include_users);
+        self.to_owned()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct DataMessageSend {
+    /// Message content to send
+    /// length min: 0, max: 2000
+    pub content: Option<String>,
+    /// Attachments to include in message
+    /// length min: 1, max: 128
+    pub attachments: Option<Vec<String>>,
+    /// Messages to reply to
+    pub replies: Option<Vec<Reply>>,
+    /// Embeds to include in message
+    ///
+    /// Text embed content contributes to the content length cap
+    /// length min: 1, max: 10
+    pub embeds: Option<Vec<SendableEmbed>>,
+    /// Masquerade to apply to this message
+    pub masquerade: Option<Masquerade>,
+    /// Information about how this message should be interacted with
+    pub interactions: Option<Interactions>,
+}
+impl_to_vec!(DataMessageSend);
+impl DataMessageSend {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn set_content(&mut self, content: impl Into<String>) -> Self {
+        self.content = Some(content.into());
+        self.clone()
+    }
+    pub fn set_attachments(&mut self, attachments: impl Into<Vec<String>>) -> Self {
+        origin(&mut self.attachments, attachments.into());
+        self.to_owned()
+    }
+    pub fn add_attachment(&mut self, attachment: impl Into<String>) -> Self {
+        opt_vec_add(&mut self.attachments, attachment.into());
+        self.to_owned()
+    }
+
+    pub fn set_replies(&mut self, replies: impl Into<Vec<Reply>>) -> Self {
+        origin(&mut self.replies, replies.into());
+        self.to_owned()
+    }
+    pub fn add_reply(&mut self, reply: impl Into<Reply>) -> Self {
+        opt_vec_add(&mut self.replies, reply.into());
+        self.to_owned()
+    }
+    pub fn set_reply_str(&mut self, replies: Vec<String>) {
+        self.replies = Some(
+            replies
+                .into_iter()
+                .map(|id| Reply {
+                    id,
+                    ..Default::default()
+                })
+                .collect(),
+        )
+    }
+    pub fn add_reply_str(&mut self, reply: impl Into<String>) -> Self {
+        self.add_reply(Reply {
+            id: reply.into(),
+            ..Default::default()
+        });
+        self.to_owned()
+    }
+
+    pub fn set_embeds(&mut self, embeds: impl Into<Vec<SendableEmbed>>) -> Self {
+        origin(&mut self.embeds, embeds.into());
+
+        self.clone()
+    }
+    pub fn add_embed(&mut self, embed: impl Into<SendableEmbed>) -> Self {
+        opt_vec_add(&mut self.embeds, embed.into());
+        self.to_owned()
+    }
+
+    pub fn set_masquerade(&mut self, masquerade: impl Into<Masquerade>) -> Self {
+        self.masquerade = Some(masquerade.into());
+        self.to_owned()
+    }
+
+    pub fn set_interactions(&mut self, interactions: impl Into<Interactions>) -> Self {
+        self.interactions = Some(interactions.into());
+        self.to_owned()
+    }
+    pub fn add_reaction(&mut self, reaction: impl Into<String>) -> Self {
+        self.set_interactions(
+            self.interactions
+                .as_ref()
+                .map_or(Interactions::new(), |origin| origin.to_owned())
+                .add_reaction(&reaction.into()),
+        )
+    }
+    pub fn set_reactions(&mut self, reactions: impl Into<Vec<String>> + Clone) -> Self {
+        let mut interactions = self.interactions.clone().unwrap_or_default();
+        reactions.into().clone().into_iter().for_each(|item| {
+            interactions.add_reaction(&item);
+        });
+
+        self.to_owned()
+    }
+}
+
+/// # Query Parameters
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct DataUnreact {
+    /// Remove a specific user's reaction
+    pub user_id: Option<String>,
+    /// Remove all reactions
+    pub remove_all: Option<bool>,
+}
+impl DataUnreact {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn set_user_id(&mut self, user_id: impl Into<String>) -> Self {
+        self.user_id = Some(user_id.into());
+        self.to_owned()
+    }
+    pub fn set_remove_all(&mut self, remove_all: bool) -> Self {
+        self.remove_all = Some(remove_all);
+        self.to_owned()
+    }
 }

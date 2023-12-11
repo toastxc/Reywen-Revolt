@@ -24,7 +24,6 @@ pub mod reywen_http {
     }
 }
 
-
 #[cfg(feature = "wasm")]
 pub mod reywen_http {
     pub mod utils {

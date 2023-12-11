@@ -1,6 +1,6 @@
 pub mod data;
+pub mod error;
 pub mod process;
-pub mod result;
 use serde::{Deserialize, Serialize};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -9,16 +9,16 @@ use self::data::WebSocketSend;
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct WebSocket {
     pub token: Option<String>,
-    pub format: Option<String>,
+    pub format: String,
     #[serde(rename = "websocket_domain")]
-    pub domain: Option<String>,
-    pub version: Option<u16>,
+    pub domain: String,
+    pub version: u16,
 }
 
 #[derive(Serialize)]
 pub struct PartialWSConf {
-    pub version: Option<u16>,
-    pub format: Option<String>,
+    pub version: u16,
+    pub format: String,
     pub token: Option<String>,
 }
 impl From<WebSocket> for PartialWSConf {
@@ -52,9 +52,9 @@ impl Default for WebSocket {
     fn default() -> Self {
         Self {
             token: None,
-            format: Some(String::from("json")),
-            domain: Some(String::from("ws.revolt.chat")),
-            version: Some(1),
+            format: String::from("json"),
+            domain: String::from("ws.revolt.chat"),
+            version: 1,
         }
     }
 }

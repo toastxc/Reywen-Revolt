@@ -1,3 +1,4 @@
+use crate::impl_to_vec;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -30,7 +31,7 @@ pub enum DataLogin {
         friendly_name: Option<String>,
     },
 }
-
+impl_to_vec!(DataLogin);
 impl DataLogin {
     pub fn mfa(
         mfa_ticket: String,
@@ -72,3 +73,4 @@ pub enum ResponseLogin {
         user_id: String,
     },
 }
+impl_to_vec!(ResponseLogin);

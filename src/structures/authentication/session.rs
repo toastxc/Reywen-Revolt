@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::impl_to_vec;
 
 /// Web Push subscription
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -34,4 +35,15 @@ pub struct SessionInfo {
     #[serde(rename = "_id")]
     pub id: String,
     pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DataEditSession {
+    pub friendly_name: String,
+}
+impl_to_vec!(DataEditSession);
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ResponseEditSession {
+    _id: String,
+    name: String,
 }
