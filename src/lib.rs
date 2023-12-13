@@ -3,10 +3,10 @@ pub mod structures;
 pub mod tests;
 pub mod websocket;
 
-#[cfg(all(feature = "standard", feature = "wasm"))]
+#[cfg(all(feature = "default", feature = "wasm"))]
 compile_error!("Multiple HTTP engines cannot be used together");
 
-#[cfg(feature = "standard")]
+#[cfg(feature = "default")]
 pub mod reywen_http {
     pub mod utils {
         pub use reywen_http::utils::*;
