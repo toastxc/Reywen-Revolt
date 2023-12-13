@@ -33,9 +33,8 @@ native-tls = "0.2.11"
 
 [features]
 # engine option | mandatory
-standard = ["reywen_http/hyper_engine"]
+default = ["reywen_http/hyper_engine"]
 wasm = ["reywen_http/reqwasm_engine"]
-
 
 
 [profile.release]
