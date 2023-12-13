@@ -27,7 +27,7 @@ tokio = { version = "1.29.1", features = ["net", "macros", "sync"] }
 futures-util = "0.3.28"
 
 # http
-tokio-tungstenite = { version = "0.20.0", features = ["native-tls"] }
+tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }
 reywen_http = { version = "0.1.18", features = ["serde"]}
 native-tls = "0.2.11"
 
