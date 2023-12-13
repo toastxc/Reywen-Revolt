@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-
+use crate::impl_to_vec;
 use crate::structures::media::attachment::File;
-
+pub mod bot;
 fn if_false(t: &bool) -> bool {
     !t
 }
@@ -186,4 +186,115 @@ pub enum UserHint {
     User,
 }
 
-pub mod bot;
+
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DataSendFriendRequest {
+    pub username: String,
+}
+impl_to_vec!(DataSendFriendRequest);
+impl DataSendFriendRequest {
+    pub fn set_username(username: impl Into<String>) -> Self {
+        Self {
+            username: username.into(),
+        }
+    }
+}
+
+//https://api.revolt.chat/users/{target}
+/// # User Data
+#[derive(Serialize, Debug, Clone, Default)]
+pub struct DataEditUser {
+    /// Attachment Id for avatar
+    pub avatar: Option<String>,
+    /// New user status
+    pub status: Option<UserStatus>,
+    /// New user profile data
+    ///
+    /// This is applied as a partial.
+    pub profile: Option<UserProfileData>,
+    /// Bitfield of user badges
+    pub badges: Option<i32>,
+    /// Enum of user flags
+    pub flags: Option<i32>,
+    /// Fields to remove from user object
+    pub remove: Option<Vec<FieldsUser>>,
+}
+impl_to_vec!(DataEditUser);
+impl DataEditUser {
+    pub fn set_avatar(&mut self, avatar: impl Into<String>) -> Self {
+        self.avatar = Some(avatar.into());
+        self.clone()
+    }
+    pub fn set_status(&mut self, status: impl Into<UserStatus>) -> Self {
+        self.status = Some(status.into());
+        self.clone()
+    }
+    pub fn set_profile(&mut self, profile: impl Into<UserProfileData>) -> Self {
+        self.profile = Some(profile.into());
+        self.clone()
+    }
+    pub fn set_badges(&mut self, badges: i32) -> Self {
+        self.badges = Some(badges);
+        self.clone()
+    }
+    pub fn set_flags(&mut self, flags: i32) -> Self {
+        self.flags = Some(flags);
+        self.clone()
+    }
+    pub fn set_remove(&mut self, remove: impl Into<Vec<FieldsUser>>) -> Self {
+        self.remove = Some(remove.into());
+        self.clone()
+    }
+    pub fn add_remove(&mut self, remove: impl Into<FieldsUser>) -> Self {
+        match self.remove.clone() {
+            Some(mut data) => {
+                data.push(remove.into());
+                self.remove = Some(data);
+            }
+            None => self.remove = Some(vec![remove.into()]),
+        }
+        self.clone()
+    }
+
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+#[derive(Serialize, Debug, Clone, Default)]
+pub struct UserProfileData {
+    /// Text to set as user profile description
+    pub content: Option<String>,
+    /// Attachment Id for background
+    pub background: Option<String>,
+}
+
+impl UserProfileData {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn set_content(&mut self, content: impl Into<String>) -> Self {
+        self.content = Some(content.into());
+        self.clone()
+    }
+    pub fn set_background(&mut self, background: impl Into<String>) -> Self {
+        self.background = Some(background.into());
+        self.clone()
+    }
+}
+/// # Mutual Friends and Servers Response
+#[derive(Deserialize, Debug, Clone, Default)]
+pub struct MutualResponse {
+    /// Array of mutual user IDs that both users are friends with
+    pub users: Vec<String>,
+    /// Array of mutual server IDs that both users are in
+    pub servers: Vec<String>,
+}
+
+/// # Flag Response
+#[derive(Deserialize, Debug, Clone, Default)]
+pub struct ResponseFlag {
+    /// Flags
+    pub flags: i32,
+}

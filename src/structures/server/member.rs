@@ -1,7 +1,10 @@
+use crate::{
+    client::methods::opt_vec_add,
+    impl_to_vec,
+    structures::{media::attachment::File, users::User},
+};
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
-
-use crate::structures::media::attachment::File;
 
 /// Composite primary key consisting of server and user id
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -52,4 +55,61 @@ pub enum RemovalIntention {
     Leave,
     Kick,
     Ban,
+}
+
+/// # Member List
+///
+/// Both lists are sorted by ID.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ResponseMemberAll {
+    /// List of members
+    pub members: Vec<Member>,
+    /// List of users
+    pub users: Vec<User>,
+}
+/// # Member Data
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct DataMemberEdit {
+    /// Member nickname
+    nickname: Option<String>,
+    /// Attachment Id to set for avatar
+    avatar: Option<String>,
+    /// Array of role ids
+    roles: Option<Vec<String>>,
+    /// Timestamp this member is timed out until
+    timeout: Option<Timestamp>,
+    /// Fields to remove from channel object
+    remove: Option<Vec<FieldsMember>>,
+}
+impl_to_vec!(DataMemberEdit);
+impl DataMemberEdit {
+    pub fn set_nickname(&mut self, nickname: impl Into<String>) -> Self {
+        self.nickname = Some(nickname.into());
+        self.clone()
+    }
+    pub fn set_avatar(&mut self, avatar: impl Into<String>) -> Self {
+        self.avatar = Some(avatar.into());
+        self.clone()
+    }
+    pub fn set_roles(&mut self, roles: impl Into<Vec<String>>) -> Self {
+        self.roles = Some(roles.into());
+        self.clone()
+    }
+    pub fn add_role(mut self, role: impl Into<String> + Clone) -> Self {
+        opt_vec_add(&mut self.roles, role.into());
+        self.clone()
+    }
+    pub fn set_timeout(&mut self, timeout: impl Into<Timestamp>) -> Self {
+        self.timeout = Some(timeout.into());
+        self.to_owned()
+    }
+
+    pub fn add_remove(&mut self, remove: impl Into<FieldsMember>) -> Self {
+        opt_vec_add(&mut self.remove, remove.into());
+        self.to_owned()
+    }
+    pub fn set_remove(&mut self, remove: impl Into<Vec<FieldsMember>>) -> Self {
+        self.remove = Some(remove.into());
+        self.to_owned()
+    }
 }

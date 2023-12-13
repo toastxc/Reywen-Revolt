@@ -1,5 +1,6 @@
 pub mod bots;
 pub mod channels;
+pub mod experiments;
 pub mod servers;
 pub mod session;
 pub mod users;

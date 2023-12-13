@@ -1,29 +1,25 @@
-use std::fmt::Debug;
-
-use crate::reywen_http::{driver::Method, results::DeltaError, utils::struct_to_url, Delta};
 use crate::{
-    client::Client,
-    json,
+    client::{Client, Result},
+    reywen_http::{driver::Method, utils::struct_to_url, Delta},
     structures::authentication::{
         login::{DataLogin, ResponseLogin},
         mfa::MFAResponse,
-        session::SessionInfo,
+        session::{DataEditSession, SessionInfo},
     },
 };
-use serde::{Deserialize, Serialize};
 
 impl Client {
     pub async fn session_login(
-        data: &DataLogin,
-        url: Option<&str>,
-    ) -> Result<ResponseLogin, DeltaError> {
+        data: impl Into<&DataLogin>,
+        url: impl Into<Option<String>>,
+    ) -> Result<ResponseLogin> {
         Delta::new()
-            .set_url(url.unwrap_or("https://api.revolt.chat"))
-            .request::<ResponseLogin>(Method::POST, "/auth/session/login", json!(data))
+            .set_url(url.into().unwrap_or("https://api.revolt.chat".to_string()))
+            .request::<ResponseLogin>(Method::POST, "/auth/session/login", data.into())
             .await
     }
 
-    pub async fn session_logout(&mut self) -> Result<Client, DeltaError> {
+    pub async fn session_logout(&mut self) -> Result<Client> {
         self.http
             .request::<()>(Method::GET, "/auth/session/logout", None)
             .await?;
@@ -32,44 +28,43 @@ impl Client {
         Ok(self.to_owned())
     }
 
-    pub async fn session_fetch_all(&self) -> Result<Vec<SessionInfo>, DeltaError> {
+    pub async fn session_fetch_all(&self) -> Result<Vec<SessionInfo>> {
         self.http
             .request(Method::GET, "/auth/session/all", None)
             .await
     }
 
-    pub async fn session_delete_all(&self, revoke_self: bool) -> Result<(), DeltaError> {
+    pub async fn session_delete_all(&self, revoke_self: bool) -> Result<()> {
         self.http
             .request(
                 Method::DELETE,
-                &format!("/auth/session/all{}", struct_to_url(revoke_self)),
+                format!("/auth/session/all{}", struct_to_url(revoke_self)),
                 None,
             )
             .await
     }
 
-    pub async fn session_delete(&self, session_id: &str) -> Result<(), DeltaError> {
+    pub async fn session_delete(
+        &self,
+        session_id: impl Into<String> + std::fmt::Display,
+    ) -> Result<()> {
         self.http
-            .request(
-                Method::DELETE,
-                &format!("/auth/session/{session_id})"),
-                None,
-            )
+            .request(Method::DELETE, format!("/auth/session/{session_id})"), None)
             .await
     }
 
     pub async fn session_edit(
         &self,
-        session_id: &str,
-        friendly_name: &str,
-    ) -> Result<(), DeltaError> {
+        session_id: impl Into<String> + std::fmt::Display,
+        friendly_name: impl Into<String>,
+    ) -> Result<()> {
         self.http
             .request(
                 Method::PATCH,
-                &format!("/auth/session/{session_id})"),
-                json!(DataEditSession {
-                    friendly_name: String::from(friendly_name),
-                }),
+                format!("/auth/session/{session_id})"),
+                &DataEditSession {
+                    friendly_name: friendly_name.into(),
+                },
             )
             .await
     }
@@ -77,20 +72,31 @@ impl Client {
 
 impl Client {
     pub async fn session_login_smart(
-        email: &str,
-        password: &str,
-        mfa_response: Option<MFAResponse>,
-        friendly_name: Option<&str>,
-    ) -> Result<ResponseLogin, DeltaError> {
-        let original =
-            Client::session_login(&DataLogin::email(email, password, friendly_name), None).await;
+        email: impl Into<String> + std::fmt::Display,
+        password: impl Into<String> + std::fmt::Display,
+        mfa_response: impl Into<Option<MFAResponse>>,
+        friendly_name: impl Into<Option<String>> + Clone,
+    ) -> Result<ResponseLogin> {
+        let original = Client::session_login(
+            &DataLogin::email(
+                &email.into(),
+                &password.into(),
+                friendly_name.clone().into().as_deref(),
+            ),
+            None,
+        )
+        .await;
 
         if let Ok(ResponseLogin::MFA {
             ticket: mfa_ticket, ..
         }) = original
         {
             Client::session_login(
-                &DataLogin::mfa(mfa_ticket, mfa_response, friendly_name),
+                &DataLogin::mfa(
+                    mfa_ticket,
+                    mfa_response.into(),
+                    friendly_name.into().as_deref(),
+                ),
                 None,
             )
             .await
@@ -98,14 +104,4 @@ impl Client {
             original
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct DataEditSession {
-    friendly_name: String,
-}
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ResponseEditSession {
-    _id: String,
-    name: String,
 }

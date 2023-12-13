@@ -1,4 +1,6 @@
+use crate::impl_to_vec;
 use serde::{Deserialize, Serialize};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[repr(u64)]
 pub enum Permission {
@@ -122,6 +124,7 @@ pub struct Field {
     /// Allow / deny values to set for this role
     pub permissions: Override,
 }
+impl_to_vec!(Field);
 
 /// Permission values to set for members in a `Group`
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -129,13 +132,13 @@ pub struct Value {
     /// Allow / deny values to set for this role
     pub permissions: u64,
 }
-
+impl_to_vec!(Value);
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PermissionData {
     pub value: Value,
     pub field: Field,
 }
-
+impl_to_vec!(PermissionData);
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Permissions {
     pub allow: Vec<Permission>,
