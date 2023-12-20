@@ -4,7 +4,7 @@ use crate::{
     structures::{
         channels::{invite::Invite, Channel},
         server::{
-            CreateServerResponse, DataBan, DataBanList, DataBanReason, DataChannelCreate,
+            CreateServerResponse,  DataChannelCreate,
             DataCreateServer, DataEditServer, Server,
         },
     },
@@ -46,55 +46,6 @@ impl Client {
     ) -> Result<Server> {
         self.http
             .request(Method::GET, &format!("/servers/{server}"), None)
-            .await
-    }
-
-    pub async fn ban_create(
-        &self,
-        server: impl Into<String> + std::fmt::Display,
-        user: impl Into<String> + std::fmt::Display,
-        reason: impl Into<Option<String>>,
-    ) -> Result<DataBan> {
-        self.http
-            .request(
-                Method::PUT,
-                format!("/servers/{server}/bans/{user}"),
-                &DataBanReason {
-                    reason: reason.into(),
-                },
-            )
-            .await
-    }
-    pub async fn ban_list(
-        &self,
-        server: impl Into<String> + std::fmt::Display,
-    ) -> Result<DataBanList> {
-        self.http
-            .request(Method::GET, format!("/servers/{server}/bans"), None)
-            .await
-    }
-
-    pub async fn ban_remove(
-        &self,
-        server: impl Into<String> + std::fmt::Display,
-        user: impl Into<String> + std::fmt::Display,
-    ) -> Result<()> {
-        self.http
-            .request(
-                Method::DELETE,
-                format!("/servers/{server}/bans/{user}"),
-                None,
-            )
-            .await
-    }
-
-    pub async fn member_kick(&self, server: &str, user: &str) -> Result<()> {
-        self.http
-            .request(
-                Method::DELETE,
-                format!("/servers/{server}/members/{user}"),
-                None,
-            )
             .await
     }
 

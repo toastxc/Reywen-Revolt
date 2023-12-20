@@ -7,6 +7,7 @@ pub mod users;
 pub mod websocket;
 
 use crate::client::Client;
+pub mod emoji;
 
 pub const SERVER: &str = "01H321YNJZZMF1SYPEY4S9B0R0";
 pub const USER: &str = "01FSRTTGJC1XJ6ZEQJMSX8Q96C";
@@ -24,6 +25,7 @@ pub fn tester_bot() -> Client {
 pub fn tester_user() -> Client {
     test_client(false)
 }
+
 
 fn bot_or(is_bot: bool) -> (String, String) {
     if is_bot {

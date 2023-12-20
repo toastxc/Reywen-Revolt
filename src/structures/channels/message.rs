@@ -1,10 +1,9 @@
+use crate::client::methods::{opt_vec_add, origin};
 use crate::impl_to_vec;
 use crate::reywen_http::utils::if_false;
 use indexmap::{IndexMap, IndexSet};
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
-use crate::client::methods::{opt_vec_add, origin};
-
 use crate::structures::{
     media::{attachment::File, embeds::Embed},
     server::member::Member,
@@ -262,7 +261,6 @@ pub struct AppendMessage {
     pub embeds: Option<Vec<Embed>>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataBulkDelete {
     /// Message IDs
@@ -270,6 +268,11 @@ pub struct DataBulkDelete {
 }
 impl_to_vec!(DataBulkDelete);
 
+impl From<Vec<String>> for DataBulkDelete {
+    fn from(value: Vec<String>) -> Self {
+        Self { ids: value }
+    }
+}
 impl DataBulkDelete {
     pub fn new() -> Self {
         Default::default()

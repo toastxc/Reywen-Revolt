@@ -1,15 +1,17 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        client::methods::{
-            channel::DataEditChannel,
-            group::DataCreateGroup,
-            message::{
-                DataBulkDelete, DataEditMessage, DataMessageSearch, DataMessageSend,
-                DataQueryMessages, DataUnreact,
+        structures::{
+            channels::{
+                group::DataCreateGroup,
+                message::{
+                    DataBulkDelete, DataEditMessage, DataMessageSearch, DataMessageSend,
+                    DataQueryMessages, DataUnreact,
+                },
+                DataEditChannel,
             },
+            permissions::{calculator::Permissions, definitions::Permission},
         },
-        structures::permissions::{calculator::Permissions, definitions::Permission},
         tests::{tester_bot, tester_user, CHANNEL, GROUP},
     };
 

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        client::methods::user::DataEditUser,
+        structures::users::DataEditUser,
         tests::{tester_bot, tester_user, USER, USER_NOTSELF},
     };
 

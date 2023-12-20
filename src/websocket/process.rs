@@ -29,8 +29,8 @@ impl WebSocket {
         Ok((
             Box::pin((read).filter_map(|result| async {
                 result
-                    .map(|a| serde_json::from_slice(&a.into_data()).unwrap())
-                    .ok()
+                    .map(|a| serde_json::from_slice::<WebSocketEvent>(&a.into_data()).ok())
+                    .ok().flatten()
             })) as Pin<Box<dyn Stream<Item = WebSocketEvent>>>,
             Arc::new(RwLock::new(write)),
         ))

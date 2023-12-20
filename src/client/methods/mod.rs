@@ -7,6 +7,8 @@ pub mod permissions;
 pub mod server;
 pub mod session;
 pub mod user;
+pub mod emoji;
+pub mod autumn;
 /// macro for creating jsons
 #[macro_export]
 macro_rules! json {
@@ -36,12 +38,6 @@ macro_rules! opt_str {
 
 /// autovec is a helper for adding an entry to an optional vector, since this code is quite big and is repeated many times it has
 /// been given its own function
-// pub fn opt_vec_add<T: Clone>(input: &Option<Vec<T>>, new: &T) -> Option<Vec<T>> {
-//     Some(input.clone().map_or(vec![new.to_owned()], |mut origin| {
-//         origin.push(new.to_owned());
-//         origin
-//     }))
-// }
 pub fn opt_vec_add<T: Clone>(input: &mut Option<Vec<T>>, new: T) {
     input.get_or_insert_with(Vec::new).push(new);
 }

@@ -1,14 +1,18 @@
 #[cfg(test)]
 mod tests {
-    use crate::{
-        client::methods::{
-            member::DataMemberEdit,
-            permissions::{DataEditRole, DataRoleCreate},
-            server::{DataChannelCreate, DataCreateServer, DataEditServer},
-        },
-        structures::permissions::{calculator::Permissions, definitions::Permission},
-        tests::{tester_bot, tester_user, ROLE, SERVER, USER},
-    };
+    use crate::structures::server::member::DataMemberEdit;
+    use crate::structures::permissions::DataEditRole;
+    use crate::structures::permissions::DataRoleCreate;
+    use crate::structures::server::DataChannelCreate;
+    use crate::structures::server::DataCreateServer;
+    use crate::structures::server::DataEditServer;
+    use crate::structures::permissions::calculator::Permissions;
+    use crate::structures::permissions::definitions::Permission;
+    use crate::tests::tester_bot;
+    use crate::tests::tester_user;
+    use crate::tests::ROLE;
+    use crate::tests::SERVER;
+    use crate::tests::USER;
 
     #[tokio::test]
     async fn test_member_edit() {
