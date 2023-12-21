@@ -53,7 +53,7 @@ impl Default for WebSocket {
         Self {
             token: None,
             format: String::from("json"),
-            domain: String::from("ws.revolt.chat"),
+            domain: String::from("wss://ws.revolt.chat"),
             version: 1,
         }
     }

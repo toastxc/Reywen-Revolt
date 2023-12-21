@@ -15,22 +15,31 @@ impl WebSocket {
         ),
         Error,
     > {
-        let (ws_stream, _) = connect_async(
-            format!(
-                "{}{}",
-                self.domain.clone(),
-                struct_to_url(Into::<PartialWSConf>::into(self.to_owned()))
-            )
-                .replace('\"', "")
+        let url = format!(
+            "{}{}{}",
+            self.domain.clone(),
+            {
+                if self.domain.clone().chars().last() != Some('/') {
+                    "/"
+                } else {
+                    ""
+                }
+            },
+            struct_to_url(Into::<PartialWSConf>::into(self.to_owned()))
         )
-        .await?;
+        .replace('\"', "");
+
+        let url = url::Url::parse(&url)?;
+
+        let (ws_stream, _) = connect_async(url).await?;
         let (write, read) = ws_stream.split();
 
         Ok((
             Box::pin((read).filter_map(|result| async {
                 result
                     .map(|a| serde_json::from_slice::<WebSocketEvent>(&a.into_data()).ok())
-                    .ok().flatten()
+                    .ok()
+                    .flatten()
             })) as Pin<Box<dyn Stream<Item = WebSocketEvent>>>,
             Arc::new(RwLock::new(write)),
         ))

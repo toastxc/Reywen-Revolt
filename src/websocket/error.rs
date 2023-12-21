@@ -1,4 +1,5 @@
 use tokio_tungstenite::tungstenite;
+use url::ParseError;
 
 #[derive(Debug)]
 pub enum Error {
@@ -7,6 +8,7 @@ pub enum Error {
     Data(DataError),
     Connection(std::io::Error),
     Watchdog(WatchdogError),
+    Url(ParseError)
 }
 #[derive(Debug)]
 pub enum DataError {
@@ -20,5 +22,11 @@ pub enum WatchdogError {
 impl From<tokio_tungstenite::tungstenite::Error> for Error {
     fn from(value: tungstenite::Error) -> Self {
         Self::Tungstenite(value)
+    }
+}
+
+impl From<ParseError> for Error {
+    fn from(value: ParseError) -> Self {
+        Self::Url(value)
     }
 }
