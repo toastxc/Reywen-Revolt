@@ -17,11 +17,11 @@ impl WebSocket {
     > {
         let (ws_stream, _) = connect_async(
             format!(
-                "wss://{}/{}",
+                "{}{}",
                 self.domain.clone(),
                 struct_to_url(Into::<PartialWSConf>::into(self.to_owned()))
             )
-            .replace('\"', ""),
+                .replace('\"', "")
         )
         .await?;
         let (write, read) = ws_stream.split();
