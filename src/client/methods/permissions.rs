@@ -1,9 +1,10 @@
+use crate::structures::permissions::calculator::Permissions;
 use crate::{
     client::{Client, Result},
     reywen_http::driver::Method,
     structures::{
         channels::Channel,
-        permissions::{definitions::PermissionData, DataEditRole, DataRoleCreate, NewRoleResponse},
+        permissions::{DataEditRole, DataRoleCreate, NewRoleResponse},
         server::{Role, Server},
     },
 };
@@ -13,7 +14,7 @@ impl Client {
         &self,
         server: impl Into<String> + std::fmt::Display,
         role_id: impl Into<String> + std::fmt::Display,
-        data: impl Into<&PermissionData>,
+        data: impl Into<&Permissions>,
     ) -> Result<Server> {
         self.http
             .request(
@@ -26,7 +27,7 @@ impl Client {
     pub async fn server_permission_set_default(
         &self,
         server: impl Into<String> + std::fmt::Display,
-        data: impl Into<&PermissionData>,
+        data: impl Into<&Permissions>,
     ) -> Result<Server> {
         self.http
             .request(
@@ -82,7 +83,7 @@ impl Client {
         &self,
         channel: impl Into<String> + std::fmt::Display,
         role_id: impl Into<String> + std::fmt::Display,
-        data: impl Into<&PermissionData>,
+        data: impl Into<&Permissions>,
     ) -> Result<Channel> {
         self.http
             .request(
@@ -95,7 +96,7 @@ impl Client {
     pub async fn channel_permissions_set_default(
         &self,
         channel: impl Into<String> + std::fmt::Display,
-        data: impl Into<&PermissionData>,
+        data: impl Into<&Permissions>,
     ) -> Result<Channel> {
         self.http
             .request(
@@ -109,7 +110,7 @@ impl Client {
     pub async fn group_permissions_set_default(
         &self,
         group: impl Into<String> + std::fmt::Display,
-        data: impl Into<&PermissionData>,
+        data: impl Into<&Permissions>,
     ) -> Result<Channel> {
         self.http
             .request(

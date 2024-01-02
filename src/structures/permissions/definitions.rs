@@ -95,31 +95,8 @@ pub struct Override {
     pub deny: u64,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Copy, Default)]
-pub struct OverrideField {
-    /// Allow bit flags
-    pub allow: i64,
-    /// Disallow bit flags
-    pub deny: i64,
-}
-
-impl From<OverrideField> for Override {
-    fn from(value: OverrideField) -> Self {
-        Self {
-            allow: value.allow as u64,
-            deny: value.deny as u64,
-        }
-    }
-}
-
-impl Override {
-    pub fn new() -> Self {
-        Default::default()
-    }
-}
-
 /// # Permission Value
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Field {
     /// Allow / deny values to set for this role
     pub permissions: Override,
@@ -127,20 +104,9 @@ pub struct Field {
 impl_to_vec!(Field);
 
 /// Permission values to set for members in a `Group`
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Value {
     /// Allow / deny values to set for this role
     pub permissions: u64,
 }
 impl_to_vec!(Value);
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct PermissionData {
-    pub value: Value,
-    pub field: Field,
-}
-impl_to_vec!(PermissionData);
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct Permissions {
-    pub allow: Vec<Permission>,
-    pub deny: Vec<Permission>,
-}
