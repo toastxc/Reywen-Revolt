@@ -8,7 +8,7 @@ pub enum Error {
     Data(DataError),
     Connection(std::io::Error),
     Watchdog(WatchdogError),
-    Url(ParseError)
+    Url(ParseError),
 }
 #[derive(Debug)]
 pub enum DataError {

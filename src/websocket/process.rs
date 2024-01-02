@@ -1,9 +1,11 @@
 use super::{data::WebSocketEvent, PartialWSConf, WebSocket};
-use crate::{reywen_http::utils::struct_to_url, websocket::error::Error};
-use futures_util::{stream::SplitSink, Stream, StreamExt};
-use std::{pin::Pin, sync::Arc};
-use tokio::sync::RwLock;
-use tokio_tungstenite::{connect_async, WebSocketStream};
+use crate::{
+    reywen_http::utils::struct_to_url, websocket::data::WebSocketSend, websocket::error::Error,
+};
+use futures_util::{stream::SplitSink, SinkExt, Stream, StreamExt};
+use std::{pin::Pin, sync::Arc, time::Duration};
+use tokio::{net::TcpStream, sync::RwLock};
+use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 
 impl WebSocket {
     pub async fn dual_async(
@@ -11,7 +13,7 @@ impl WebSocket {
     ) -> Result<
         (
             Pin<Box<dyn Stream<Item = WebSocketEvent>>>,
-            Arc<RwLock<SinkSplit>>,
+            Arc<RwLock<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
         ),
         Error,
     > {
@@ -19,7 +21,7 @@ impl WebSocket {
             "{}{}{}",
             self.domain.clone(),
             {
-                if self.domain.clone().chars().last() != Some('/') {
+                if self.domain.clone().ends_with('/') {
                     "/"
                 } else {
                     ""
@@ -34,19 +36,32 @@ impl WebSocket {
         let (ws_stream, _) = connect_async(url).await?;
         let (write, read) = ws_stream.split();
 
+        let write = Arc::new(RwLock::new(write));
+
+        tokio::spawn(ws_maintain(Arc::clone(&write)));
+
         Ok((
-            Box::pin((read).filter_map(|result| async {
+            Box::pin(read.filter_map(|result| async {
                 result
                     .map(|a| serde_json::from_slice::<WebSocketEvent>(&a.into_data()).ok())
                     .ok()
                     .flatten()
             })) as Pin<Box<dyn Stream<Item = WebSocketEvent>>>,
-            Arc::new(RwLock::new(write)),
+            write,
         ))
     }
 }
 
-type SinkSplit = SplitSink<
-    WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
-    tokio_tungstenite::tungstenite::Message,
->;
+async fn ws_maintain(
+    write: Arc<RwLock<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
+) {
+    loop {
+        tokio::time::sleep(Duration::from_secs(5)).await;
+        write
+            .write()
+            .await
+            .send(WebSocketSend::Ping { data: 0 }.into())
+            .await
+            .ok();
+    }
+}
