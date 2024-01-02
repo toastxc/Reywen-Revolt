@@ -1,11 +1,11 @@
+use crate::impl_to_vec;
 use crate::reywen_http::utils::if_false;
 use crate::structures::media::attachment::File;
 use serde::{Deserialize, Serialize};
-use crate::impl_to_vec;
 
+pub mod group;
 pub mod invite;
 pub mod message;
-pub mod group;
 
 /// Representation of a channel on Revolt
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -123,6 +123,23 @@ impl Channel {
             | Channel::VoiceChannel { id, .. } => id.clone(),
         }
     }
+
+    pub fn server_id(&self) -> Option<String> {
+        match self {
+            Channel::TextChannel { server, .. } | Channel::VoiceChannel { server, .. } => {
+                Some(server.clone())
+            }
+            _ => None,
+        }
+    }
+    pub fn name(&self) -> Option<String> {
+        match self {
+            Channel::VoiceChannel { name, .. }
+            | Channel::TextChannel { name, .. }
+            | Channel::Group { name, .. } => Some(name.clone()),
+            _ => None,
+        }
+    }
 }
 
 /// Partial values of [Channel]
@@ -151,8 +168,6 @@ pub enum FieldsChannel {
     Icon,
     DefaultPermissions,
 }
-
-
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataEditChannel {
