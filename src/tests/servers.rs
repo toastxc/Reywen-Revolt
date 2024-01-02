@@ -95,7 +95,6 @@ mod tests {
             .add_allow(Permission::ViewChannel)
             .add_allow(Permission::KickMembers);
 
-
         if let Err(error) = client.server_permission_set_default(SERVER, &data).await {
             panic!("{:#?}", error);
         }
@@ -116,7 +115,6 @@ mod tests {
         let perms = Permissions::default()
             .add_allow(Permission::ViewChannel)
             .add_allow(Permission::KickMembers);
-
 
         if let Err(error) = client.server_permission_set(SERVER, ROLE, &perms).await {
             panic!("{:#?}", error);

@@ -1,5 +1,7 @@
+pub mod autumn;
 pub mod bot;
 pub mod channel;
+pub mod emoji;
 pub mod group;
 pub mod member;
 pub mod message;
@@ -7,8 +9,6 @@ pub mod permissions;
 pub mod server;
 pub mod session;
 pub mod user;
-pub mod emoji;
-pub mod autumn;
 /// macro for creating jsons
 #[macro_export]
 macro_rules! json {

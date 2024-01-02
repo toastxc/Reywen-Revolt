@@ -12,7 +12,11 @@ impl Client {
         emoji_id: impl Into<String> + std::fmt::Display,
     ) -> Result<Emoji> {
         self.http
-            .request(Method::PUT, format!("/custom/emoji/{emoji_id}"), data.into())
+            .request(
+                Method::PUT,
+                format!("/custom/emoji/{emoji_id}"),
+                data.into(),
+            )
             .await
     }
     pub async fn emoji_delete(
@@ -23,7 +27,10 @@ impl Client {
             .request(Method::DELETE, format!("/custom/emoji/{emoji_id}"), None)
             .await
     }
-    pub async fn emoji_fetch(&self, emoji_id: impl Into<String> + std::fmt::Display) -> Result<Emoji> {
+    pub async fn emoji_fetch(
+        &self,
+        emoji_id: impl Into<String> + std::fmt::Display,
+    ) -> Result<Emoji> {
         self.http
             .request(Method::GET, format!("/custom/emoji/{emoji_id}"), None)
             .await

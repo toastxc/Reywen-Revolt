@@ -1,10 +1,10 @@
+use crate::structures::server::ban::{DataBan, DataBanReason};
+use crate::structures::server::DataBanList;
 use crate::{
     client::{Client, Result},
     reywen_http::driver::Method,
     structures::server::member::{DataMemberEdit, Member, ResponseMemberAll},
 };
-use crate::structures::server::{ DataBanList, };
-use crate::structures::server::ban::{DataBan, DataBanReason};
 
 impl Client {
     pub async fn member_edit(

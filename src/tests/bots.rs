@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::structures::users::bot::{DataCreateBot, DataEditBot};
-    use crate::tests::{BOT, SERVER, tester_user};
+    use crate::tests::{tester_user, BOT, SERVER};
 
     #[tokio::test]
     async fn test_create_bot() {

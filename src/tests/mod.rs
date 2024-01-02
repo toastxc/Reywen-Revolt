@@ -5,12 +5,10 @@ pub mod servers;
 pub mod session;
 pub mod users;
 pub mod websocket;
-
-use std::env;
-use dotenv::*;
 use crate::client::Client;
+use dotenv::*;
+use std::env;
 pub mod emoji;
-
 pub const SERVER: &str = "01H321YNJZZMF1SYPEY4S9B0R0";
 pub const USER: &str = "01FSRTTGJC1XJ6ZEQJMSX8Q96C";
 pub const ROLE: &str = "01GXFR9FPEPFY188X5MKV2E8ZN";
@@ -24,10 +22,8 @@ pub fn tester_bot() -> Client {
     dotenv().ok();
 
     Client::from_token(
-
         env::var("DEVEL_BOT_TOKEN").unwrap(),
         env::var("DEVEL_BOT_ID").unwrap(),
-
         true,
     )
     .unwrap()
@@ -38,7 +34,6 @@ pub fn tester_user() -> Client {
     Client::from_token(
         env::var("DEVEL_USER_TOKEN").unwrap(),
         env::var("DEVEL_USER_ID").unwrap(),
-
         false,
     )
     .unwrap()

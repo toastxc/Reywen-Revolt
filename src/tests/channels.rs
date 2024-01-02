@@ -272,7 +272,7 @@ mod tests {
             .channel_permissions_set(
                 "01H3226059WB9HTRBR3YZ9M6Q9",
                 "01H4T0RZ1YD2Q7G7ZTAAAXBKH7",
-                &data
+                &data,
             )
             .await
         {
@@ -287,7 +287,6 @@ mod tests {
         let data = Permissions::default()
             .add_allow(Permission::ViewChannel)
             .add_allow(Permission::SendMessage);
-
 
         println!("{:#?}", data);
 
