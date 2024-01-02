@@ -1,12 +1,11 @@
-use crate::{impl_to_vec, reywen_http::utils::if_false, structures::media::attachment::File};
-use std::collections::HashMap;
-use num_enum::TryFromPrimitive;
-use serde::{Deserialize, Serialize};
 use crate::client::methods::opt_vec_add;
 use crate::structures::channels::Channel;
 use crate::structures::server::ban::ServerBan;
 use crate::structures::users::User;
-
+use crate::{impl_to_vec, reywen_http::utils::if_false, structures::media::attachment::File};
+use num_enum::TryFromPrimitive;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 pub mod ban;
 pub mod member;
@@ -139,13 +138,10 @@ pub enum FieldsRole {
     Colour,
 }
 
-
-
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DataChannelCreate {
     #[serde(rename = "type")]
-    pub r#type: Option<ChannelType>,
+    pub r#type: ChannelType,
     pub name: String,
     pub description: Option<String>,
     pub nsfw: Option<bool>,
@@ -166,7 +162,7 @@ impl DataChannelCreate {
         }
     }
     pub fn set_type(&mut self, r#type: impl Into<ChannelType>) -> Self {
-        self.r#type = Some(r#type.into());
+        self.r#type = r#type.into();
         self.clone()
     }
     pub fn set_name(&mut self, name: impl Into<String>) -> Self {
@@ -316,5 +312,11 @@ impl DataEditServer {
         self.categories = Some(categories.into());
         self.clone()
     }
-}
 
+    pub fn add_remove(&mut self, remove: FieldsServer) -> Self {
+        if let Some(mut a) = self.clone().remove {
+            a.push(remove)
+        }
+        self.clone()
+    }
+}
