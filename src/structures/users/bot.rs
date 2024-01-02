@@ -1,6 +1,6 @@
+use crate::impl_to_vec;
 use crate::reywen_http::utils::if_false;
 use serde::{Deserialize, Serialize};
-use crate::impl_to_vec;
 
 use crate::structures::media::attachment::File;
 use crate::structures::users::User;

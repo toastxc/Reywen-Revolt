@@ -1,11 +1,10 @@
+use crate::structures::channels::group::DataCreateGroup;
 use crate::{
     client::Client,
     client::Result,
-
     reywen_http::driver::Method,
     structures::{channels::Channel, users::User},
 };
-use crate::structures::channels::group::DataCreateGroup;
 
 impl Client {
     pub async fn group_member_add(

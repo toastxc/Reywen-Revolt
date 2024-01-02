@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::impl_to_vec;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DataCreateGroup {

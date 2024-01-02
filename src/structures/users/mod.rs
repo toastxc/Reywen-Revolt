@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 use crate::impl_to_vec;
 use crate::structures::media::attachment::File;
+use serde::{Deserialize, Serialize};
 pub mod bot;
 fn if_false(t: &bool) -> bool {
     !t
@@ -185,9 +185,6 @@ pub enum UserHint {
     /// Only match users
     User,
 }
-
-
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DataSendFriendRequest {

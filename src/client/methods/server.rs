@@ -4,8 +4,7 @@ use crate::{
     structures::{
         channels::{invite::Invite, Channel},
         server::{
-            CreateServerResponse,  DataChannelCreate,
-            DataCreateServer, DataEditServer, Server,
+            CreateServerResponse, DataChannelCreate, DataCreateServer, DataEditServer, Server,
         },
     },
 };
