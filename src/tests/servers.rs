@@ -1,13 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use crate::structures::server::member::DataMemberEdit;
+    use crate::structures::permissions::calculator::Permissions;
+    use crate::structures::permissions::definitions::Permission;
     use crate::structures::permissions::DataEditRole;
     use crate::structures::permissions::DataRoleCreate;
+    use crate::structures::server::member::DataMemberEdit;
     use crate::structures::server::DataChannelCreate;
     use crate::structures::server::DataCreateServer;
     use crate::structures::server::DataEditServer;
-    use crate::structures::permissions::calculator::Permissions;
-    use crate::structures::permissions::definitions::Permission;
     use crate::tests::tester_bot;
     use crate::tests::tester_user;
     use crate::tests::ROLE;
@@ -93,8 +93,8 @@ mod tests {
         let client = tester_bot();
         let data = Permissions::default()
             .add_allow(Permission::ViewChannel)
-            .add_allow(Permission::KickMembers)
-            .export();
+            .add_allow(Permission::KickMembers);
+
 
         if let Err(error) = client.server_permission_set_default(SERVER, &data).await {
             panic!("{:#?}", error);
@@ -115,8 +115,8 @@ mod tests {
 
         let perms = Permissions::default()
             .add_allow(Permission::ViewChannel)
-            .add_allow(Permission::KickMembers)
-            .export();
+            .add_allow(Permission::KickMembers);
+
 
         if let Err(error) = client.server_permission_set(SERVER, ROLE, &perms).await {
             panic!("{:#?}", error);

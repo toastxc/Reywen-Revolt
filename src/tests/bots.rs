@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
     use crate::structures::users::bot::{DataCreateBot, DataEditBot};
-    use crate::tests::{BOT, SERVER, test_client};
+    use crate::tests::{BOT, SERVER, tester_user};
 
     #[tokio::test]
     async fn test_create_bot() {
-        let client = test_client(false);
+        let client = tester_user();
 
         let data = DataCreateBot::new("womp");
 
@@ -16,7 +16,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete_bot() {
-        let client = test_client(false);
+        let client = tester_user();
 
         let data = DataCreateBot::new("womp");
         match client.bot_create(&data).await {
@@ -31,7 +31,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_edit_bot() {
-        let client = test_client(false);
+        let client = tester_user();
 
         let data_bot_create = DataCreateBot::new("wompywompy");
         let data_bot_edit = DataEditBot::new().set_name("cowdoyinthecity2");
@@ -47,7 +47,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bot_fetch() {
-        let client = test_client(false);
+        let client = tester_user();
 
         if let Err(error) = client.bot_fetch(BOT).await {
             panic!("{:#?}", error);
@@ -56,7 +56,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bot_fetch_owned() {
-        let client = test_client(false);
+        let client = tester_user();
 
         if let Err(error) = client.bot_fetch_owned().await {
             panic!("{:#?}", error);
@@ -65,7 +65,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bot_fetch_public() {
-        let client = test_client(false);
+        let client = tester_user();
 
         if let Err(error) = client.bot_fetch_public(BOT).await {
             panic!("{:#?}", error);
@@ -74,7 +74,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bot_invite() {
-        let client = test_client(false);
+        let client = tester_user();
 
         if let Err(error) = client.bot_invite(BOT, SERVER, true).await {
             panic!("{:#?}", error);

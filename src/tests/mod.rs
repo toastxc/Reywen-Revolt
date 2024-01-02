@@ -19,28 +19,19 @@ pub const USER_NOTSELF: &str = "01H2PWB11T4DY3E76Y8PHFT3EX";
 // enter values here for testing
 
 pub fn tester_bot() -> Client {
-    test_client(true)
+    Client::from_token(
+        include_str!("bot-token.txt").replace([' ', '\n'], ""),
+        include_str!("bot-id.txt").replace([' ', '\n'], ""),
+        true,
+    )
+    .unwrap()
 }
 
 pub fn tester_user() -> Client {
-    test_client(false)
-}
-
-
-fn bot_or(is_bot: bool) -> (String, String) {
-    if is_bot {
-        (
-            String::from("x-bot-token"),
-            include_str!("bot-token.txt").replace([' ', '\n'], ""),
-        )
-    } else {
-        (
-            String::from("x-session-token"),
-            include_str!("self-token.txt").replace([' ', '\n'], ""),
-        )
-    }
-}
-
-pub fn test_client(is_bot: bool) -> Client {
-    Client::from_token(&bot_or(is_bot).1, is_bot).unwrap()
+    Client::from_token(
+        include_str!("self-token.txt").replace([' ', '\n'], ""),
+        include_str!("self-id.txt").replace([' ', '\n'], ""),
+        true,
+    )
+    .unwrap()
 }

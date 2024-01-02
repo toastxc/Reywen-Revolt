@@ -88,7 +88,7 @@ mod tests {
             Client::session_login_smart("EMAIL", "PASSWORD", Some(MFAResponse::totp("CODE")), None)
                 .await
         {
-            let _client = Client::from_token(&token, false).unwrap();
+            let _client = Client::from_token(&token, "",false).unwrap();
             write
                 .write()
                 .await
