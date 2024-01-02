@@ -32,6 +32,9 @@ reywen_http = { version = "0.1.18", features = ["serde"]}
 native-tls = "0.2.11"
 url = "2.5.0"
 
+# development
+dotenv = "0.15.0"
+
 [features]
 # engine option | mandatory
 default = ["reywen_http/hyper_engine"]

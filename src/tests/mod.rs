@@ -6,6 +6,8 @@ pub mod session;
 pub mod users;
 pub mod websocket;
 
+use std::env;
+use dotenv::*;
 use crate::client::Client;
 pub mod emoji;
 
@@ -19,19 +21,25 @@ pub const USER_NOTSELF: &str = "01H2PWB11T4DY3E76Y8PHFT3EX";
 // enter values here for testing
 
 pub fn tester_bot() -> Client {
+    dotenv().ok();
+
     Client::from_token(
-        include_str!("bot-token.txt").replace([' ', '\n'], ""),
-        include_str!("bot-id.txt").replace([' ', '\n'], ""),
+
+        env::var("DEVEL_BOT_TOKEN").unwrap(),
+        env::var("DEVEL_BOT_ID").unwrap(),
+
         true,
     )
     .unwrap()
 }
 
 pub fn tester_user() -> Client {
+    dotenv().ok();
     Client::from_token(
-        include_str!("self-token.txt").replace([' ', '\n'], ""),
-        include_str!("self-id.txt").replace([' ', '\n'], ""),
-        true,
+        env::var("DEVEL_USER_TOKEN").unwrap(),
+        env::var("DEVEL_USER_ID").unwrap(),
+
+        false,
     )
     .unwrap()
 }
