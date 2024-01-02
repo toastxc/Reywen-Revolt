@@ -1,14 +1,14 @@
 use crate::client::methods::{opt_vec_add, origin};
 use crate::impl_to_vec;
 use crate::reywen_http::utils::if_false;
-use indexmap::{IndexMap, IndexSet};
-use iso8601_timestamp::Timestamp;
-use serde::{Deserialize, Serialize};
 use crate::structures::{
     media::{attachment::File, embeds::Embed},
     server::member::Member,
     users::User,
 };
+use indexmap::{IndexMap, IndexSet};
+use iso8601_timestamp::Timestamp;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Reply {
@@ -27,6 +27,38 @@ pub struct SendableEmbed {
     pub media: Option<String>,
     pub colour: Option<String>,
 }
+
+impl SendableEmbed {
+    pub fn set_icon_url(&mut self, icon_url: impl Into<String>) -> Self {
+        self.icon_url = Some(icon_url.into());
+        self.clone()
+    }
+
+    pub fn set_url(&mut self, url: impl Into<String>) -> Self {
+        self.url = Some(url.into());
+        self.clone()
+    }
+    pub fn set_title(&mut self, title: impl Into<String>) -> Self {
+        self.title = Some(title.into());
+        self.clone()
+    }
+    pub fn set_description(&mut self, description: impl Into<String>) -> Self {
+        self.description = Some(description.into());
+        self.clone()
+    }
+    pub fn set_media(&mut self, media: impl Into<String>) -> Self {
+        self.media = Some(media.into());
+        self.clone()
+    }
+    pub fn set_colour(&mut self, colour: impl Into<String>) -> Self {
+        self.colour = Some(colour.into());
+        self.clone()
+    }
+    pub fn set_color(&mut self, color: impl Into<String>) -> Self {
+        self.set_colour(color)
+    }
+}
+
 /// Representation of a system event message
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
@@ -303,9 +335,34 @@ impl DataEditMessage {
         Default::default()
     }
 
+    pub fn from_content(content: impl Into<String> + std::fmt::Display) -> Self {
+        Self::default().set_content(content)
+    }
+    pub fn from_embed_text(embed: impl Into<String>) -> Self {
+        Self::default().add_embed_text(embed)
+    }
+
+    pub fn from_embed(embed: impl Into<SendableEmbed>) -> Self {
+        Self::default().add_embed(embed)
+    }
+
     pub fn set_content(&mut self, content: impl Into<String> + std::fmt::Display) -> Self {
         self.content = Some(content.into());
         self.to_owned()
+    }
+
+    pub fn add_embed(&mut self, embed: impl Into<SendableEmbed>) -> Self {
+        if let Some(mut a) = self.embeds.clone() {
+            a.push(embed.into())
+        }
+        self.clone()
+    }
+
+    pub fn add_embed_text(&mut self, message: impl Into<String>) -> Self {
+        if let Some(mut a) = self.embeds.clone() {
+            a.push(SendableEmbed::default().set_title(message))
+        }
+        self.clone()
     }
 }
 
@@ -444,6 +501,19 @@ pub struct DataMessageSend {
 }
 impl_to_vec!(DataMessageSend);
 impl DataMessageSend {
+    pub fn from_content(content: impl Into<String>) -> Self {
+        Self::default().set_content(content)
+    }
+    pub fn from_embed(embed: SendableEmbed) -> Self {
+        Self::default().add_embed(embed)
+    }
+    pub fn from_embed_text(embed_text: impl Into<String>) -> Self {
+        Self::default().add_embed(SendableEmbed::default().set_title(embed_text.into()))
+    }
+
+    pub fn add_embed_text(&mut self, text: impl Into<String>) -> Self {
+        self.add_embed(SendableEmbed::default().set_title(text))
+    }
     pub fn new() -> Self {
         Default::default()
     }
