@@ -5,6 +5,7 @@ use crate::{
     reywen_http::driver::Method,
     structures::server::member::{DataMemberEdit, Member, ResponseMemberAll},
 };
+use crate::structures::server::member::MemberWithRoles;
 
 impl Client {
     pub async fn member_edit(
@@ -30,6 +31,19 @@ impl Client {
             .request(
                 Method::GET,
                 format!("/servers/{server}/members/{member}"),
+                None,
+            )
+            .await
+    }
+    pub async fn member_fetch_roles(
+        &self,
+        server: impl Into<String> + std::fmt::Display,
+        member: impl Into<String> + std::fmt::Display,
+    ) -> Result<MemberWithRoles> {
+        self.http
+            .request(
+                Method::GET,
+                format!("/servers/{server}/members/{member}?roles=true"),
                 None,
             )
             .await

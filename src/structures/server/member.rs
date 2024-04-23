@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::{
     client::methods::opt_vec_add,
     impl_to_vec,
@@ -5,6 +6,7 @@ use crate::{
 };
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
+use crate::structures::server::Role;
 
 /// Composite primary key consisting of server and user id
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -112,4 +114,9 @@ impl DataMemberEdit {
         self.remove = Some(remove.into());
         self.to_owned()
     }
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MemberWithRoles {
+    pub member: Member,
+    pub roles: HashMap<String, Role>,
 }
