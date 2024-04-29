@@ -50,6 +50,64 @@ impl WebSocket {
             write,
         ))
     }
+
+    pub async fn dual_async_res(
+        &self,
+    ) -> Result<
+        (
+            Pin<
+                Box<
+                    dyn Stream<
+                        Item = Result<
+                            Result<WebSocketEvent, serde_json::Error>,
+                            tokio_tungstenite::tungstenite::Error,
+                        >,
+                    >,
+                >,
+            >,
+            Arc<RwLock<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
+        ),
+        Error,
+    > {
+        let url = format!(
+            "{}{}{}",
+            self.domain.clone(),
+            {
+                if self.domain.clone().ends_with('/') {
+                    "/"
+                } else {
+                    ""
+                }
+            },
+            struct_to_url(Into::<PartialWSConf>::into(self.to_owned()))
+        )
+        .replace('\"', "");
+
+        let url = url::Url::parse(&url)?;
+
+        let (ws_stream, _) = connect_async(url).await?;
+        let (write, read) = ws_stream.split();
+
+        let write = Arc::new(RwLock::new(write));
+
+        tokio::spawn(ws_maintain(Arc::clone(&write)));
+
+        let read = Box::pin(
+            read.map(|a| a.map(|a| serde_json::from_slice::<WebSocketEvent>(&a.into_data()))),
+        )
+            as Pin<
+                Box<
+                    dyn Stream<
+                        Item = Result<
+                            Result<WebSocketEvent, serde_json::Error>,
+                            tokio_tungstenite::tungstenite::Error,
+                        >,
+                    >,
+                >,
+            >;
+
+        Ok((read, write))
+    }
 }
 
 async fn ws_maintain(

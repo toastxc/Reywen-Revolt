@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use crate::structures::server::Role;
 use crate::{
     client::methods::opt_vec_add,
     impl_to_vec,
@@ -6,7 +6,7 @@ use crate::{
 };
 use iso8601_timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
-use crate::structures::server::Role;
+use std::collections::HashMap;
 
 /// Composite primary key consisting of server and user id
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
